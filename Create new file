@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>売買契約書 リスクチェッカー</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:        #f0f2f5;
+      --white:     #ffffff;
+      --border:    #d1d5db;
+      --border-l:  #e5e7eb;
+      --blue-d:    #1e3a6e;
+      --blue:      #1d4ed8;
+      --text:      #111827;
+      --text-s:    #374151;
+      --muted:     #6b7280;
+
+      --hi:   #1d4ed8;   /* highlight outline */
+
+      --r-bg:   #fef2f2; --r-bd: #fca5a5; --r-tx: #dc2626; --r-dot: #ef4444;
+      --y-bg:   #fffbeb; --y-bd: #fcd34d; --y-tx: #b45309; --y-dot: #f59e0b;
+      --g-bg:   #f0fdf4; --g-bd: #86efac; --g-tx: #15803d; --g-dot: #22c55e;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--blue-d);
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      border-bottom: 3px solid var(--blue);
+      min-height: 58px;
+    }
+    .topbar-left { display:flex; align-items:center; gap:12px; padding:10px 0; }
+    .topbar-icon {
+      width:34px; height:34px; background:var(--blue);
+      border-radius:6px; display:flex; align-items:center;
+      justify-content:center; font-size:17px;
+    }
+    .topbar h1 { font-size:17px; font-weight:700; color:#fff; }
+    .topbar-sub { font-size:11px; color:rgba(255,255,255,.6); margin-top:1px; }
+    .topbar-right { display:flex; align-items:center; gap:8px; padding:8px 0; flex-wrap:wrap; }
+
+    /* ── Check button ── */
+    #checkBtn {
+      background: var(--blue);
+      color: #fff; border: none; cursor: pointer;
+      padding: 8px 20px; border-radius: 5px;
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    #checkBtn:hover { background: #1e40af; }
+    #checkBtn.active { background: #15803d; }
+
+    #resetBtn {
+      background: transparent;
+      color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.3);
+      cursor: pointer; padding: 8px 14px; border-radius: 5px;
+      font-family: inherit; font-size: 12px;
+      transition: .2s; white-space: nowrap;
+    }
+    #resetBtn:hover { background: rgba(255,255,255,.1); color:#fff; }
+
+    /* ── Summary bar (hidden until checked) ── */
+    #summaryBar {
+      display: none;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: none;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    #summaryBar.show { display: flex; }
+    .sum-title { font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 4px; }
+    .sum-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600;
+    }
+    .sum-dot {
+      width:10px; height:10px; border-radius:50%;
+    }
+
+    /* ── Main layout ── */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 16px;
+      padding: 16px 20px 40px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+    @media(max-width:960px){
+      .main { grid-template-columns:1fr; }
+      .panel-right { order: -1; }
+    }
+
+    /* ── Left: Contract ── */
+    .panel-left {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-header h2 {
+      font-size: 13px; font-weight: 700; color: var(--text-s);
+    }
+    .panel-header span { font-size: 11px; color: var(--muted); }
+
+    .contract-body {
+      padding: 28px 32px 40px;
+      line-height: 1.95;
+      font-size: 13.5px;
+    }
+    .contract-title {
+      text-align: center;
+      font-size: 18px; font-weight: 700;
+      color: var(--text); margin-bottom: 6px; letter-spacing: 2px;
+    }
+    .contract-no {
+      text-align: center; font-size: 12px; color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .preamble {
+      margin-bottom: 20px; color: var(--text-s); font-size: 13px;
+      padding: 14px 16px; background: #f8fafc;
+      border-left: 3px solid var(--border); border-radius: 0 4px 4px 0;
+    }
+
+    .clause { margin-bottom: 18px; }
+    .clause-title {
+      font-weight: 700; font-size: 13.5px;
+      color: var(--blue-d); margin-bottom: 6px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--border-l);
+    }
+    .clause-body { color: var(--text-s); font-size: 13px; line-height: 2; }
+    .clause-body ol, .clause-body ul {
+      padding-left: 20px; margin: 4px 0;
+    }
+    .clause-body li { margin-bottom: 3px; }
+    .clause-body .indent { padding-left: 16px; }
+
+    .sign-block {
+      margin-top: 32px; display: flex; gap: 40px; flex-wrap: wrap;
+      border-top: 1px solid var(--border); padding-top: 24px;
+    }
+    .sign-party { flex:1; min-width:220px; }
+    .sign-party h4 { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+    .sign-line { border-bottom: 1px solid #000; margin: 28px 0 4px; }
+    .sign-label { font-size: 11px; color: var(--muted); }
+
+    /* ── Highlight spans ── */
+    .hl {
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background .15s, outline .15s;
+      position: relative;
+    }
+    .hl-r { background: #fee2e2; border-bottom: 2px solid var(--r-dot); }
+    .hl-y { background: #fef3c7; border-bottom: 2px solid var(--y-dot); }
+    .hl-g { background: #dcfce7; border-bottom: 2px solid var(--g-dot); }
+    .hl.focused { outline: 2px solid var(--hi); outline-offset: 1px; }
+
+    /* hidden until checked */
+    .hl-r, .hl-y, .hl-g { background: transparent; border-bottom: none; }
+    body.checked .hl-r { background: #fee2e2; border-bottom: 2px solid var(--r-dot); }
+    body.checked .hl-y { background: #fef3c7; border-bottom: 2px solid var(--y-dot); }
+    body.checked .hl-g { background: #dcfce7; border-bottom: 2px solid var(--g-dot); }
+
+    /* ── Right: Risk panel ── */
+    .panel-right { display:flex; flex-direction:column; gap:12px; }
+
+    .risk-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .risk-section-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer; user-select: none;
+    }
+    .risk-section-header:hover { background: #f8fafc; }
+    .risk-color-bar {
+      width: 4px; height: 18px; border-radius: 2px; flex-shrink:0;
+    }
+    .risk-section-title { font-size: 12px; font-weight: 700; flex:1; }
+    .risk-count {
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 10px;
+    }
+    .chevron { font-size:10px; color:var(--muted); transition: transform .2s; }
+    .risk-section.collapsed .chevron { transform: rotate(-90deg); }
+
+    .risk-items { padding: 8px 10px 10px; display:flex; flex-direction:column; gap:6px; }
+    .risk-section.collapsed .risk-items { display:none; }
+
+    .risk-item {
+      border-radius: 6px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: filter .15s, transform .1s;
+      border-width: 1px; border-style: solid;
+    }
+    .risk-item:hover { filter: brightness(.97); transform: translateX(2px); }
+    .risk-item.r { background: var(--r-bg); border-color: var(--r-bd); }
+    .risk-item.y { background: var(--y-bg); border-color: var(--y-bd); }
+    .risk-item.g { background: var(--g-bg); border-color: var(--g-bd); }
+    .risk-item.active-item { outline: 2px solid var(--hi); }
+
+    .ri-top { display:flex; align-items:flex-start; gap:7px; margin-bottom:4px; }
+    .ri-badge {
+      font-size:9px; font-weight:700; letter-spacing:.5px;
+      padding:2px 6px; border-radius:3px; flex-shrink:0; margin-top:1px;
+      white-space:nowrap;
+    }
+    .ri-badge.r { background:#fecaca; color:var(--r-tx); }
+    .ri-badge.y { background:#fde68a; color:var(--y-tx); }
+    .ri-badge.g { background:#bbf7d0; color:var(--g-tx); }
+    .ri-title { font-size: 12px; font-weight: 600; color: var(--text); }
+    .ri-clause { font-size: 10px; color: var(--muted); margin-bottom:3px; }
+    .ri-desc { font-size: 11px; color: var(--text-s); line-height: 1.6; }
+
+    /* locked message */
+    .locked-msg {
+      padding: 20px 16px; text-align: center;
+      color: var(--muted); font-size: 12px;
+    }
+    .locked-msg .lock-icon { font-size: 24px; display:block; margin-bottom:6px; }
+    body.checked .locked-msg { display:none; }
+    body.checked .risk-items-wrap { display:block; }
+    .risk-items-wrap { display:none; }
+
+    /* overall score */
+    .score-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: none;
+    }
+    body.checked .score-card { display:block; }
+    .score-title { font-size:11px; font-weight:600; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px; }
+    .score-bar-wrap { display:flex; flex-direction:column; gap:6px; }
+    .score-row { display:flex; align-items:center; gap:8px; }
+    .score-row-label { font-size:11px; color:var(--text-s); width:72px; flex-shrink:0; }
+    .score-track { flex:1; height:8px; background:var(--border-l); border-radius:4px; overflow:hidden; }
+    .score-fill { height:100%; border-radius:4px; transition: width 1s ease .2s; width:0; }
+    .score-num { font-size:11px; font-weight:700; min-width:28px; text-align:right; }
+
+    .verdict {
+      margin-top: 12px; padding: 10px 12px;
+      border-radius: 6px; font-size: 12px; font-weight: 600; line-height: 1.5;
+    }
+    .verdict.warn { background: var(--r-bg); color: var(--r-tx); border:1px solid var(--r-bd); }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-icon">📋</div>
+    <div>
+      <h1>売買契約書 リスクチェッカー</h1>
+      <div class="topbar-sub">製造業向け ／ Contract Risk Analyzer</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button id="resetBtn" onclick="resetCheck()">リセット</button>
+    <button id="checkBtn" onclick="runCheck()">
+      <span>🔍</span> リスクチェック実行
+    </button>
+  </div>
+</div>
+
+<!-- SUMMARY BAR -->
+<div id="summaryBar">
+  <span class="sum-title">チェック結果：</span>
+  <div class="sum-item"><div class="sum-dot" style="background:var(--r-dot)"></div><span id="cntR">0</span> 件の高リスク</div>
+  <div class="sum-item"><div class="sum-dot" style="background:var(--y-dot)"></div><span id="cntY">0</span> 件の中リスク</div>
+  <div class="sum-item"><div class="sum-dot" style="background:var(--g-dot)"></div><span id="cntG">0</span> 件の低リスク</div>
+  <div style="margin-left:auto;font-size:11px;color:var(--muted)">※条項をクリックすると契約書該当箇所へ移動</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ════ LEFT: CONTRACT ════ -->
+  <div class="panel-left">
+    <div class="panel-header">
+      <h2>製品売買基本契約書（サンプル）</h2>
+      <span>架空の契約書 — 実際の法的効力はありません</span>
+    </div>
+    <div class="contract-body" id="contractBody">
+
+      <div class="contract-title">製品売買基本契約書</div>
+      <div class="contract-no">契約番号：MSA-2024-0091　／　作成日：2024年4月1日</div>
+
+      <div class="preamble">
+        株式会社アルファ製作所（以下「売主」という）と有限会社ベータ工業（以下「買主」という）は、売主が製造する製品の継続的な売買取引に関し、以下のとおり基本契約（以下「本契約」という）を締結する。
+      </div>
+
+      <!-- 第1条 -->
+      <div class="clause" id="c1">
+        <div class="clause-title">第１条（目的）</div>
+        <div class="clause-body">
+          本契約は、売主が製造する精密機械部品（以下「製品」という）の売買に関する基本的事項を定めることを目的とする。個別の取引は、本契約に基づき、別途締結する個別発注書（以下「注文書」という）によって成立する。
+        </div>
+      </div>
+
+      <!-- 第2条 -->
+      <div class="clause" id="c2">
+        <div class="clause-title">第２条（品質・仕様）</div>
+        <div class="clause-body">
+          <ol>
+            <li>製品の品質・仕様は、注文書に添付する製品仕様書（以下「仕様書」という）に定めるとおりとする。</li>
+            <li><span class="hl hl-y" data-id="y1">仕様書に定めのない事項については、売主が定める社内規格によるものとし、買主は事前の同意なく変更に異議を申し立てないものとする。</span></li>
+            <li>売主は、製品の品質向上を目的とした仕様変更を行う場合、<span class="hl hl-y" data-id="y2">買主への通知を要さず、随時実施できるものとする。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第3条 -->
+      <div class="clause" id="c3">
+        <div class="clause-title">第３条（納期・納入方法）</div>
+        <div class="clause-body">
+          <ol>
+            <li>製品の納期は注文書に記載する日（以下「納期」という）とする。</li>
+            <li><span class="hl hl-r" data-id="r1">売主が納期を遵守できなかった場合、買主は遅延日数×契約金額の0.5%を違約金として請求できる。ただし上限は設けない。</span></li>
+            <li>天災・戦争・ストライキ等の不可抗力による遅延については、<span class="hl hl-y" data-id="y3">売主が書面で通知した場合に限り、30日を超えない範囲で納期を猶予する。</span></li>
+            <li>納入方法は売主工場渡しとし、輸送費および保険料は<span class="hl hl-r" data-id="r2">すべて買主の負担とする。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第4条 -->
+      <div class="clause" id="c4">
+        <div class="clause-title">第４条（代金・支払条件）</div>
+        <div class="clause-body">
+          <ol>
+            <li>製品の代金は注文書に記載する金額（消費税別）とする。</li>
+            <li>買主は、納品月の翌月末日までに売主の指定口座へ振込払いするものとする。振込手数料は買主負担とする。</li>
+            <li><span class="hl hl-r" data-id="r3">買主が支払期日を遵守しなかった場合、売主は年利15%の遅延損害金を請求できるものとする。</span></li>
+            <li><span class="hl hl-y" data-id="y4">売主は市況変動・原材料費の高騰を理由として、30日前の書面通知により価格を改定できるものとし、買主はこれを拒否できない。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第5条 -->
+      <div class="clause" id="c5">
+        <div class="clause-title">第５条（所有権移転・危険負担）</div>
+        <div class="clause-body">
+          <ol>
+            <li><span class="hl hl-g" data-id="g1">製品の所有権は、買主が代金を完済した時点をもって売主から買主に移転する。</span></li>
+            <li>製品の引渡し後に生じた滅失・損傷等の危険は買主が負担する。ただし、<span class="hl hl-y" data-id="y5">売主の責めに帰すべき事由による場合についても、引渡し完了をもって危険が移転したものとみなす。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第6条 -->
+      <div class="clause" id="c6">
+        <div class="clause-title">第６条（検査・検収）</div>
+        <div class="clause-body">
+          <ol>
+            <li>買主は、製品受領後<span class="hl hl-r" data-id="r4">3営業日以内</span>に検査を完了し、合否を書面にて通知しなければならない。</li>
+            <li>上記期間内に通知がない場合、当該製品は合格したものとみなす。</li>
+            <li>不合格品については、売主の選択により<span class="hl hl-y" data-id="y6">修補または代替品の納入のいずれかで対応し、それ以外の補償は行わない。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第7条 -->
+      <div class="clause" id="c7">
+        <div class="clause-title">第７条（瑕疵担保責任）</div>
+        <div class="clause-body">
+          <ol>
+            <li>売主は、検収合格後<span class="hl hl-y" data-id="y7">6ヶ月以内</span>に発見された隠れた瑕疵について責任を負う。</li>
+            <li><span class="hl hl-r" data-id="r5">瑕疵が発見された場合でも、売主の責任は代替品の提供に限定され、それによって生じた買主の生産停止・納期遅延等の間接損害については一切責任を負わない。</span></li>
+            <li>瑕疵の判断は売主の技術部門が行うものとし、その判断は最終的なものとする。</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第8条 -->
+      <div class="clause" id="c8">
+        <div class="clause-title">第８条（損害賠償）</div>
+        <div class="clause-body">
+          <ol>
+            <li><span class="hl hl-r" data-id="r6">本契約に起因して買主に損害が生じた場合においても、売主が負う賠償責任の上限は当該注文書に係る代金の10%とする。</span></li>
+            <li>いかなる場合も、売主は逸失利益・間接損害・特別損害については賠償責任を負わない。</li>
+            <li><span class="hl hl-g" data-id="g2">買主の故意または重大な過失による損害については、買主が全責任を負う。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第9条 -->
+      <div class="clause" id="c9">
+        <div class="clause-title">第９条（知的財産権）</div>
+        <div class="clause-body">
+          <ol>
+            <li><span class="hl hl-r" data-id="r7">買主の提供する図面・仕様に基づき製造した製品に関して生じた発明・考案・意匠その他一切の知的財産権は、すべて売主に帰属する。</span></li>
+            <li>売主は、本契約に基づき取得した知的財産権を第三者への販売目的に利用しないものとする。ただし、<span class="hl hl-y" data-id="y8">売主の汎用製造技術の改良に関しては、この限りではない。</span></li>
+            <li><span class="hl hl-g" data-id="g3">第三者の知的財産権を侵害した場合、当事者はただちに相手方に通知するものとする。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第10条 -->
+      <div class="clause" id="c10">
+        <div class="clause-title">第１０条（機密保持）</div>
+        <div class="clause-body">
+          <ol>
+            <li><span class="hl hl-g" data-id="g4">両当事者は、本契約の遂行上知り得た相手方の技術情報・営業情報を第三者に開示・漏洩してはならない。</span></li>
+            <li><span class="hl hl-g" data-id="g5">機密保持義務は、本契約終了後3年間継続するものとする。</span></li>
+            <li>公知の情報、独自開発情報、法令に基づく開示については前項の義務を負わない。</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第11条 -->
+      <div class="clause" id="c11">
+        <div class="clause-title">第１１条（不可抗力）</div>
+        <div class="clause-body">
+          <ol>
+            <li>地震・台風・洪水・火災・感染症の流行・法令の制定改廃・政府の命令その他当事者の合理的な支配が及ばない事由（以下「不可抗力」という）により契約義務の履行が不能または著しく困難となった場合、<span class="hl hl-y" data-id="y9">その義務の不履行について相手方に対する責任を免れる。ただし、この免責は売主のみに適用されるものとする。</span></li>
+            <li><span class="hl hl-g" data-id="g6">不可抗力が発生した場合、その当事者は相手方に対し遅滞なく書面で通知するものとする。</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第12条 -->
+      <div class="clause" id="c12">
+        <div class="clause-title">第１２条（契約解除）</div>
+        <div class="clause-body">
+          <ol>
+            <li>いずれの当事者も、相手方が本契約に違反し、催告後14日以内に是正されない場合、本契約を解除できる。</li>
+            <li><span class="hl hl-r" data-id="r8">売主は、経営上の都合により、30日前の書面通知をもって本契約をいつでも解除できる。この場合、売主は損害賠償責任を負わないものとする。</span></li>
+            <li>解除によって生じた損害については、解除された当事者が全責任を負う。</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第13条 -->
+      <div class="clause" id="c13">
+        <div class="clause-title">第１３条（競業禁止）</div>
+        <div class="clause-body">
+          <ol>
+            <li><span class="hl hl-y" data-id="y10">買主は、本契約期間中および終了後2年間、売主の競合他社と同種の取引を行ってはならない。</span></li>
+            <li>前項に違反した場合、買主は売主に対し違約金として500万円を支払うものとする。</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 第14条 -->
+      <div class="clause" id="c14">
+        <div class="clause-title">第１４条（準拠法・管轄裁判所）</div>
+        <div class="clause-body">
+          <ol>
+            <li><span class="hl hl-g" data-id="g7">本契約は日本法に準拠するものとする。</span></li>
+            <li>本契約に関する紛争については、売主の本店所在地を管轄する地方裁判所を第一審の専属的合意管轄裁判所とする。</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 署名欄 -->
+      <div class="sign-block">
+        <div class="sign-party">
+          <h4>売主</h4>
+          <div style="font-size:12px; color:var(--text-s); margin-bottom:4px;">株式会社アルファ製作所</div>
+          <div style="font-size:11px; color:var(--muted);">東京都港区〇〇 1-2-3</div>
+          <div class="sign-line"></div>
+          <div class="sign-label">代表取締役社長　印</div>
+        </div>
+        <div class="sign-party">
+          <h4>買主</h4>
+          <div style="font-size:12px; color:var(--text-s); margin-bottom:4px;">有限会社ベータ工業</div>
+          <div style="font-size:11px; color:var(--muted);">大阪府大阪市〇〇 4-5-6</div>
+          <div class="sign-line"></div>
+          <div class="sign-label">代表取締役　印</div>
+        </div>
+      </div>
+
+    </div><!-- /contract-body -->
+  </div><!-- /panel-left -->
+
+  <!-- ════ RIGHT: RISK PANEL ════ -->
+  <div class="panel-right">
+
+    <!-- Overall score (visible after check) -->
+    <div class="score-card" id="scoreCard">
+      <div class="score-title">リスクスコア概要</div>
+      <div class="score-bar-wrap">
+        <div class="score-row">
+          <div class="score-row-label" style="color:var(--r-tx)">高リスク</div>
+          <div class="score-track"><div class="score-fill" id="sf-r" style="background:var(--r-dot)"></div></div>
+          <div class="score-num" style="color:var(--r-tx)" id="sn-r">0</div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-label" style="color:var(--y-tx)">中リスク</div>
+          <div class="score-track"><div class="score-fill" id="sf-y" style="background:var(--y-dot)"></div></div>
+          <div class="score-num" style="color:var(--y-tx)" id="sn-y">0</div>
+        </div>
+        <div class="score-row">
+          <div class="score-row-label" style="color:var(--g-tx)">低リスク</div>
+          <div class="score-track"><div class="score-fill" id="sf-g" style="background:var(--g-dot)"></div></div>
+          <div class="score-num" style="color:var(--g-tx)" id="sn-g">0</div>
+        </div>
+      </div>
+      <div class="verdict warn" id="verdictBox"></div>
+    </div>
+
+    <!-- 高リスク -->
+    <div class="risk-section" id="sec-r">
+      <div class="risk-section-header" onclick="toggleSec('sec-r')">
+        <div class="risk-color-bar" style="background:var(--r-dot)"></div>
+        <div class="risk-section-title" style="color:var(--r-tx)">🔴 高リスク — 要注意条項</div>
+        <div class="risk-count" style="background:#fee2e2; color:var(--r-tx)" id="badge-r">—</div>
+        <div class="chevron">▼</div>
+      </div>
+      <div class="locked-msg"><span class="lock-icon">🔒</span>チェックを実行してください</div>
+      <div class="risk-items-wrap">
+        <div class="risk-items" id="items-r"></div>
+      </div>
+    </div>
+
+    <!-- 中リスク -->
+    <div class="risk-section" id="sec-y">
+      <div class="risk-section-header" onclick="toggleSec('sec-y')">
+        <div class="risk-color-bar" style="background:var(--y-dot)"></div>
+        <div class="risk-section-title" style="color:var(--y-tx)">🟡 中リスク — 確認推奨</div>
+        <div class="risk-count" style="background:#fef3c7; color:var(--y-tx)" id="badge-y">—</div>
+        <div class="chevron">▼</div>
+      </div>
+      <div class="locked-msg"><span class="lock-icon">🔒</span>チェックを実行してください</div>
+      <div class="risk-items-wrap">
+        <div class="risk-items" id="items-y"></div>
+      </div>
+    </div>
+
+    <!-- 低リスク -->
+    <div class="risk-section" id="sec-g">
+      <div class="risk-section-header" onclick="toggleSec('sec-g')">
+        <div class="risk-color-bar" style="background:var(--g-dot)"></div>
+        <div class="risk-section-title" style="color:var(--g-tx)">🟢 低リスク — 問題なし</div>
+        <div class="risk-count" style="background:#dcfce7; color:var(--g-tx)" id="badge-g">—</div>
+        <div class="chevron">▼</div>
+      </div>
+      <div class="locked-msg"><span class="lock-icon">🔒</span>チェックを実行してください</div>
+      <div class="risk-items-wrap">
+        <div class="risk-items" id="items-g"></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-right -->
+</div><!-- /main -->
+
+<script>
+/* ══════════════════════════════════════
+   RISK DATA
+══════════════════════════════════════ */
+const risks = [
+  /* ── 高リスク ── */
+  {
+    id:'r1', level:'r',
+    title:'納期違約金に上限なし',
+    clause:'第３条２項',
+    desc:'遅延日数×0.5%で上限なし。長期遅延時に契約金額を超える違約金が発生するリスクあり。上限（例：契約金額の20%）を明記すべき。'
+  },
+  {
+    id:'r2', level:'r',
+    title:'輸送費・保険料が全額買主負担',
+    clause:'第３条４項',
+    desc:'工場渡し条件にもかかわらず輸送コストを買主が全負担する規定。Incotermsとの整合を確認し、費用分担を交渉すること。'
+  },
+  {
+    id:'r3', level:'r',
+    title:'遅延損害金：年利15%',
+    clause:'第４条３項',
+    desc:'法定利率（3%）を大幅に上回る年利15%。商慣行上も高水準であり、利率の引き下げ交渉が必要。'
+  },
+  {
+    id:'r4', level:'r',
+    title:'検収期間がわずか3営業日',
+    clause:'第６条１項',
+    desc:'精密部品の検査として3営業日は実務上不十分。通知なき場合に合格とみなす規定と合わさり、不良品の見逃しリスクが高い。10〜15営業日への延長を検討。'
+  },
+  {
+    id:'r5', level:'r',
+    title:'瑕疵による間接損害を免責',
+    clause:'第７条２項',
+    desc:'瑕疵により生産ラインが停止しても売主は補償しない。製造業では連鎖的損害が甚大になる可能性があり、最低限の補償規定が必要。'
+  },
+  {
+    id:'r6', level:'r',
+    title:'損害賠償上限が代金の10%',
+    clause:'第８条１項',
+    desc:'売主の賠償上限を代金の10%に制限。製造不良による大規模損害に対して実損害回収が著しく困難。上限を代金の50〜100%に引き上げるよう交渉すること。'
+  },
+  {
+    id:'r7', level:'r',
+    title:'買主提供図面の知財が売主帰属',
+    clause:'第９条１項',
+    desc:'買主が費用・リソースを投じた設計図面に基づく発明が売主に帰属する。競合他社への技術流出リスクがある。知財の共有または買主帰属に修正すること。'
+  },
+  {
+    id:'r8', level:'r',
+    title:'売主の一方的解除権（損害賠償なし）',
+    clause:'第１２条２項',
+    desc:'売主が「経営上の都合」のみで解除でき、しかも損害賠償不要。サプライチェーン安定性が脅かされる。最低限の代替調達期間（90日以上）確保と補償規定を求めること。'
+  },
+
+  /* ── 中リスク ── */
+  {
+    id:'y1', level:'y',
+    title:'仕様変更に買主の同意不要',
+    clause:'第２条２項',
+    desc:'売主が社内規格を一方的に変更でき、買主は異議申立不可。品質基準のずれや互換性問題が生じるおそれ。重要変更には事前通知・同意条項を追加すべき。'
+  },
+  {
+    id:'y2', level:'y',
+    title:'品質改善名目の仕様変更が無通知で可能',
+    clause:'第２条３項',
+    desc:'「品質向上」を名目とした仕様変更が通知なしに実施される。互換性・認証取得に影響する場合は多大な損失を招く可能性。'
+  },
+  {
+    id:'y3', level:'y',
+    title:'不可抗力猶予が最大30日',
+    clause:'第３条３項',
+    desc:'自然災害等での猶予期間が30日に限定。長期サプライチェーン障害（パンデミック等）での対応として不十分な場合がある。'
+  },
+  {
+    id:'y4', level:'y',
+    title:'価格改定を買主は拒否不可',
+    clause:'第４条４項',
+    desc:'市況変動を理由に30日前通知のみで価格変更が可能で、買主に拒否権がない。価格上昇幅の上限や交渉機会の規定を追加することを推奨。'
+  },
+  {
+    id:'y5', level:'y',
+    title:'売主起因の損傷も引渡し後は買主リスク',
+    clause:'第５条２項',
+    desc:'引渡し完了後は売主起因の事由でも危険が買主移転とみなす規定。製品に潜在的欠陥がある場合のリスクを買主が全負担する。'
+  },
+  {
+    id:'y6', level:'y',
+    title:'不合格品の補償が修補・代替のみ',
+    clause:'第６条３項',
+    desc:'不合格品による生産遅延・追加費用について売主は補償しない。継続的取引での品質問題発生時に損害回復が困難。'
+  },
+  {
+    id:'y7', level:'y',
+    title:'瑕疵担保期間が6ヶ月',
+    clause:'第７条１項',
+    desc:'精密機械部品として6ヶ月は短い場合がある。使用状況により1〜2年への延長交渉を検討。なお民法上の原則（1年）と確認すること。'
+  },
+  {
+    id:'y8', level:'y',
+    title:'汎用技術改良への知財流用',
+    clause:'第９条２項',
+    desc:'買主の技術情報から得た知見が売主の汎用技術改良に使用される可能性がある。範囲の明確化が必要。'
+  },
+  {
+    id:'y9', level:'y',
+    title:'不可抗力免責が売主のみ適用',
+    clause:'第１１条１項',
+    desc:'不可抗力免責が売主のみに付与されており、買主側の不可抗力（設備故障・受注キャンセル等）には適用されない不平等な規定。双方に適用されるよう修正を求めること。'
+  },
+  {
+    id:'y10', level:'y',
+    title:'競業禁止が契約終了後2年間',
+    desc:'製造業の部品調達において競合他社との取引禁止は過度な拘束の可能性。範囲・期間の合理性を法的観点から確認すること。',
+    clause:'第１３条１項'
+  },
+
+  /* ── 低リスク ── */
+  {
+    id:'g1', level:'g',
+    title:'代金完済後に所有権移転',
+    clause:'第５条１項',
+    desc:'代金完済まで売主が所有権を保持する規定。売主保護として標準的な条項。'
+  },
+  {
+    id:'g2', level:'g',
+    title:'買主の故意・重過失は買主負担',
+    clause:'第８条３項',
+    desc:'買主側の帰責事由による損害は買主負担という合理的な規定。'
+  },
+  {
+    id:'g3', level:'g',
+    title:'知財侵害の相互通知義務',
+    clause:'第９条３項',
+    desc:'第三者知財侵害時の通知義務が双方に課されており、適切なリスク管理規定。'
+  },
+  {
+    id:'g4', level:'g',
+    title:'機密保持義務（相互）',
+    clause:'第１０条１項',
+    desc:'双方向の機密保持義務が明記。技術情報・営業情報の適切な保護規定として評価できる。'
+  },
+  {
+    id:'g5', level:'g',
+    title:'機密保持：契約終了後3年間継続',
+    clause:'第１０条２項',
+    desc:'契約終了後の存続期間3年は製造業の実務として適切な水準。'
+  },
+  {
+    id:'g6', level:'g',
+    title:'不可抗力の通知義務',
+    clause:'第１１条２項',
+    desc:'不可抗力発生時の速やかな書面通知義務を規定。適切なコミュニケーション確保の観点から問題なし。'
+  },
+  {
+    id:'g7', level:'g',
+    title:'準拠法が日本法と明記',
+    clause:'第１４条１項',
+    desc:'国際取引でなければ標準的。日本法準拠が明記されており法的明確性に問題なし。'
+  },
+];
+
+/* ══════════════════════════════════════
+   BUILD RISK ITEMS
+══════════════════════════════════════ */
+let checkedOnce = false;
+
+function buildItems() {
+  ['r','y','g'].forEach(lv => {
+    const container = document.getElementById(`items-${lv}`);
+    container.innerHTML = '';
+    const lvRisks = risks.filter(r => r.level === lv);
+    lvRisks.forEach(r => {
+      const div = document.createElement('div');
+      div.className = `risk-item ${lv}`;
+      div.id = `ri-${r.id}`;
+      div.innerHTML = `
+        <div class="ri-top">
+          <div class="ri-badge ${lv}">${lv==='r'?'高リスク':lv==='y'?'中リスク':'低リスク'}</div>
+          <div class="ri-title">${r.title}</div>
+        </div>
+        <div class="ri-clause">${r.clause}</div>
+        <div class="ri-desc">${r.desc}</div>`;
+      div.addEventListener('click', () => focusClause(r.id, div));
+      container.appendChild(div);
+    });
+  });
+}
+
+/* ══════════════════════════════════════
+   FOCUS / SCROLL
+══════════════════════════════════════ */
+let lastFocused = null;
+function focusClause(id, itemEl) {
+  // remove previous
+  if (lastFocused) {
+    lastFocused.classList.remove('focused');
+  }
+  document.querySelectorAll('.risk-item').forEach(el => el.classList.remove('active-item'));
+
+  const span = document.querySelector(`[data-id="${id}"]`);
+  if (span) {
+    span.classList.add('focused');
+    span.scrollIntoView({ behavior:'smooth', block:'center' });
+    lastFocused = span;
+    setTimeout(() => span.classList.remove('focused'), 2500);
+  }
+  itemEl.classList.add('active-item');
+}
+
+/* ══════════════════════════════════════
+   RUN CHECK
+══════════════════════════════════════ */
+function runCheck() {
+  if (!checkedOnce) {
+    buildItems();
+    checkedOnce = true;
+  }
+
+  document.body.classList.add('checked');
+  document.getElementById('checkBtn').classList.add('active');
+  document.getElementById('checkBtn').innerHTML = '<span>✅</span> チェック完了';
+  document.getElementById('summaryBar').classList.add('show');
+
+  const rCount = risks.filter(r=>r.level==='r').length;
+  const yCount = risks.filter(r=>r.level==='y').length;
+  const gCount = risks.filter(r=>r.level==='g').length;
+  const total  = rCount + yCount + gCount;
+
+  document.getElementById('cntR').textContent = rCount;
+  document.getElementById('cntY').textContent = yCount;
+  document.getElementById('cntG').textContent = gCount;
+
+  document.getElementById('badge-r').textContent = rCount + '件';
+  document.getElementById('badge-y').textContent = yCount + '件';
+  document.getElementById('badge-g').textContent = gCount + '件';
+
+  document.getElementById('sn-r').textContent = rCount;
+  document.getElementById('sn-y').textContent = yCount;
+  document.getElementById('sn-g').textContent = gCount;
+
+  // score bars
+  setTimeout(() => {
+    document.getElementById('sf-r').style.width = (rCount / total * 100) + '%';
+    document.getElementById('sf-y').style.width = (yCount / total * 100) + '%';
+    document.getElementById('sf-g').style.width = (gCount / total * 100) + '%';
+  }, 100);
+
+  // verdict
+  const vb = document.getElementById('verdictBox');
+  vb.textContent = `⚠️ 高リスク条項が${rCount}件検出されました。署名前に法務部門または弁護士への確認を強く推奨します。`;
+}
+
+/* ══════════════════════════════════════
+   RESET
+══════════════════════════════════════ */
+function resetCheck() {
+  document.body.classList.remove('checked');
+  document.getElementById('checkBtn').classList.remove('active');
+  document.getElementById('checkBtn').innerHTML = '<span>🔍</span> リスクチェック実行';
+  document.getElementById('summaryBar').classList.remove('show');
+  if (lastFocused) { lastFocused.classList.remove('focused'); lastFocused = null; }
+}
+
+/* ══════════════════════════════════════
+   TOGGLE SECTIONS
+══════════════════════════════════════ */
+function toggleSec(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+/* ── Click highlight spans ── */
+document.querySelectorAll('.hl').forEach(span => {
+  span.addEventListener('click', () => {
+    const id = span.dataset.id;
+    const item = document.getElementById(`ri-${id}`);
+    if (item) {
+      item.scrollIntoView({ behavior:'smooth', block:'center' });
+      item.classList.add('active-item');
+      setTimeout(() => item.classList.remove('active-item'), 2000);
+    }
+  });
+});
+</script>
+</body>
+</html>
