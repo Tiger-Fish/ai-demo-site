@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>コンプライアンス・労働法クイズ</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:       #f0f2f5;
+      --white:    #ffffff;
+      --border:   #d1d5db;
+      --border-l: #e5e7eb;
+      --blue-d:   #1e3a6e;
+      --blue:     #1d4ed8;
+      --blue-l:   #eff6ff;
+      --blue-m:   #3b82f6;
+      --text:     #111827;
+      --text-s:   #374151;
+      --muted:    #6b7280;
+      --ok:       #16a34a;
+      --ok-bg:    #f0fdf4;
+      --ok-bd:    #86efac;
+      --ng:       #dc2626;
+      --ng-bg:    #fef2f2;
+      --ng-bd:    #fca5a5;
+      --warn-bg:  #fffbeb;
+      --warn-tx:  #92400e;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP','Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--blue-d);
+      border-bottom: 3px solid var(--blue);
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; min-height: 58px;
+    }
+    .header-left { display:flex; align-items:center; gap:12px; padding:10px 0; }
+    .hico {
+      width:34px; height:34px; background:var(--blue);
+      border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:17px;
+    }
+    .header h1 { font-size:17px; font-weight:700; color:#fff; }
+    .header-sub { font-size:11px; color:rgba(255,255,255,.55); margin-top:1px; }
+    .header-tag {
+      background:rgba(255,255,255,.12); color:rgba(255,255,255,.85);
+      font-size:11px; padding:4px 12px; border-radius:4px;
+      border:1px solid rgba(255,255,255,.2);
+    }
+
+    /* ── Main wrapper ── */
+    .wrap {
+      flex:1; display:flex; align-items:flex-start; justify-content:center;
+      padding: 28px 16px 48px;
+    }
+    .card {
+      width: 100%; max-width: 700px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    }
+
+    /* ── Card header (progress) ── */
+    .card-header {
+      padding: 16px 24px 14px;
+      border-bottom: 1px solid var(--border-l);
+      background: #f8fafc;
+    }
+    .prog-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .prog-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .prog-frac  { font-size: 13px; font-weight: 700; color: var(--blue); }
+    .prog-track {
+      height: 6px; background: var(--border-l);
+      border-radius: 4px; overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%; background: var(--blue);
+      border-radius: 4px;
+      transition: width .5s cubic-bezier(.4,0,.2,1);
+    }
+    .cat-badge {
+      display: inline-block;
+      font-size: 10px; font-weight: 600; letter-spacing: .5px;
+      padding: 2px 10px; border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    /* ── Question area ── */
+    .card-body { padding: 28px 28px 24px; }
+
+    .q-number {
+      font-size: 12px; font-weight: 700; color: var(--blue);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+    }
+    .q-text {
+      font-size: 16px; font-weight: 600; color: var(--text);
+      line-height: 1.7; margin-bottom: 24px;
+    }
+
+    /* ── Choices ── */
+    .choices { display:flex; flex-direction:column; gap:10px; }
+    .choice {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px; color: var(--text-s);
+      transition: border-color .15s, background .15s, transform .1s;
+      position: relative;
+      user-select: none;
+    }
+    .choice:hover:not(.disabled) {
+      border-color: var(--blue-m);
+      background: var(--blue-l);
+      transform: translateX(3px);
+    }
+    .choice.disabled { cursor: default; }
+    .choice-num {
+      width: 26px; height: 26px; flex-shrink:0;
+      border-radius: 50%;
+      background: var(--border-l);
+      color: var(--muted);
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items:center; justify-content:center;
+      transition: background .15s, color .15s;
+    }
+    .choice-text { flex:1; line-height:1.5; }
+
+    /* correct / incorrect states */
+    .choice.correct {
+      border-color: var(--ok-bd);
+      background: var(--ok-bg);
+      animation: correct-pop .35s ease;
+    }
+    .choice.correct .choice-num {
+      background: var(--ok); color: #fff;
+    }
+    .choice.incorrect {
+      border-color: var(--ng-bd);
+      background: var(--ng-bg);
+      animation: shake .4s ease;
+    }
+    .choice.incorrect .choice-num {
+      background: var(--ng); color: #fff;
+    }
+    .choice.dim { opacity: .45; }
+
+    @keyframes correct-pop {
+      0%   { transform:scale(1); }
+      40%  { transform:scale(1.025) translateX(3px); }
+      100% { transform:scale(1)   translateX(3px); }
+    }
+    @keyframes shake {
+      0%,100%{ transform:translateX(0); }
+      20%    { transform:translateX(-6px); }
+      40%    { transform:translateX(6px); }
+      60%    { transform:translateX(-4px); }
+      80%    { transform:translateX(4px); }
+    }
+
+    /* ── Feedback box ── */
+    .feedback {
+      margin-top: 18px; padding: 14px 16px;
+      border-radius: 8px; font-size: 13px;
+      line-height: 1.7;
+      animation: fadeDown .3s ease;
+      display: none;
+    }
+    .feedback.show { display: block; }
+    .feedback.ok {
+      background: var(--ok-bg); border: 1px solid var(--ok-bd); color: #14532d;
+    }
+    .feedback.ng {
+      background: var(--ng-bg); border: 1px solid var(--ng-bd); color: #7f1d1d;
+    }
+    .fb-title { font-weight: 700; margin-bottom: 4px; font-size: 14px; }
+    .fb-law {
+      display: inline-block; margin-top: 6px;
+      font-size: 11px; font-weight: 600;
+      background: rgba(0,0,0,.06); padding: 2px 8px; border-radius: 4px;
+    }
+    @keyframes fadeDown {
+      from { opacity:0; transform:translateY(-8px); }
+      to   { opacity:1; transform:translateY(0);    }
+    }
+
+    /* ── Next button ── */
+    .btn-next {
+      display: none; margin-top: 22px; width: 100%;
+      padding: 13px;
+      background: var(--blue); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background .15s;
+      animation: fadeDown .3s ease;
+    }
+    .btn-next:hover { background: #1e40af; }
+    .btn-next.show { display: block; }
+
+    /* ── Result screen ── */
+    #resultScreen {
+      display: none;
+      padding: 32px 28px 36px;
+      animation: fadeDown .5s ease;
+    }
+    #resultScreen.show { display: block; }
+
+    .result-score-wrap { text-align: center; margin-bottom: 28px; }
+    .score-circle {
+      width: 120px; height: 120px; border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex; flex-direction:column;
+      align-items: center; justify-content: center;
+      font-weight: 700;
+      border: 5px solid;
+      position: relative;
+    }
+    .score-num-big { font-size: 40px; line-height:1; }
+    .score-denom   { font-size: 14px; color: var(--muted); }
+    .grade-label {
+      font-size: 22px; font-weight: 700; margin-bottom: 6px;
+    }
+    .grade-sub { font-size: 13px; color: var(--muted); }
+
+    .result-breakdown {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 24px;
+    }
+    @media(max-width:480px){ .result-breakdown { grid-template-columns:1fr; } }
+    .rb-item {
+      background: #f8fafc; border:1px solid var(--border-l);
+      border-radius:8px; padding:12px 14px; text-align:center;
+    }
+    .rb-item .rb-val { font-size:22px; font-weight:700; color:var(--blue); }
+    .rb-item .rb-lbl { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    .result-review-title {
+      font-size: 13px; font-weight: 700; color: var(--text-s);
+      margin-bottom: 10px; display:flex; align-items:center; gap:6px;
+    }
+    .review-list { display:flex; flex-direction:column; gap:8px; }
+    .review-item {
+      display:flex; gap:10px; padding:10px 12px;
+      border-radius:8px; font-size:12px;
+      border:1px solid;
+    }
+    .review-item.ok  { background:var(--ok-bg); border-color:var(--ok-bd); }
+    .review-item.ng  { background:var(--ng-bg); border-color:var(--ng-bd); }
+    .review-icon { font-size:14px; flex-shrink:0; margin-top:1px; }
+    .review-text { flex:1; }
+    .review-q { font-weight:600; color:var(--text); margin-bottom:2px; line-height:1.5; }
+    .review-ans { color:var(--muted); }
+    .review-ans.ng-ans { color:var(--ng); }
+
+    .btn-retry {
+      width:100%; margin-top:22px; padding:13px;
+      background:var(--blue); color:#fff;
+      border:none; border-radius:8px;
+      font-family:inherit; font-size:14px; font-weight:600;
+      cursor:pointer; transition:background .15s;
+    }
+    .btn-retry:hover { background:#1e40af; }
+
+    /* ── Confetti canvas ── */
+    #confetti-canvas {
+      position:fixed; inset:0; pointer-events:none; z-index:999;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="hico">📚</div>
+    <div>
+      <h1>コンプライアンス・労働法クイズ</h1>
+      <div class="header-sub">社員研修用 ／ Compliance Training Quiz</div>
+    </div>
+  </div>
+  <div class="header-tag">全10問</div>
+</div>
+
+<!-- MAIN -->
+<div class="wrap">
+  <div class="card">
+
+    <!-- Progress header -->
+    <div class="card-header" id="quizHeader">
+      <div class="prog-row">
+        <div class="prog-label" id="progLabel">問題 1 / 10</div>
+        <div class="prog-frac" id="scoreFrac">スコア: 0 / 0</div>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="progFill" style="width:0%"></div>
+      </div>
+      <div><span class="cat-badge" id="catBadge">—</span></div>
+    </div>
+
+    <!-- Question body -->
+    <div class="card-body" id="quizBody">
+      <div class="q-number" id="qNum">Q1</div>
+      <div class="q-text"  id="qText">読込中…</div>
+      <div class="choices" id="choices"></div>
+      <div class="feedback" id="feedback">
+        <div class="fb-title" id="fbTitle"></div>
+        <div id="fbDesc"></div>
+        <span class="fb-law" id="fbLaw"></span>
+      </div>
+      <button class="btn-next" id="btnNext" onclick="nextQ()">次の問題へ →</button>
+    </div>
+
+    <!-- Result -->
+    <div id="resultScreen">
+      <div class="result-score-wrap">
+        <div class="score-circle" id="scoreCircle">
+          <div class="score-num-big" id="scoreNum">0</div>
+          <div class="score-denom">/ 10点</div>
+        </div>
+        <div class="grade-label" id="gradeLabel">—</div>
+        <div class="grade-sub"  id="gradeSub">—</div>
+      </div>
+      <div class="result-breakdown">
+        <div class="rb-item"><div class="rb-val" id="rb-correct">0</div><div class="rb-lbl">正解数</div></div>
+        <div class="rb-item"><div class="rb-val" id="rb-wrong" style="color:var(--ng)">0</div><div class="rb-lbl">不正解数</div></div>
+        <div class="rb-item"><div class="rb-val" id="rb-labor">—</div><div class="rb-lbl">労働基準法</div></div>
+        <div class="rb-item"><div class="rb-val" id="rb-harass">—</div><div class="rb-lbl">ハラスメント</div></div>
+      </div>
+      <div class="result-review-title">📋 解答一覧</div>
+      <div class="review-list" id="reviewList"></div>
+      <button class="btn-retry" onclick="restartQuiz()">🔄 もう一度挑戦する</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   QUIZ DATA
+══════════════════════════════════════ */
+const Q = [
+  {
+    cat: '労働基準法',
+    catColor: '#dbeafe', catTx: '#1e40af',
+    q: '労働基準法が定める1日の法定労働時間として正しいものはどれか。',
+    choices: ['6時間','7時間','8時間','10時間'],
+    ans: 2,
+    ok_msg: '正解！法定労働時間は1日8時間・1週40時間です。',
+    ng_msg: '法定労働時間は1日8時間（第32条）です。これを超える時間外労働には割増賃金が必要です。',
+    law: '労働基準法 第32条'
+  },
+  {
+    cat: '労働基準法',
+    catColor: '#dbeafe', catTx: '#1e40af',
+    q: '法定時間外労働（残業）に対する割増賃金率として正しいものはどれか。',
+    choices: ['通常賃金の10%以上','通常賃金の25%以上','通常賃金の35%以上','通常賃金の50%以上（月60時間超の場合）'],
+    ans: 1,
+    ok_msg: '正解！時間外労働の割増率は原則25%以上です。月60時間超の場合は50%以上になります。',
+    ng_msg: '時間外労働の割増賃金率は25%以上（第37条）です。月60時間を超えた部分は50%以上となります（大企業は2023年4月から全企業に適用）。',
+    law: '労働基準法 第37条'
+  },
+  {
+    cat: '労働基準法',
+    catColor: '#dbeafe', catTx: '#1e40af',
+    q: '労働基準法上、労働時間が6時間を超え8時間以下の場合、与えなければならない休憩時間の最低時間はどれか。',
+    choices: ['10分','30分（少なくとも）','45分（少なくとも）','60分（少なくとも）'],
+    ans: 1,
+    ok_msg: '正解！6時間超8時間以下の場合は少なくとも45分の休憩が必要です。',
+    ng_msg: '労働時間が6時間を超える場合は少なくとも45分、8時間を超える場合は少なくとも60分の休憩を与えなければなりません（第34条）。',
+    law: '労働基準法 第34条'
+  },
+  {
+    cat: '労働基準法',
+    catColor: '#dbeafe', catTx: '#1e40af',
+    q: '入社から6ヶ月継続勤務し、全労働日の8割以上出勤した労働者に付与しなければならない年次有給休暇の日数はどれか。',
+    choices: ['3日','5日','10日','14日'],
+    ans: 2,
+    ok_msg: '正解！入社6ヶ月後に付与される有給休暇は10日です。',
+    ng_msg: '入社後6ヶ月の継続勤務かつ8割以上出勤した場合、10日間の年次有給休暇を付与しなければなりません（第39条）。',
+    law: '労働基準法 第39条'
+  },
+  {
+    cat: 'ハラスメント',
+    catColor: '#fce7f3', catTx: '#9d174d',
+    q: '厚生労働省が定めるパワーハラスメントの3要素として、正しい組み合わせはどれか。',
+    choices: [
+      '①職場内での行為 ②優越的な関係を背景 ③業務上必要かつ相当な範囲を超えた言動',
+      '①優越的な関係を背景 ②業務上必要かつ相当な範囲を超えた言動 ③労働者の就業環境が害される',
+      '①性別を理由とする ②優越的な関係を背景 ③身体的な攻撃を含む言動',
+      '①繰り返し行われる ②複数人が関与する ③証拠が残る言動'
+    ],
+    ans: 1,
+    ok_msg: '正解！パワハラの3要素を正確に理解しています。',
+    ng_msg: 'パワハラの3要素は「①優越的な関係を背景にした言動」「②業務上必要かつ相当な範囲を超えた言動」「③労働者の就業環境が害される」です（労働施策総合推進法 第30条の2）。',
+    law: '労働施策総合推進法 第30条の2'
+  },
+  {
+    cat: 'ハラスメント',
+    catColor: '#fce7f3', catTx: '#9d174d',
+    q: 'セクシュアルハラスメントの防止措置として、事業主に義務付けられていないものはどれか。',
+    choices: [
+      'ハラスメント防止方針の策定・周知',
+      '相談窓口の設置',
+      '加害者の即時解雇',
+      '相談者・行為者等のプライバシー保護'
+    ],
+    ans: 2,
+    ok_msg: '正解！即時解雇は義務ではなく、適切な調査・対処が求められます。',
+    ng_msg: '事業主に義務付けられているのは「方針の策定・周知」「相談窓口の設置」「迅速・適切な対処」「プライバシー保護」などです。加害者の即時解雇は義務ではなく、事案に応じた適切な措置が求められます（男女雇用機会均等法 第11条）。',
+    law: '男女雇用機会均等法 第11条'
+  },
+  {
+    cat: 'ハラスメント',
+    catColor: '#fce7f3', catTx: '#9d174d',
+    q: '妊娠・出産・育児休業等を理由とした不利益取扱い（マタニティハラスメント）に該当しないものはどれか。',
+    choices: [
+      '妊娠を理由に降格させる',
+      '育休取得を理由に昇進を見送る',
+      '育休取得者に対し復職後の業務内容について事前に説明・相談する',
+      '産休取得の申し出をした社員に自主退職を促す'
+    ],
+    ans: 2,
+    ok_msg: '正解！事前に業務内容を説明・相談することは、むしろ推奨される対応です。',
+    ng_msg: '育休取得者への事前説明・相談は、スムーズな職場復帰のために推奨される対応です。降格・昇進見送り・退職勧奨はいずれもマタニティハラスメントに該当します（男女雇用機会均等法 第9条、育児・介護休業法 第10条）。',
+    law: '男女雇用機会均等法 第9条・育児介護休業法 第10条'
+  },
+  {
+    cat: '安全衛生',
+    catColor: '#d1fae5', catTx: '#065f46',
+    q: '労働安全衛生法において、常時使用する労働者が50人以上の事業場に選任が義務付けられているのはどれか。',
+    choices: ['安全委員会のみ','衛生管理者と産業医','安全衛生推進者','作業主任者のみ'],
+    ans: 1,
+    ok_msg: '正解！50人以上の事業場では衛生管理者と産業医の選任が義務付けられています。',
+    ng_msg: '労働者50人以上の事業場では、衛生管理者（第12条）と産業医（第13条）の選任が義務付けられています。安全委員会・衛生委員会も設置が必要です（第17・18条）。',
+    law: '労働安全衛生法 第12条・第13条'
+  },
+  {
+    cat: '安全衛生',
+    catColor: '#d1fae5', catTx: '#065f46',
+    q: '労働安全衛生法に基づく一般定期健康診断について正しいものはどれか。',
+    choices: [
+      '実施は任意であり、費用は労働者負担でよい',
+      '年1回実施が義務であり、費用は事業者負担が原則',
+      '5年に1回実施すれば足りる',
+      '健康診断の結果を本人の同意なしに上司に報告しなければならない'
+    ],
+    ans: 1,
+    ok_msg: '正解！定期健康診断は年1回実施・事業者負担が原則です。',
+    ng_msg: '定期健康診断は年1回の実施が義務であり（第66条）、費用は事業者が負担するのが原則です。結果は本人に通知（第66条の6）し、本人の同意なく上司に報告するのは個人情報保護法上も問題があります。',
+    law: '労働安全衛生法 第66条'
+  },
+  {
+    cat: '労働基準法',
+    catColor: '#dbeafe', catTx: '#1e40af',
+    q: '使用者が労働者を解雇する場合の原則として正しいものはどれか。',
+    choices: [
+      '少なくとも7日前に予告するか、7日分の平均賃金を支払う',
+      '少なくとも14日前に予告するか、14日分の平均賃金を支払う',
+      '少なくとも30日前に予告するか、30日分以上の平均賃金（解雇予告手当）を支払う',
+      '解雇に予告は不要。解雇通知書を交付すれば即日解雇できる'
+    ],
+    ans: 2,
+    ok_msg: '正解！解雇予告は30日前、または30日分以上の解雇予告手当が必要です。',
+    ng_msg: '使用者は原則として少なくとも30日前に解雇の予告をするか、30日分以上の平均賃金（解雇予告手当）を支払わなければなりません（第20条）。ただし天災等のやむを得ない事由や労働者の責に帰すべき事由がある場合は例外があります。',
+    law: '労働基準法 第20条'
+  }
+];
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let current = 0;
+let score   = 0;
+let answered = [];  // {q, userAns, correct}
+let totalAnswered = 0;
+
+/* ══════════════════════════════════════
+   RENDER QUESTION
+══════════════════════════════════════ */
+function renderQ() {
+  const q = Q[current];
+
+  // progress
+  const pct = (current / Q.length * 100).toFixed(0);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = `問題 ${current+1} / ${Q.length}`;
+  document.getElementById('scoreFrac').textContent = `スコア: ${score} / ${totalAnswered}`;
+
+  // category badge
+  const badge = document.getElementById('catBadge');
+  badge.textContent = q.cat;
+  badge.style.background = q.catColor;
+  badge.style.color = q.catTx;
+  badge.style.fontWeight = '600';
+  badge.style.fontSize = '11px';
+  badge.style.padding = '3px 10px';
+  badge.style.borderRadius = '10px';
+
+  // question
+  document.getElementById('qNum').textContent = `Q${current+1}`;
+  document.getElementById('qText').textContent = q.q;
+
+  // choices
+  const cont = document.getElementById('choices');
+  cont.innerHTML = '';
+  const labels = ['A','B','C','D'];
+  q.choices.forEach((c, i) => {
+    const div = document.createElement('div');
+    div.className = 'choice';
+    div.innerHTML = `<div class="choice-num">${labels[i]}</div><div class="choice-text">${c}</div>`;
+    div.addEventListener('click', () => selectAnswer(i));
+    cont.appendChild(div);
+  });
+
+  // hide feedback & next
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  document.getElementById('btnNext').className = 'btn-next';
+
+  // animate in
+  const body = document.getElementById('quizBody');
+  body.style.animation = 'none';
+  body.offsetHeight; // reflow
+  body.style.animation = 'fadeDown .3s ease';
+}
+
+/* ══════════════════════════════════════
+   SELECT ANSWER
+══════════════════════════════════════ */
+function selectAnswer(idx) {
+  const q = Q[current];
+  const choices = document.querySelectorAll('.choice');
+  // disable all
+  choices.forEach(c => c.classList.add('disabled'));
+
+  totalAnswered++;
+  const isCorrect = idx === q.ans;
+  if (isCorrect) score++;
+
+  // highlight choices
+  choices.forEach((c, i) => {
+    if (i === q.ans) {
+      c.classList.add('correct');
+    } else if (i === idx && !isCorrect) {
+      c.classList.add('incorrect');
+    } else {
+      c.classList.add('dim');
+    }
+  });
+
+  // feedback
+  const fb = document.getElementById('feedback');
+  fb.className = `feedback ${isCorrect ? 'ok' : 'ng'} show`;
+  document.getElementById('fbTitle').textContent = isCorrect ? '✅ 正解！' : '❌ 不正解';
+  document.getElementById('fbDesc').textContent  = isCorrect ? q.ok_msg : q.ng_msg;
+  document.getElementById('fbLaw').textContent   = q.law;
+
+  // update score display
+  document.getElementById('scoreFrac').textContent = `スコア: ${score} / ${totalAnswered}`;
+
+  // log
+  answered.push({ qi: current, userAns: idx, correct: isCorrect });
+
+  // confetti if correct
+  if (isCorrect) launchConfetti();
+
+  // next button
+  document.getElementById('btnNext').className = 'btn-next show';
+  if (current === Q.length - 1) {
+    document.getElementById('btnNext').textContent = '結果を見る 📊';
+  }
+}
+
+/* ══════════════════════════════════════
+   NEXT
+══════════════════════════════════════ */
+function nextQ() {
+  current++;
+  if (current >= Q.length) {
+    showResult();
+  } else {
+    renderQ();
+  }
+}
+
+/* ══════════════════════════════════════
+   RESULT
+══════════════════════════════════════ */
+function showResult() {
+  document.getElementById('quizHeader').style.display = 'none';
+  document.getElementById('quizBody').style.display   = 'none';
+  const rs = document.getElementById('resultScreen');
+  rs.classList.add('show');
+
+  // circle
+  const circle = document.getElementById('scoreCircle');
+  let circleColor;
+  if (score >= 8)      circleColor = ['#16a34a','#dcfce7'];
+  else if (score >= 6) circleColor = ['#2563eb','#dbeafe'];
+  else                 circleColor = ['#dc2626','#fee2e2'];
+  circle.style.borderColor = circleColor[0];
+  circle.style.background  = circleColor[1];
+  circle.style.color       = circleColor[0];
+
+  // animate score number
+  let n = 0;
+  const el = document.getElementById('scoreNum');
+  const t = setInterval(() => {
+    el.textContent = n++;
+    if (n > score) clearInterval(t);
+  }, 120);
+
+  // grade
+  const gl = document.getElementById('gradeLabel');
+  const gs = document.getElementById('gradeSub');
+  if (score >= 9)      { gl.textContent='🏆 優秀'; gl.style.color='#15803d'; gs.textContent='素晴らしい成績です！コンプライアンス知識が十分に身についています。'; }
+  else if (score >= 8) { gl.textContent='🥇 優秀'; gl.style.color='#15803d'; gs.textContent='高い水準をクリアしています。引き続き知識の維持に努めましょう。'; }
+  else if (score >= 6) { gl.textContent='🥈 合格'; gl.style.color='#1d4ed8'; gs.textContent='合格ラインをクリアしています。不正解の項目を中心に復習しましょう。'; }
+  else                 { gl.textContent='📚 要再学習'; gl.style.color='#dc2626'; gs.textContent='合格ラインに達していません。不正解箇所を重点的に学習してください。'; }
+
+  // breakdown
+  document.getElementById('rb-correct').textContent = score;
+  document.getElementById('rb-wrong').textContent   = Q.length - score;
+
+  const laborTotal = answered.filter(a => Q[a.qi].cat === '労働基準法').length;
+  const laborOk    = answered.filter(a => Q[a.qi].cat === '労働基準法' && a.correct).length;
+  const harTotal   = answered.filter(a => Q[a.qi].cat === 'ハラスメント').length;
+  const harOk      = answered.filter(a => Q[a.qi].cat === 'ハラスメント' && a.correct).length;
+  document.getElementById('rb-labor').textContent   = `${laborOk}/${laborTotal}`;
+  document.getElementById('rb-harass').textContent  = `${harOk}/${harTotal}`;
+
+  // review list
+  const rl = document.getElementById('reviewList');
+  rl.innerHTML = '';
+  answered.forEach(a => {
+    const q = Q[a.qi];
+    const labels = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = `review-item ${a.correct ? 'ok' : 'ng'}`;
+    div.innerHTML = `
+      <div class="review-icon">${a.correct ? '✅' : '❌'}</div>
+      <div class="review-text">
+        <div class="review-q">Q${a.qi+1}. ${q.q}</div>
+        <div class="review-ans ${a.correct ? '' : 'ng-ans'}">
+          あなたの回答: ${labels[a.userAns]}. ${q.choices[a.userAns]}
+          ${!a.correct ? `<br>正解: ${labels[q.ans]}. ${q.choices[q.ans]}` : ''}
+        </div>
+      </div>`;
+    rl.appendChild(div);
+  });
+
+  // big confetti for good score
+  if (score >= 8) {
+    setTimeout(() => launchConfetti(true), 300);
+    setTimeout(() => launchConfetti(true), 800);
+  }
+}
+
+/* ══════════════════════════════════════
+   RESTART
+══════════════════════════════════════ */
+function restartQuiz() {
+  current = 0; score = 0; answered = []; totalAnswered = 0;
+  document.getElementById('quizHeader').style.display = '';
+  document.getElementById('quizBody').style.display   = '';
+  document.getElementById('resultScreen').classList.remove('show');
+  renderQ();
+}
+
+/* ══════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════ */
+function launchConfetti(big=false) {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const count = big ? 120 : 40;
+  const colors = ['#1d4ed8','#16a34a','#f59e0b','#ec4899','#06b6d4'];
+  const particles = Array.from({length:count}, () => ({
+    x: Math.random() * canvas.width,
+    y: -10,
+    r: Math.random() * 6 + 3,
+    d: Math.random() * count,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    tilt: Math.random() * 10 - 5,
+    tiltAngle: 0,
+    tiltAngleInc: Math.random() * 0.07 + 0.05,
+    vx: Math.random() * 3 - 1.5,
+    vy: Math.random() * 2 + 2,
+  }));
+
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.lineWidth = p.r;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r/3, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+      ctx.stroke();
+    });
+    particles.forEach(p => {
+      p.tiltAngle += p.tiltAngleInc;
+      p.y += p.vy;
+      p.x += p.vx;
+      p.tilt = Math.sin(p.tiltAngle) * 12;
+    });
+    frame++;
+    if (frame < (big ? 160 : 80)) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+renderQ();
+</script>
+</body>
+</html>
