@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>営業ダッシュボード 2024-2025</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg:       #f0f2f5;
+      --white:    #ffffff;
+      --border:   #d1d5db;
+      --border-l: #e5e7eb;
+
+      /* Brand blue */
+      --blue-d:   #1e3a6e;   /* header, headings */
+      --blue:     #1d4ed8;   /* primary accent */
+      --blue-m:   #3b82f6;   /* lighter accent */
+      --blue-l:   #eff6ff;   /* bg tint */
+
+      /* Branch palette — Power BI-ish */
+      --tokyo:    #1d4ed8;
+      --osaka:    #0369a1;
+      --nagoya:   #475569;
+      --fukuoka:  #0f766e;
+
+      /* Status */
+      --ok:       #16a34a;
+      --warn:     #d97706;
+      --ng:       #dc2626;
+      --ok-bg:    #f0fdf4;
+      --warn-bg:  #fffbeb;
+      --ng-bg:    #fef2f2;
+
+      --text:     #111827;
+      --text-s:   #374151;
+      --muted:    #6b7280;
+      --muted-l:  #9ca3af;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ════════ Header ════════ */
+    .header {
+      background: var(--blue-d);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-bottom: 3px solid var(--blue);
+      min-height: 64px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+    }
+    .header-icon {
+      width: 36px; height: 36px;
+      background: var(--blue);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .header h1 {
+      font-size: clamp(15px, 2.5vw, 20px);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: .3px;
+    }
+    .header-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,.6);
+      font-weight: 400;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+    .period-badge {
+      background: rgba(255,255,255,.12);
+      color: rgba(255,255,255,.9);
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.2);
+      white-space: nowrap;
+    }
+
+    /* ════════ Layout ════════ */
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 20px 48px;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+
+    @media(max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-4 { grid-template-columns: repeat(2,1fr); }
+    }
+    @media(max-width: 480px) {
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ════════ Section header ════════ */
+    .sec-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      margin-top: 28px;
+    }
+    .sec-header:first-of-type { margin-top: 0; }
+    .sec-bar {
+      width: 4px; height: 18px;
+      background: var(--blue);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .sec-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue-d);
+      letter-spacing: .3px;
+    }
+    .sec-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ════════ KPI card ════════ */
+    .kpi-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 18px 16px;
+      border-top: 3px solid var(--blue);
+      position: relative;
+      transition: box-shadow .2s;
+    }
+    .kpi-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.10); }
+    .kpi-card.t { border-top-color: var(--tokyo);   }
+    .kpi-card.o { border-top-color: var(--osaka);   }
+    .kpi-card.n { border-top-color: var(--nagoya);  }
+    .kpi-card.f { border-top-color: var(--fukuoka); }
+
+    .kpi-branch {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .kpi-branch .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .kpi-value {
+      font-size: clamp(20px, 3vw, 26px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.5px;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+    .kpi-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .kpi-divider {
+      border: none;
+      border-top: 1px solid var(--border-l);
+      margin: 10px 0 8px;
+    }
+    .kpi-rate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .kpi-rate-label { font-size: 11px; color: var(--muted); }
+    .kpi-rate-val {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .rate-ok   { color: var(--ok);   }
+    .rate-warn { color: var(--warn); }
+    .rate-ng   { color: var(--ng);   }
+
+    /* ════════ Card (charts / ranking) ════════ */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 20px 16px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-s);
+      margin-bottom: 4px;
+    }
+    .card-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .chart-wrap { position: relative; width: 100%; }
+
+    /* ════════ Achievement table ════════ */
+    .ach-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .ach-table thead tr {
+      background: #f8fafc;
+    }
+    .ach-table th {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-align: center;
+      padding: 9px 10px;
+      border: 1px solid var(--border-l);
+      letter-spacing: .3px;
+      white-space: nowrap;
+    }
+    .ach-table th.month-h { text-align: left; }
+    .ach-table td {
+      text-align: center;
+      padding: 8px 10px;
+      border: 1px solid var(--border-l);
+    }
+    .ach-table tbody tr:nth-child(even) td { background: #fafafa; }
+    .ach-table tbody tr:hover td { background: var(--blue-l) !important; }
+    .ach-table .month-col {
+      text-align: left;
+      color: var(--text-s);
+      font-weight: 500;
+      background: #f8fafc !important;
+    }
+
+    /* cell status */
+    .cell-ok   { color: var(--ok);   font-weight: 600; }
+    .cell-warn { color: var(--warn); font-weight: 600; background: var(--warn-bg) !important; }
+    .cell-ng   { color: var(--ng);   font-weight: 700; background: var(--ng-bg)   !important; }
+
+    /* legend note */
+    .legend-note {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ════════ Ranking ════════ */
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border-l);
+    }
+    .rank-item:last-child { border-bottom: none; }
+
+    .rank-badge {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .rb-1 { background: #fef9c3; color: #92400e; border: 1.5px solid #f59e0b; }
+    .rb-2 { background: #f1f5f9; color: #475569; border: 1.5px solid #94a3b8; }
+    .rb-3 { background: #fef3e6; color: #92400e; border: 1.5px solid #f97316; }
+    .rb-4 { background: #f8fafc; color: #94a3b8; border: 1.5px solid #e2e8f0; }
+
+    .rank-info { flex: 1; }
+    .rank-name { font-weight: 700; font-size: 14px; color: var(--text); }
+    .rank-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    .rank-right { text-align: right; min-width: 100px; }
+    .rank-pct { font-size: 16px; font-weight: 700; }
+    .rank-bar-bg {
+      height: 5px;
+      background: var(--border-l);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    .rank-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0;
+      transition: width 1.2s ease .3s;
+    }
+
+    /* ════════ Reveal ════════ */
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity .5s, transform .5s; }
+    .reveal.on { opacity: 1; transform: translateY(0); }
+
+    /* ════════ Scrollbar ════════ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    /* ════════ Footer ════════ */
+    .footer {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer p { font-size: 11px; color: var(--muted-l); }
+    .footer-dot { color: var(--ok); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">📊</div>
+    <div>
+      <h1>営業ダッシュボード</h1>
+      <div class="header-sub">Sales Performance Report</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="period-badge">2024年4月 〜 2025年3月</div>
+    <div class="period-badge">全4支店</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- ① KPI CARDS -->
+  <div class="sec-header">
+    <div class="sec-bar"></div>
+    <div class="sec-label">支店別サマリー</div>
+    <div class="sec-note">単位：百万円</div>
+  </div>
+  <div class="grid-4 reveal">
+    <div class="kpi-card t">
+      <div class="kpi-branch"><span class="dot" style="background:var(--tokyo)"></span>東京支店</div>
+      <div class="kpi-value" id="kpi-t">—</div>
+      <div class="kpi-label">年間売上合計（百万円）</div>
+      <hr class="kpi-divider"/>
+      <div class="kpi-rate-row">
+        <span class="kpi-rate-label">年間達成率</span>
+        <span class="kpi-rate-val" id="kpi-tr">—</span>
+      </div>
+    </div>
+    <div class="kpi-card o">
+      <div class="kpi-branch"><span class="dot" style="background:var(--osaka)"></span>大阪支店</div>
+      <div class="kpi-value" id="kpi-o">—</div>
+      <div class="kpi-label">年間売上合計（百万円）</div>
+      <hr class="kpi-divider"/>
+      <div class="kpi-rate-row">
+        <span class="kpi-rate-label">年間達成率</span>
+        <span class="kpi-rate-val" id="kpi-or">—</span>
+      </div>
+    </div>
+    <div class="kpi-card n">
+      <div class="kpi-branch"><span class="dot" style="background:var(--nagoya)"></span>名古屋支店</div>
+      <div class="kpi-value" id="kpi-n">—</div>
+      <div class="kpi-label">年間売上合計（百万円）</div>
+      <hr class="kpi-divider"/>
+      <div class="kpi-rate-row">
+        <span class="kpi-rate-label">年間達成率</span>
+        <span class="kpi-rate-val" id="kpi-nr">—</span>
+      </div>
+    </div>
+    <div class="kpi-card f">
+      <div class="kpi-branch"><span class="dot" style="background:var(--fukuoka)"></span>福岡支店</div>
+      <div class="kpi-value" id="kpi-f">—</div>
+      <div class="kpi-label">年間売上合計（百万円）</div>
+      <hr class="kpi-divider"/>
+      <div class="kpi-rate-row">
+        <span class="kpi-rate-label">年間達成率</span>
+        <span class="kpi-rate-val" id="kpi-fr">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② BAR + LINE -->
+  <div class="sec-header" style="margin-top:28px">
+    <div class="sec-bar"></div>
+    <div class="sec-label">売上グラフ</div>
+  </div>
+  <div class="grid-2 reveal">
+    <div class="card">
+      <div class="card-title">年間売上合計 — 支店別比較</div>
+      <div class="card-sub">単位：億円</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">月別売上推移</div>
+      <div class="card-sub">単位：百万円</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="lineChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ③ ACHIEVEMENT TABLE -->
+  <div class="sec-header">
+    <div class="sec-bar"></div>
+    <div class="sec-label">月別達成率 詳細</div>
+  </div>
+  <div class="card reveal">
+    <div class="card-title">達成率一覧</div>
+    <div class="card-sub">目標比 ／ 月別・支店別</div>
+    <div style="overflow-x:auto">
+      <table class="ach-table" id="achTable"></table>
+    </div>
+    <div class="legend-note" style="margin-top:12px">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--ok-bg);border:1px solid var(--ok)"></div>達成（100%以上）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--warn-bg);border:1px solid var(--warn)"></div>注意（95〜99%）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--ng-bg);border:1px solid var(--ng)"></div>未達成（95%未満）</div>
+    </div>
+  </div>
+
+  <!-- ④ RANKING + NEW CUSTOMERS -->
+  <div class="sec-header">
+    <div class="sec-bar"></div>
+    <div class="sec-label">達成率ランキング ／ 新規顧客数推移</div>
+  </div>
+  <div class="grid-2 reveal">
+    <div class="card">
+      <div class="card-title">年間達成率ランキング</div>
+      <div class="card-sub">2024年4月〜2025年3月 累計</div>
+      <div id="rankList"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">月別 新規顧客数</div>
+      <div class="card-sub">単位：人</div>
+      <div class="chart-wrap" style="height:260px"><canvas id="newCustChart"></canvas></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="footer">
+  <p><span class="footer-dot">●</span> 営業ダッシュボード — 2024年4月〜2025年3月実績</p>
+  <p>全データはCSVより自動集計</p>
+</div>
+
+<script>
+/* ══════════════════════════════
+   DATA
+══════════════════════════════ */
+const months = ['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const monthsFull = [
+  '2024年4月','2024年5月','2024年6月','2024年7月','2024年8月','2024年9月',
+  '2024年10月','2024年11月','2024年12月','2025年1月','2025年2月','2025年3月'
+];
+const branches = ['東京','大阪','名古屋','福岡'];
+
+const sales = {
+  東京:  [412,438,395,421,378,445,461,448,498,389,401,521],
+  大阪:  [298,312,325,308,289,334,341,328,367,298,305,389],
+  名古屋:[187,201,195,189,175,208,215,209,231,185,191,248],
+  福岡:  [143,138,152,147,131,158,163,156,178,141,148,191],
+};
+const targets = {
+  東京:  [400,420,410,415,400,425,440,445,480,405,410,500],
+  大阪:  [310,320,315,320,310,325,335,335,360,315,315,375],
+  名古屋:[190,200,195,195,190,200,210,210,225,195,195,235],
+  福岡:  [140,145,145,148,140,150,155,158,170,148,150,180],
+};
+const newCust = {
+  東京:  [12,14,10,13,8,15,16,14,18,9,11,20],
+  大阪:  [8,9,11,7,6,12,11,9,13,7,8,15],
+  名古屋:[5,6,5,4,3,7,7,6,8,4,5,10],
+  福岡:  [4,3,5,4,2,6,5,4,6,3,4,7],
+};
+
+/* Branch colors (CSS var values resolved at runtime) */
+const colorMap = {
+  東京:  '#1d4ed8',
+  大阪:  '#0369a1',
+  名古屋:'#475569',
+  福岡:  '#0f766e',
+};
+
+const sum = arr => arr.reduce((a,b)=>a+b,0);
+
+const annualSales  = {};
+const annualTarget = {};
+const annualRate   = {};
+branches.forEach(b => {
+  annualSales[b]  = sum(sales[b]);
+  annualTarget[b] = sum(targets[b]);
+  annualRate[b]   = (annualSales[b] / annualTarget[b] * 100).toFixed(2);
+});
+
+/* ══════════════════════════════
+   HELPERS
+══════════════════════════════ */
+function animateCounter(el, target) {
+  const dur = 1400, start = performance.now();
+  const tick = now => {
+    const p = Math.min((now - start) / dur, 1);
+    const e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(target * e).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+function rateClass(r) {
+  if (r >= 100) return 'rate-ok';
+  if (r >= 95)  return 'rate-warn';
+  return 'rate-ng';
+}
+function cellClass(r) {
+  if (r >= 100) return 'cell-ok';
+  if (r >= 95)  return 'cell-warn';
+  return 'cell-ng';
+}
+
+/* ══════════════════════════════
+   KPI CARDS
+══════════════════════════════ */
+function initKPI() {
+  const map = { 東京:'t', 大阪:'o', 名古屋:'n', 福岡:'f' };
+  branches.forEach(b => {
+    const k = map[b];
+    const ve = document.getElementById(`kpi-${k}`);
+    const re = document.getElementById(`kpi-${k}r`);
+    animateCounter(ve, annualSales[b]);
+    const r = parseFloat(annualRate[b]);
+    re.textContent = annualRate[b] + '%';
+    re.className = `kpi-rate-val ${rateClass(r)}`;
+  });
+}
+
+/* ══════════════════════════════
+   CHART DEFAULTS
+══════════════════════════════ */
+Chart.defaults.color       = '#6b7280';
+Chart.defaults.borderColor = '#e5e7eb';
+Chart.defaults.font.family = "'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif";
+Chart.defaults.font.size   = 12;
+
+/* ── Bar Chart ── */
+function buildBarChart() {
+  const ctx = document.getElementById('barChart').getContext('2d');
+  const vals = branches.map(b => +(annualSales[b]/100).toFixed(1));
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: branches,
+      datasets: [{
+        data: vals,
+        backgroundColor: branches.map(b => colorMap[b] + 'cc'),
+        borderColor:     branches.map(b => colorMap[b]),
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart', delay: ctx => ctx.dataIndex * 100 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#111827',
+          bodyColor: '#374151',
+          borderColor: '#d1d5db',
+          borderWidth: 1,
+          callbacks: { label: ctx => `  ${ctx.raw} 億円` }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#374151', font: { size: 12, weight: '600' } }
+        },
+        y: {
+          grid: { color: '#f3f4f6' },
+          border: { dash: [4,4] },
+          ticks: { color: '#6b7280', callback: v => v + '億' }
+        }
+      }
+    }
+  });
+}
+
+/* ── Line Chart ── */
+function buildLineChart() {
+  const ctx = document.getElementById('lineChart').getContext('2d');
+  const datasets = branches.map(b => ({
+    label: b,
+    data: sales[b],
+    borderColor: colorMap[b],
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    pointBackgroundColor: '#fff',
+    pointBorderColor: colorMap[b],
+    pointBorderWidth: 1.5,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    tension: 0.25,
+  }));
+
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels: months, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 1000 },
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'end',
+          labels: {
+            boxWidth: 24, boxHeight: 2,
+            padding: 14,
+            color: '#374151',
+            font: { size: 11 },
+            usePointStyle: false,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#111827',
+          bodyColor: '#374151',
+          borderColor: '#d1d5db',
+          borderWidth: 1,
+          callbacks: { label: ctx => `  ${ctx.dataset.label}: ${ctx.raw.toLocaleString()} 百万円` }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#6b7280', font: { size: 11 } }
+        },
+        y: {
+          grid: { color: '#f3f4f6' },
+          border: { dash: [4,4] },
+          ticks: { color: '#6b7280', callback: v => v.toLocaleString() }
+        }
+      }
+    }
+  });
+}
+
+/* ── Achievement Table ── */
+function buildAchTable() {
+  const tbl = document.getElementById('achTable');
+  const thead = tbl.createTHead();
+  const hr = thead.insertRow();
+  hr.innerHTML = `<th class="month-h">月</th>` +
+    branches.map(b => `<th>${b}</th>`).join('');
+
+  const tbody = tbl.createTBody();
+  months.forEach((m, mi) => {
+    const tr = tbody.insertRow();
+    let html = `<td class="month-col">${monthsFull[mi]}</td>`;
+    branches.forEach(b => {
+      const r = parseFloat((sales[b][mi] / targets[b][mi] * 100).toFixed(1));
+      html += `<td class="${cellClass(r)}">${r}%</td>`;
+    });
+    tr.innerHTML = html;
+  });
+}
+
+/* ── Ranking ── */
+function buildRanking() {
+  const sorted = [...branches].sort((a,b) => parseFloat(annualRate[b]) - parseFloat(annualRate[a]));
+  const max = parseFloat(annualRate[sorted[0]]);
+  const rbClass = ['rb-1','rb-2','rb-3','rb-4'];
+  const wrap = document.getElementById('rankList');
+
+  sorted.forEach((b, i) => {
+    const r = parseFloat(annualRate[b]);
+    const w = (r / max * 100).toFixed(1);
+    const div = document.createElement('div');
+    div.className = 'rank-item';
+    div.innerHTML = `
+      <div class="rank-badge ${rbClass[i]}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${b}支店</div>
+        <div class="rank-sub">年間売上 ${annualSales[b].toLocaleString()} 百万円</div>
+      </div>
+      <div class="rank-right">
+        <div class="rank-pct ${rateClass(r)}">${annualRate[b]}%</div>
+        <div class="rank-bar-bg">
+          <div class="rank-bar-fill" style="background:${colorMap[b]}" data-w="${w}"></div>
+        </div>
+      </div>`;
+    wrap.appendChild(div);
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.rank-bar-fill').forEach(el => {
+      el.style.width = el.dataset.w + '%';
+    });
+  }, 300);
+}
+
+/* ── New Customer Chart ── */
+function buildNewCustChart() {
+  const ctx = document.getElementById('newCustChart').getContext('2d');
+  const datasets = branches.map(b => ({
+    label: b,
+    data: newCust[b],
+    borderColor: colorMap[b],
+    backgroundColor: colorMap[b] + '1a',
+    borderWidth: 1.5,
+    pointBackgroundColor: '#fff',
+    pointBorderColor: colorMap[b],
+    pointBorderWidth: 1.5,
+    pointRadius: 3,
+    pointHoverRadius: 5,
+    tension: 0.25,
+    fill: true,
+  }));
+
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels: months, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 1000 },
+      plugins: {
+        legend: {
+          position: 'top', align: 'end',
+          labels: {
+            boxWidth: 24, boxHeight: 2,
+            padding: 14, color: '#374151', font: { size: 11 },
+          }
+        },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#111827',
+          bodyColor: '#374151',
+          borderColor: '#d1d5db',
+          borderWidth: 1,
+          callbacks: { label: ctx => `  ${ctx.dataset.label}: ${ctx.raw}人` }
+        }
+      },
+      scales: {
+        x: { grid:{ display:false }, ticks:{ color:'#6b7280', font:{ size:11 } } },
+        y: {
+          grid: { color:'#f3f4f6' },
+          border: { dash:[4,4] },
+          ticks: { color:'#6b7280', stepSize:5 }
+        }
+      }
+    }
+  });
+}
+
+/* ══════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════ */
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('on');
+      revObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.06 });
+document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
+
+/* ══════════════════════════════
+   INIT
+══════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  initKPI();
+  buildBarChart();
+  buildLineChart();
+  buildAchTable();
+  buildRanking();
+  buildNewCustChart();
+});
+</script>
+</body>
+</html>
