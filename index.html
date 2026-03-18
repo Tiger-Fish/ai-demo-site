@@ -191,10 +191,10 @@
     /* ══ DEMO CARDS ══ */
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 22px;
     }
-    @media(max-width:1000px){ .cards-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:1100px){ .cards-grid { grid-template-columns: 1fr 1fr; } }
     @media(max-width:540px){ .cards-grid { grid-template-columns: 1fr; } }
 
     .demo-card {
@@ -218,6 +218,7 @@
     .demo-card:hover::before { opacity:1; }
 
     .card-gold::before   { background: linear-gradient(90deg, #92400e, #c9a84c); }
+    .card-navy::before   { background: linear-gradient(90deg, #003087, #1d4ed8); }
 
     /* card accent colors */
     .card-blue::before   { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
@@ -238,6 +239,7 @@
     .icon-indigo { background: #e0e7ff; }
     .icon-teal   { background: #ccfbf1; }
     .icon-gold   { background: #fef3c7; }
+    .icon-navy   { background: #dbeafe; }
 
     .card-meta {}
     .card-cat {
@@ -248,6 +250,7 @@
     .cat-indigo { color: #4338ca; }
     .cat-teal   { color: #0f766e; }
     .cat-gold   { color: #92400e; }
+    .cat-navy   { color: #003087; }
 
     .card-title {
       font-size: 16px; font-weight: 800;
@@ -273,6 +276,7 @@
     .tag-indigo { background:#eef2ff; color:#4338ca; border-color:#c7d2fe; }
     .tag-teal   { background:#f0fdfa; color:#0f766e; border-color:#99f6e4; }
     .tag-gold   { background:#fffbeb; color:#92400e; border-color:#fcd34d; }
+    .tag-navy   { background:#eff6ff; color:#003087; border-color:#bfdbfe; }
 
     /* demo button */
     .btn-demo {
@@ -289,6 +293,7 @@
     .btn-indigo { background: #4338ca; color: #fff; }
     .btn-teal   { background: #0f766e; color: #fff; }
     .btn-gold   { background: #92400e; color: #fff; }
+    .btn-navy   { background: #003087; color: #fff; }
 
     .btn-arrow { font-size: 14px; transition: transform .15s; }
     .btn-demo:hover .btn-arrow { transform: translateX(3px); }
@@ -431,7 +436,7 @@
     <p>最新AIを活用した業務ツールのデモンストレーション。<br>データ分析・リスク管理・社員教育をAIが変える。</p>
     <div class="hero-stats">
       <div class="stat-item">
-        <div class="stat-val">4</div>
+        <div class="stat-val">5</div>
         <div class="stat-lbl">デモツール</div>
       </div>
       <div class="stat-item">
@@ -450,7 +455,7 @@
 <div class="section">
   <div class="sec-header fade-up">
     <div class="sec-label">Demo Tools</div>
-    <div class="sec-title">4つのAI業務ツール</div>
+    <div class="sec-title">5つのAI業務ツール</div>
     <div class="sec-sub">すべてブラウザで動作。インストール不要でいますぐ体験できます。</div>
   </div>
 
@@ -548,6 +553,29 @@
       </div>
     </div>
 
+    <!-- Card 5: Shizuki Quiz -->
+    <div class="demo-card card-navy fade-up">
+      <div class="card-visual">
+        <div class="card-icon icon-navy">⚡</div>
+        <div class="card-meta">
+          <div class="card-cat cat-navy">Company Knowledge</div>
+          <div class="card-title">シヅキ理解度チェック</div>
+        </div>
+      </div>
+      <div class="card-body-wrap">
+        <hr class="card-divider"/>
+        <p class="card-desc">指月電機製作所への理解度を3レベルで確認。新卒・キャリア・ベテランを問わず、自社知識をクイズ形式で腕試し。全30問に挑戦しよう。</p>
+        <div class="card-tags">
+          <span class="tag tag-navy">3段階レベル</span>
+          <span class="tag tag-navy">全30問</span>
+          <span class="tag tag-navy">記録保存</span>
+        </div>
+        <a class="btn-demo btn-navy" href="shizuki-quiz.html">
+          チェックする <span class="btn-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -600,6 +628,7 @@
     <a href="contract.html">契約書チェッカー</a>
     <a href="quiz.html">社員研修クイズ</a>
     <a href="kaisha-ho-app.html">会社法学習</a>
+    <a href="shizuki-quiz.html">シヅキ理解度</a>
   </div>
 </footer>
 
