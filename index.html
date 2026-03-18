@@ -191,10 +191,10 @@
     /* ══ DEMO CARDS ══ */
     .cards-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 22px;
     }
-    @media(max-width:860px){ .cards-grid { grid-template-columns: 1fr 1fr; } }
+    @media(max-width:1000px){ .cards-grid { grid-template-columns: 1fr 1fr; } }
     @media(max-width:540px){ .cards-grid { grid-template-columns: 1fr; } }
 
     .demo-card {
@@ -217,6 +217,8 @@
     }
     .demo-card:hover::before { opacity:1; }
 
+    .card-gold::before   { background: linear-gradient(90deg, #92400e, #c9a84c); }
+
     /* card accent colors */
     .card-blue::before   { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
     .card-indigo::before { background: linear-gradient(90deg, #4338ca, #818cf8); }
@@ -235,6 +237,7 @@
     .icon-blue   { background: #dbeafe; }
     .icon-indigo { background: #e0e7ff; }
     .icon-teal   { background: #ccfbf1; }
+    .icon-gold   { background: #fef3c7; }
 
     .card-meta {}
     .card-cat {
@@ -244,6 +247,7 @@
     .cat-blue   { color: #1d4ed8; }
     .cat-indigo { color: #4338ca; }
     .cat-teal   { color: #0f766e; }
+    .cat-gold   { color: #92400e; }
 
     .card-title {
       font-size: 16px; font-weight: 800;
@@ -268,6 +272,7 @@
     .tag-blue   { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
     .tag-indigo { background:#eef2ff; color:#4338ca; border-color:#c7d2fe; }
     .tag-teal   { background:#f0fdfa; color:#0f766e; border-color:#99f6e4; }
+    .tag-gold   { background:#fffbeb; color:#92400e; border-color:#fcd34d; }
 
     /* demo button */
     .btn-demo {
@@ -283,6 +288,7 @@
     .btn-blue   { background: #1d4ed8; color: #fff; }
     .btn-indigo { background: #4338ca; color: #fff; }
     .btn-teal   { background: #0f766e; color: #fff; }
+    .btn-gold   { background: #92400e; color: #fff; }
 
     .btn-arrow { font-size: 14px; transition: transform .15s; }
     .btn-demo:hover .btn-arrow { transform: translateX(3px); }
@@ -425,7 +431,7 @@
     <p>最新AIを活用した業務ツールのデモンストレーション。<br>データ分析・リスク管理・社員教育をAIが変える。</p>
     <div class="hero-stats">
       <div class="stat-item">
-        <div class="stat-val">3</div>
+        <div class="stat-val">4</div>
         <div class="stat-lbl">デモツール</div>
       </div>
       <div class="stat-item">
@@ -444,7 +450,7 @@
 <div class="section">
   <div class="sec-header fade-up">
     <div class="sec-label">Demo Tools</div>
-    <div class="sec-title">3つのAI業務ツール</div>
+    <div class="sec-title">4つのAI業務ツール</div>
     <div class="sec-sub">すべてブラウザで動作。インストール不要でいますぐ体験できます。</div>
   </div>
 
@@ -519,6 +525,29 @@
       </div>
     </div>
 
+    <!-- Card 4: Kaisha-ho Learning -->
+    <div class="demo-card card-gold fade-up">
+      <div class="card-visual">
+        <div class="card-icon icon-gold">⚖️</div>
+        <div class="card-meta">
+          <div class="card-cat cat-gold">Legal Learning</div>
+          <div class="card-title">会社法 逐条学習</div>
+        </div>
+      </div>
+      <div class="card-body-wrap">
+        <hr class="card-divider"/>
+        <p class="card-desc">会社法を条文ごとに学習。逐条解説を読んで確認問題に挑戦、合格で記録。不正解条文は後から再挑戦できる。執行監査室・法務担当者向け。</p>
+        <div class="card-tags">
+          <span class="tag tag-gold">逐条解説</span>
+          <span class="tag tag-gold">確認問題</span>
+          <span class="tag tag-gold">学習記録</span>
+        </div>
+        <a class="btn-demo btn-gold" href="kaisha-ho-app.html">
+          学習を始める <span class="btn-arrow">→</span>
+        </a>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -570,6 +599,7 @@
     <a href="dashboard.html">営業ダッシュボード</a>
     <a href="contract.html">契約書チェッカー</a>
     <a href="quiz.html">社員研修クイズ</a>
+    <a href="kaisha-ho-app.html">会社法学習</a>
   </div>
 </footer>
 
