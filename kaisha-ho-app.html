@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会社法 逐条学習アプリ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;500&family=BIZ+UDGothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #2d2d4e;
+    --paper: #f5f0e8;
+    --paper-warm: #ede8d8;
+    --accent: #8b1a1a;
+    --accent-light: #c0392b;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --success: #2d6a4f;
+    --success-bg: #d8f3dc;
+    --fail: #8b1a1a;
+    --fail-bg: #fde8e8;
+    --unseen: #555577;
+    --unseen-bg: #eeeef5;
+    --border: #c8bfa8;
+    --shadow: 0 2px 12px rgba(26,26,46,0.12);
+    --shadow-deep: 0 8px 32px rgba(26,26,46,0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(139,26,26,0.05) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-deep);
+  }
+  .header-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+  }
+  .header-nav { display: flex; gap: 0.5rem; }
+  .nav-btn {
+    background: none;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--paper);
+    padding: 0.35rem 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.78rem;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--gold);
+    color: var(--ink);
+    border-color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; padding: 2rem; max-width: 960px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ── SCREEN: HOME ── */
+  .home-hero {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-hero::before {
+    content: '会社法';
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 5rem;
+    font-weight: 700;
+    color: rgba(201,168,76,0.12);
+    letter-spacing: 0.1em;
+    pointer-events: none;
+  }
+  .home-hero h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--gold);
+  }
+  .home-hero p { font-size: 0.88rem; color: rgba(245,240,232,0.7); line-height: 1.7; }
+
+  .progress-bar-wrap {
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .progress-stats { display: flex; gap: 2rem; flex: 1; }
+  .stat-item { text-align: center; }
+  .stat-num { font-family: 'Noto Serif JP', serif; font-size: 1.8rem; font-weight: 700; line-height: 1; }
+  .stat-num.passed { color: var(--success); }
+  .stat-num.failed { color: var(--fail); }
+  .stat-num.total { color: var(--ink); }
+  .stat-label { font-size: 0.72rem; color: #666; margin-top: 0.2rem; }
+  .progress-bar-outer {
+    flex: 2;
+    background: var(--unseen-bg);
+    border-radius: 99px;
+    height: 12px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--gold));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-title span { font-size: 0.8rem; color: #888; font-weight: 400; font-family: 'Noto Sans JP'; }
+
+  /* chapter grouping */
+  .chapter-group { margin-bottom: 1.5rem; }
+  .chapter-label {
+    font-size: 0.72rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    padding-left: 0.25rem;
+    border-left: 3px solid var(--accent);
+    padding-left: 0.5rem;
+  }
+
+  .article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+  }
+  .article-btn {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.4rem;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .article-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .article-btn.passed {
+    background: var(--success-bg);
+    border-color: var(--success);
+    color: var(--success);
+  }
+  .article-btn.failed {
+    background: var(--fail-bg);
+    border-color: var(--fail);
+    color: var(--fail);
+  }
+  .article-btn.unseen {
+    background: white;
+    color: var(--unseen);
+    border-color: var(--border);
+  }
+  .article-btn .art-status {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 400;
+    margin-top: 0.15rem;
+    opacity: 0.8;
+  }
+  .fail-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    background: var(--fail);
+    color: white;
+    border-radius: 99px;
+    font-size: 0.6rem;
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+
+  /* ── SCREEN: STUDY ── */
+  .study-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .back-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--ink);
+    font-family: 'Noto Sans JP';
+    transition: all 0.15s;
+  }
+  .back-btn:hover { background: var(--ink); color: var(--paper); }
+
+  .article-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .article-number {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .article-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--ink);
+  }
+  .article-text {
+    background: var(--paper-warm);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+    line-height: 1.9;
+    color: var(--ink-light);
+    font-family: 'Noto Serif JP', serif;
+    margin-bottom: 1.5rem;
+  }
+  .explanation-block {
+    border-top: 1px dashed var(--border);
+    padding-top: 1.25rem;
+  }
+  .explanation-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .explanation-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 2px;
+  }
+  .explanation-text {
+    font-size: 0.9rem;
+    line-height: 2;
+    color: var(--ink);
+  }
+  .explanation-text p { margin-bottom: 0.75rem; }
+  .explanation-text strong { color: var(--accent); }
+  .point-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+  }
+  .point-list li {
+    display: flex;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    border-bottom: 1px dotted var(--border);
+  }
+  .point-list li:last-child { border-bottom: none; }
+  .point-list li::before {
+    content: '▶';
+    color: var(--gold);
+    font-size: 0.7rem;
+    margin-top: 0.3rem;
+    flex-shrink: 0;
+  }
+
+  /* QUIZ */
+  .quiz-card {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 12px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-deep);
+  }
+  .quiz-label {
+    font-size: 0.72rem;
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+  }
+  .quiz-question {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .quiz-option {
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(245,240,232,0.2);
+    border-radius: 8px;
+    padding: 0.8rem 1.1rem;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    color: var(--paper);
+    text-align: left;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .quiz-option:hover:not(:disabled) {
+    background: rgba(201,168,76,0.2);
+    border-color: var(--gold);
+  }
+  .quiz-option.correct {
+    background: rgba(45,106,79,0.4);
+    border-color: #4caf7d;
+    color: #a8f0c6;
+  }
+  .quiz-option.incorrect {
+    background: rgba(139,26,26,0.4);
+    border-color: #c0392b;
+    color: #ffb3b3;
+  }
+  .quiz-option .opt-key {
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .quiz-option.correct .opt-key { background: rgba(76,175,125,0.4); }
+  .quiz-option.incorrect .opt-key { background: rgba(192,57,43,0.4); }
+
+  .quiz-result {
+    margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    display: none;
+  }
+  .quiz-result.show { display: block; }
+  .quiz-result.correct-result {
+    background: rgba(45,106,79,0.3);
+    border: 1px solid #4caf7d;
+    color: #a8f0c6;
+  }
+  .quiz-result.incorrect-result {
+    background: rgba(139,26,26,0.3);
+    border: 1px solid #c0392b;
+    color: #ffb3b3;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.5rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary:hover { background: var(--accent); color: white; }
+  .btn-secondary {
+    background: none;
+    color: var(--paper);
+    border: 1.5px solid rgba(245,240,232,0.3);
+    border-radius: 8px;
+    padding: 0.7rem 1.5rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── SCREEN: PROGRESS ── */
+  .progress-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 600px) { .progress-grid { grid-template-columns: 1fr; } }
+  .progress-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .progress-card-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+  }
+  .fail-list { list-style: none; }
+  .fail-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px dotted var(--border);
+    font-size: 0.85rem;
+  }
+  .fail-list li:last-child { border-bottom: none; }
+  .fail-count {
+    background: var(--fail-bg);
+    color: var(--fail);
+    border-radius: 99px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .retry-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    transition: all 0.15s;
+    margin-left: 0.5rem;
+  }
+  .retry-btn:hover { background: var(--ink); }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+  .cal-day.has-study { background: var(--gold-light); color: var(--ink); }
+  .cal-day.today { background: var(--accent); color: white; }
+  .cal-day.empty { background: var(--unseen-bg); color: #ccc; }
+
+  /* empty state */
+  .empty-msg {
+    text-align: center;
+    padding: 2rem;
+    color: #aaa;
+    font-size: 0.88rem;
+  }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.75rem 1.5rem;
+    border-radius: 99px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-deep);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .screen.active { animation: fadeIn 0.25s ease; }
+
+  /* ── RESET MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--paper);
+    border-radius: 14px;
+    padding: 2rem 2.5rem;
+    max-width: 360px;
+    width: 90%;
+    box-shadow: var(--shadow-deep);
+    text-align: center;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .modal-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+  .modal-desc {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: center; }
+  .btn-danger {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.65rem 1.5rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-danger:hover { background: #6b1010; }
+  .btn-cancel {
+    background: none;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 1.5rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-cancel:hover { background: var(--paper-warm); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">⚖ 会社法 逐条学習</div>
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="showScreen('home')">条文一覧</button>
+    <button class="nav-btn" onclick="showScreen('progress')">学習記録</button>
+    <button class="nav-btn" onclick="confirmReset()" style="border-color:rgba(192,57,43,0.5);color:#ffaaaa;">リセット</button>
+  </nav>
+</header>
+
+<!-- HOME SCREEN -->
+<div id="screen-home" class="screen active">
+  <div class="home-hero">
+    <h1>会社法 逐条学習アプリ</h1>
+    <p>条文を選択 → 解説を読む → 問題に挑戦 → 合格で記録。2ヶ月で全条文制覇を目指そう。</p>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-stats">
+      <div class="stat-item">
+        <div class="stat-num passed" id="count-passed">0</div>
+        <div class="stat-label">合格</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num failed" id="count-failed">0</div>
+        <div class="stat-label">不正解あり</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num total" id="count-total">50</div>
+        <div class="stat-label">収録条文</div>
+      </div>
+    </div>
+    <div class="progress-bar-outer" style="flex:2;">
+      <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="article-list-container"></div>
+</div>
+
+<!-- STUDY SCREEN -->
+<div id="screen-study" class="screen">
+  <div class="study-header">
+    <button class="back-btn" onclick="showScreen('home')">← 一覧に戻る</button>
+    <div id="study-nav" style="display:flex;gap:0.5rem;margin-left:auto;"></div>
+  </div>
+  <div id="study-content"></div>
+</div>
+
+<!-- PROGRESS SCREEN -->
+<div id="screen-progress" class="screen">
+  <div class="section-title">📊 学習進捗</div>
+  <div class="progress-grid">
+    <div class="progress-card">
+      <div class="progress-card-title">📅 学習カレンダー（直近30日）</div>
+      <div id="calendar-container"></div>
+    </div>
+    <div class="progress-card">
+      <div class="progress-card-title">🎯 合格状況</div>
+      <div id="progress-donut-text"></div>
+    </div>
+    <div class="progress-card" style="grid-column: 1 / -1;">
+      <div class="progress-card-title">❌ 不正解だった条文（再挑戦可）</div>
+      <ul class="fail-list" id="fail-list"></ul>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- RESET MODAL -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">学習履歴をリセット</div>
+    <div class="modal-desc">合格・不正解の記録がすべて削除されます。<br>この操作は元に戻せません。</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeReset()">キャンセル</button>
+      <button class="btn-danger" onclick="doReset()">リセットする</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  ARTICLE DATA — 会社法 第1条〜第50条
+// ══════════════════════════════════════════════
+const ARTICLES = [
+  // 第一章 総則
+  {
+    id: 1, chapter: "第一章 総則",
+    title: "目的",
+    text: "この法律は、会社の設立、組織、運営及び管理について定めることを目的とする。",
+    explanation: `
+      <p>会社法第1条は、<strong>会社法全体の目的・適用範囲</strong>を宣言する規定です。</p>
+      <p>会社法は2006年（平成18年）に施行され、それまで商法第2編・有限会社法・株式会社の監査等に関する商法の特例に関する法律（商法特例法）等に分散していた会社に関する規定を一本化しました。</p>
+      <ul class="point-list">
+        <li>「設立」：会社を誕生させるルール（発起設立・募集設立）</li>
+        <li>「組織」：株主総会・取締役会等の機関設計</li>
+        <li>「運営」：日常の業務執行・意思決定プロセス</li>
+        <li>「管理」：計算書類・内部統制・監査の仕組み</li>
+      </ul>
+      <p>執行監査室の立場では、「管理」部分（内部統制・監査）が特に重要です。</p>
+    `,
+    quiz: {
+      question: "会社法は何年に施行されましたか？",
+      options: ["1993年（平成5年）", "2006年（平成18年）", "2015年（平成27年）", "1990年（平成2年）"],
+      correct: 1,
+      explanation: "会社法は2006年（平成18年）5月1日に施行。商法第2編・有限会社法等を一本化した法律です。"
+    }
+  },
+  {
+    id: 2, chapter: "第一章 総則",
+    title: "会社の商号",
+    text: "会社は、株式会社、合名会社、合資会社又は合同会社の種類に従い、それぞれその商号中に株式会社、合名会社、合資会社又は合同会社という文字を用いなければならない。",
+    explanation: `
+      <p>会社法第2条は<strong>会社の4種類</strong>と、それぞれに必要な商号の文字を規定します。</p>
+      <ul class="point-list">
+        <li><strong>株式会社</strong>：最も一般的。株主は出資額を限度とした有限責任</li>
+        <li><strong>合名会社</strong>：社員全員が無限責任を負う（現在はほぼ利用されない）</li>
+        <li><strong>合資会社</strong>：無限責任社員と有限責任社員が混在</li>
+        <li><strong>合同会社（LLC）</strong>：2006年新設。社員全員有限責任で内部自治が柔軟</li>
+      </ul>
+      <p>上場企業・監査対象はほぼ株式会社です。商号に「株式会社」を入れることは義務であり、誤記は登記不備となります。</p>
+    `,
+    quiz: {
+      question: "会社法上の会社の種類として正しいものはどれですか？",
+      options: ["株式会社・合名会社・合資会社・合同会社の4種類", "株式会社・有限会社・合名会社・合資会社の4種類", "株式会社・合名会社・合同会社の3種類", "株式会社のみ"],
+      correct: 0,
+      explanation: "会社法では株式会社・合名会社・合資会社・合同会社の4種類。2006年施行時に有限会社は廃止（既存の有限会社は特例有限会社として存続）。"
+    }
+  },
+  {
+    id: 3, chapter: "第一章 総則",
+    title: "会社の住所",
+    text: "会社の住所は、その本店の所在地にあるものとする。",
+    explanation: `
+      <p>会社の「住所」＝<strong>本店所在地</strong>であることを明確にした規定です。</p>
+      <p>これは法的な意味での住所であり、訴訟の管轄（どの裁判所に提起するか）、通知・送達の宛先、登記の効力範囲などに影響します。</p>
+      <ul class="point-list">
+        <li>「本店」は実質的な主たる営業所であることが原則</li>
+        <li>登記上の本店所在地が法的住所となる（実態と異なっても登記が優先）</li>
+        <li>支店・事務所の所在地は「住所」ではない</li>
+      </ul>
+    `,
+    quiz: {
+      question: "会社法上、会社の住所はどこにあるとされますか？",
+      options: ["代表取締役の自宅", "本店の所在地", "主要な事業所の所在地", "登記申請した法務局の所在地"],
+      correct: 1,
+      explanation: "会社法3条により、会社の住所は本店の所在地。訴訟管轄や通知の宛先の基準となります。"
+    }
+  },
+  {
+    id: 4, chapter: "第一章 総則",
+    title: "法人格",
+    text: "会社は、法人とする。",
+    explanation: `
+      <p>たったの一文ですが非常に重要な規定です。<strong>会社は法人</strong>、すなわち自然人（生身の人間）ではないが、法律上「人」として権利義務の主体になれることを宣言しています。</p>
+      <p>法人格があるということは：</p>
+      <ul class="point-list">
+        <li>会社名義で契約・財産所有・訴訟ができる</li>
+        <li>会社の財産と株主・社員の財産は別（財産の独立性）</li>
+        <li>会社が負った債務は原則として株主個人には及ばない（有限責任の前提）</li>
+        <li>会社は永続的に存在できる（社長が変わっても会社は続く）</li>
+      </ul>
+      <p>「法人格の濫用」（形式だけの法人を使って責任を免れる行為）は裁判所が法人格を否認することがあります（法人格否認の法理）。</p>
+    `,
+    quiz: {
+      question: "会社法4条が定める「会社は法人とする」の意味として最も適切なものはどれですか？",
+      options: ["会社は国家から認められた特別な権限を持つ", "会社は権利義務の主体となれる法律上の人格を持つ", "会社の代表者が法的責任を負うことを意味する", "会社は税法上の特別な扱いを受ける"],
+      correct: 1,
+      explanation: "法人格とは法律上の人格。会社自身が権利義務の主体となり、財産や契約を自らの名義で持てることを意味します。"
+    }
+  },
+  {
+    id: 5, chapter: "第一章 総則",
+    title: "外国会社の日本法の適用等",
+    text: "外国会社（外国の法令に準拠して設立された法人その他の外国の団体であって、会社と同種のもの又は会社に類似するものをいう。以下同じ。）は、法律の規定に従い登記をすることによって、日本において取引を継続してすることができる。",
+    explanation: `
+      <p>外国会社が日本で継続的に取引を行うには<strong>日本での登記が必要</strong>という規定です。</p>
+      <ul class="point-list">
+        <li>外国会社＝外国法令に基づき設立された法人等で、日本の会社と同種・類似のもの</li>
+        <li>単発の取引はOKだが、継続的取引には日本での登記（外国会社の登記）が必要</li>
+        <li>登記せずに継続取引した場合、その取引の相手方は損害賠償を請求できる</li>
+        <li>日本に進出した外資系企業はこの規定に基づき登記している</li>
+      </ul>
+    `,
+    quiz: {
+      question: "外国会社が日本において取引を継続して行うために必要なことは何ですか？",
+      options: ["外務省への届出", "日本法に準拠した再設立", "法律の規定に従い日本での登記", "国税庁への登録"],
+      correct: 2,
+      explanation: "会社法5条により、外国会社が日本で継続取引するには法律に従い登記が必要。登記なしの継続取引は相手方への損害賠償義務が生じます。"
+    }
+  },
+  // 第二章 株式会社の設立
+  {
+    id: 25, chapter: "第二章 株式会社の設立",
+    title: "定款の作成",
+    text: "株式会社を設立するには、発起人が定款を作成し、その全員がこれに署名し、又は記名押印しなければならない。",
+    explanation: `
+      <p>株式会社設立の<strong>最初のステップは定款の作成</strong>です。発起人全員の署名・記名押印が必要です。</p>
+      <ul class="point-list">
+        <li>定款は会社の「憲法」。会社の根本規則を定める最重要文書</li>
+        <li>電磁的記録（電子定款）も認められる（印紙税4万円が不要になる）</li>
+        <li>公証人による認証が必要（25条で規定）</li>
+        <li>発起人は設立時に株式を引き受ける者。1人でも可（1人会社）</li>
+      </ul>
+    `,
+    quiz: {
+      question: "株式会社設立のための定款作成において、正しい記述はどれですか？",
+      options: ["取締役が定款を作成する", "発起人が定款を作成し全員が署名または記名押印する", "株主全員で定款を作成する", "法務局が定款の雛型を提供する"],
+      correct: 1,
+      explanation: "会社法26条により、定款は発起人が作成し、発起人全員の署名または記名押印が必要です。"
+    }
+  },
+  {
+    id: 27, chapter: "第二章 株式会社の設立",
+    title: "定款の記載事項（絶対的記載事項）",
+    text: "株式会社の定款には、次に掲げる事項を記載し、又は記録しなければならない。一 目的　二 商号　三 本店の所在地　四 設立に際して出資される財産の価額又はその最低額　五 発起人の氏名又は名称及び住所",
+    explanation: `
+      <p>定款に必ず記載しなければならない<strong>絶対的記載事項</strong>（5項目）を定めます。一つでも欠けると定款が無効になります。</p>
+      <ul class="point-list">
+        <li><strong>目的</strong>：会社が行う事業の内容（定款に記載された範囲外の行為は原則無効）</li>
+        <li><strong>商号</strong>：会社名（「株式会社」という文字が必要）</li>
+        <li><strong>本店の所在地</strong>：最小行政区画（市区町村）まで記載すれば足りる</li>
+        <li><strong>出資財産の価額・最低額</strong>：資本金の基礎となる出資額</li>
+        <li><strong>発起人の氏名・名称・住所</strong>：設立者の特定</li>
+      </ul>
+      <p>なお、「発行可能株式総数」も設立登記前に定款に定める必要がありますが、設立時には発起人全員の同意で定める方式も認められています。</p>
+    `,
+    quiz: {
+      question: "株式会社の定款の絶対的記載事項として誤っているものはどれですか？",
+      options: ["目的", "取締役の氏名", "商号", "本店の所在地"],
+      correct: 1,
+      explanation: "取締役の氏名は絶対的記載事項ではありません。絶対的記載事項は①目的②商号③本店所在地④出資財産の価額・最低額⑤発起人の氏名・住所の5つです。"
+    }
+  },
+  // 第三章 株式
+  {
+    id: 105, chapter: "第三章 株式",
+    title: "株主の権利",
+    text: "株主は、その有する株式につき次に掲げる権利その他この法律の規定により認められた権利を有する。一 剰余金の配当を受ける権利　二 残余財産の分配を受ける権利　三 株主総会における議決権",
+    explanation: `
+      <p>株主の基本的権利の3本柱を定める重要規定です。</p>
+      <ul class="point-list">
+        <li><strong>剰余金配当請求権</strong>：利益の分配を受ける権利（自益権）</li>
+        <li><strong>残余財産分配請求権</strong>：会社清算時に残った財産の分配（自益権）</li>
+        <li><strong>議決権</strong>：株主総会での意思決定参加（共益権）</li>
+      </ul>
+      <p>この3つの権利をすべて与えない種類株式は発行できません（105条2項）。少なくとも一つの自益権は保障されなければなりません。</p>
+      <p>執行監査室にとっては、これらの権利が適正に保護されているかが監査のポイントとなります。</p>
+    `,
+    quiz: {
+      question: "会社法105条が定める株主の基本的権利として誤っているものはどれですか？",
+      options: ["剰余金の配当を受ける権利", "代表取締役を選任する権利", "残余財産の分配を受ける権利", "株主総会における議決権"],
+      correct: 1,
+      explanation: "代表取締役は取締役会が選定するものであり、株主の直接的権利ではありません。株主の基本3権利は①剰余金配当②残余財産分配③議決権です。"
+    }
+  },
+  {
+    id: 107, chapter: "第三章 株式",
+    title: "株式の内容についての特別の定め",
+    text: "株式会社は、その発行する全部の株式の内容として次に掲げる事項を定款で定めることができる。一 譲渡による当該株式の取得について当該株式会社の承認を要すること。二 当該株式について、株主が当該株式会社に対してその取得を請求することができること。三 当該株式について、当該株式会社が一定の事由が生じたことを条件としてこれを取得することができること。",
+    explanation: `
+      <p>会社が発行する<strong>全部の株式</strong>に共通の特別な内容を定款で設定できる3つの類型：</p>
+      <ul class="point-list">
+        <li><strong>譲渡制限株式</strong>（1号）：株式の譲渡に会社の承認が必要。中小企業の閉鎖性維持に活用</li>
+        <li><strong>取得請求権付株式</strong>（2号）：株主が会社に「買い取ってくれ」と請求できる権利付き</li>
+        <li><strong>取得条項付株式</strong>（3号）：一定の条件が成就したら会社が強制取得できる</li>
+      </ul>
+      <p>上場会社は原則として譲渡制限を付けられません（株式の自由な流通が前提）。非上場の中小企業では譲渡制限株式が一般的です。</p>
+    `,
+    quiz: {
+      question: "株式の譲渡に会社の承認を要する株式を何といいますか？",
+      options: ["取得請求権付株式", "取得条項付株式", "譲渡制限株式", "議決権制限株式"],
+      correct: 2,
+      explanation: "株式の譲渡に会社の承認が必要な株式を「譲渡制限株式」といいます。中小・非上場企業で株主の固定化・閉鎖性維持のために広く用いられます。"
+    }
+  },
+  // 第四章 機関
+  {
+    id: 295, chapter: "第四章 機関（株主総会）",
+    title: "株主総会の権限",
+    text: "株主総会は、この法律に規定する事項及び株式会社の組織、運営、管理その他株式会社に関する一切の事項について決議をすることができる。２ 取締役会設置会社においては、株主総会は、この法律に規定する事項及び定款で定めた事項に限り、決議をすることができる。",
+    explanation: `
+      <p>株主総会の権限範囲を定める重要規定。<strong>取締役会設置会社か否かで権限が異なります。</strong></p>
+      <ul class="point-list">
+        <li><strong>取締役会非設置会社</strong>：一切の事項を株主総会で決議可能（万能機関）</li>
+        <li><strong>取締役会設置会社</strong>：法定事項＋定款記載事項のみ（業務執行は取締役会に委譲）</li>
+      </ul>
+      <p>上場会社は取締役会設置が義務なので、株主総会の権限は限定的。経営の効率性のため、日常の業務執行は取締役会・代表取締役に委ねられます。</p>
+      <p>監査の観点では、株主総会で決議すべき事項が適正に上程・決議されているかが重要チェックポイントです。</p>
+    `,
+    quiz: {
+      question: "取締役会設置会社における株主総会の権限について正しい記述はどれですか？",
+      options: ["一切の事項について決議できる", "会社法に規定する事項と定款で定めた事項に限り決議できる", "取締役の選任のみ決議できる", "株主総会は業務執行の最高決定機関である"],
+      correct: 1,
+      explanation: "取締役会設置会社の株主総会は会社法規定事項と定款記載事項のみ決議可能（295条2項）。業務執行権限は取締役会に移譲されています。"
+    }
+  },
+  {
+    id: 296, chapter: "第四章 機関（株主総会）",
+    title: "株主総会の招集",
+    text: "株主総会は、必要がある場合には、いつでも、招集することができる。２ 定時株主総会は、毎事業年度の終了後一定の時期に招集しなければならない。３ 株主総会は、次条の規定により招集する場合を除き、取締役が招集する。",
+    explanation: `
+      <p>株主総会には2種類あります：</p>
+      <ul class="point-list">
+        <li><strong>定時株主総会</strong>：毎事業年度終了後、一定時期に必ず開催（2項）。通常は決算後3ヶ月以内</li>
+        <li><strong>臨時株主総会</strong>：必要があればいつでも開催可（1項）</li>
+      </ul>
+      <p>招集権者は原則として取締役（取締役会設置会社では取締役会の決議が必要）です。</p>
+      <p>なお、一定の要件を満たす株主も招集請求権・招集権を持ちます（297条）。上場会社では総議決権の3%以上を持つ株主が請求可能です。</p>
+    `,
+    quiz: {
+      question: "定時株主総会について正しい記述はどれですか？",
+      options: ["任意で開催するもので義務はない", "毎事業年度の終了後一定の時期に招集しなければならない", "株主が要求した場合のみ開催する", "2年に1度開催すれば足りる"],
+      correct: 1,
+      explanation: "定時株主総会は毎事業年度終了後一定時期に必ず招集が必要（296条2項）。通常は決算後3ヶ月以内（3月決算なら6月まで）に開催されます。"
+    }
+  },
+  {
+    id: 297, chapter: "第四章 機関（株主総会）",
+    title: "株主による招集の請求",
+    text: "総株主の議決権の百分の三（これを下回る割合を定款で定めた場合にあっては、その割合）以上の議決権を六箇月（これを下回る期間を定款で定めた場合にあっては、その期間）前から引き続き有する株主は、取締役に対し、株主総会の目的である事項及び招集の理由を示して、株主総会の招集を請求することができる。",
+    explanation: `
+      <p>一定規模以上の株主には<strong>株主総会の招集請求権</strong>があります。これはコーポレートガバナンスの重要な仕組みです。</p>
+      <ul class="point-list">
+        <li>要件：総議決権の<strong>3%以上</strong>を<strong>6ヶ月以上</strong>継続保有</li>
+        <li>定款で要件を緩和（下回る割合・期間を定める）可能</li>
+        <li>非公開会社では6ヶ月の継続保有要件なし</li>
+        <li>請求後に取締役が招集しない場合は、株主自身が裁判所の許可を得て招集できる</li>
+      </ul>
+      <p>アクティビスト株主（物言う株主）が活用する規定です。監査役・監査委員が取締役の不正を発見した場合も株主に情報提供する際の前提となります。</p>
+    `,
+    quiz: {
+      question: "株主が取締役に株主総会の招集を請求するための原則的な要件として正しいものはどれですか？",
+      options: ["全株主の同意が必要", "総議決権の3%以上を6ヶ月前から継続保有", "1株でも保有していれば請求可能", "総議決権の過半数を保有"],
+      correct: 1,
+      explanation: "297条1項により、総議決権の3%以上を6ヶ月前から継続保有する株主が招集請求可能（定款でいずれも緩和可）。"
+    }
+  },
+  {
+    id: 330, chapter: "第四章 機関（取締役・取締役会）",
+    title: "株式会社と役員等の関係",
+    text: "株式会社と役員及び会計監査人との関係は、委任に関する規定に従う。",
+    explanation: `
+      <p>会社と取締役・監査役・会計監査人等（役員等）の関係は<strong>委任関係</strong>（民法643条以下）に従うという重要規定です。</p>
+      <ul class="point-list">
+        <li>雇用契約ではなく委任契約→ 受任者（取締役等）は善管注意義務を負う（民法644条）</li>
+        <li>善管注意義務：その地位・職業に通常期待される注意を払う義務</li>
+        <li>委任は各当事者がいつでも解除可能（ただし解任には正当事由なければ損害賠償も）</li>
+        <li>忠実義務（355条）も善管注意義務の延長線上にある</li>
+      </ul>
+      <p>取締役が経営判断を誤り会社に損害を与えた場合、善管注意義務違反として損害賠償責任を負います（423条）。監査役としてこの点を理解することは極めて重要です。</p>
+    `,
+    quiz: {
+      question: "会社法330条が定める、会社と取締役の法律関係として正しいものはどれですか？",
+      options: ["雇用関係", "請負関係", "委任関係", "組合関係"],
+      correct: 2,
+      explanation: "会社と役員等の関係は委任関係（330条）。これにより取締役等は民法上の善管注意義務を負い、違反した場合は会社への損害賠償責任が生じます。"
+    }
+  },
+  {
+    id: 341, chapter: "第四章 機関（取締役・取締役会）",
+    title: "役員の選任の決議要件",
+    text: "役員を選任する株主総会の決議は、議決権を行使することができる株主の議決権の過半数（三分の一以上の割合を定款で定めた場合にあっては、その割合以上）を有する株主が出席し、出席した当該株主の議決権の過半数（これを上回る割合を定款で定めた場合にあっては、その割合以上）をもって行わなければならない。",
+    explanation: `
+      <p>役員選任決議は通常の普通決議よりも要件が厳しい<strong>特別の普通決議</strong>です。</p>
+      <ul class="point-list">
+        <li>定足数：議決権の<strong>過半数</strong>（定款で1/3以上に緩和可）</li>
+        <li>決議要件：出席者の議決権の<strong>過半数</strong>（定款で上回る割合に加重可）</li>
+        <li>普通決議は定款で定足数を排除（0%）にできるが、役員選任は1/3未満にできない</li>
+      </ul>
+      <p>これは役員の正統性を担保するため、通常の事項より厳しい要件を課しています。累積投票（342条）を使えば少数株主も役員を選任できます。</p>
+    `,
+    quiz: {
+      question: "役員選任決議の定足数について、定款での最低限の緩和限度はどこまでですか？",
+      options: ["定足数を0%（排除）にできる", "総議決権の3分の1以上まで緩和可能", "総議決権の過半数以上で変更不可", "総議決権の4分の1以上まで緩和可能"],
+      correct: 1,
+      explanation: "役員選任の定足数は過半数が原則ですが、定款で3分の1以上に緩和可能（341条）。ただし3分の1未満にはできません。"
+    }
+  },
+  {
+    id: 348, chapter: "第四章 機関（取締役・取締役会）",
+    title: "業務の執行",
+    text: "取締役は、定款に別段の定めがある場合を除き、株式会社（取締役会設置会社を除く。以下この条において同じ。）の業務を執行する。２ 取締役が二人以上ある場合には、株式会社の業務は、定款に別段の定めがある場合を除き、取締役の過半数をもって決定する。",
+    explanation: `
+      <p>取締役会非設置会社における業務執行の決定方法を定めます。</p>
+      <ul class="point-list">
+        <li>取締役会非設置会社では、取締役が直接業務執行する</li>
+        <li>取締役が複数いる場合は過半数決定が原則</li>
+        <li>取締役会設置会社では、業務執行は取締役会が決定し代表取締役が執行（362条等）</li>
+      </ul>
+      <p>上場会社・大会社では取締役会設置が義務なので本条は直接適用されませんが、取締役会設置会社の規定（362条）を理解するための対比として重要です。</p>
+    `,
+    quiz: {
+      question: "取締役会非設置会社で取締役が複数いる場合、業務の決定方法は原則どうなりますか？",
+      options: ["取締役全員の一致", "取締役の過半数で決定", "代表取締役が単独で決定", "株主総会の承認が必要"],
+      correct: 1,
+      explanation: "348条2項により、取締役が複数の場合は過半数で業務を決定（定款に別段の定めがある場合を除く）。"
+    }
+  },
+  {
+    id: 355, chapter: "第四章 機関（取締役・取締役会）",
+    title: "忠実義務",
+    text: "取締役は、法令及び定款並びに株主総会の決議を遵守し、株式会社のため忠実にその職務を行わなければならない。",
+    explanation: `
+      <p>取締役の<strong>忠実義務</strong>を定める根本規定です。英米法のフィデューシャリー・デューティー（受託者責任）に相当します。</p>
+      <ul class="point-list">
+        <li>法令・定款・株主総会決議を遵守する義務</li>
+        <li>会社のために忠実に職務を行う義務（自己利益優先の禁止）</li>
+        <li>善管注意義務（330条・民法644条）の延長・強化版</li>
+      </ul>
+      <p>忠実義務違反の典型例：</p>
+      <ul class="point-list">
+        <li>競業取引（自分や第三者のために会社と同種の取引をすること）→ 356条で規制</li>
+        <li>利益相反取引（会社と自己取引すること）→ 同じく356条で規制</li>
+        <li>会社の機会の奪取（会社が得るべきビジネスを自己のものとすること）</li>
+      </ul>
+    `,
+    quiz: {
+      question: "会社法355条の忠実義務について正しい記述はどれですか？",
+      options: ["株主に対する義務である", "会社のために法令・定款・株主総会決議を遵守して忠実に職務を行う義務", "利益を最大化する義務のみを指す", "社外取締役には適用されない"],
+      correct: 1,
+      explanation: "忠実義務（355条）は会社に対する義務。法令・定款・株主総会決議の遵守と会社のための忠実な職務遂行が要求されます。競業・利益相反規制（356条）の基礎となります。"
+    }
+  },
+  {
+    id: 356, chapter: "第四章 機関（取締役・取締役会）",
+    title: "競業及び利益相反取引の制限",
+    text: "取締役は、次に掲げる場合には、株主総会において、当該取引につき重要な事実を開示し、その承認を受けなければならない。一 取締役が自己又は第三者のために株式会社の事業の部類に属する取引をしようとするとき。二 取締役が自己又は第三者のために株式会社と取引をしようとするとき。三 株式会社が取締役の債務を保証することその他取締役以外の者との間において株式会社と当該取締役との利益が相反する取引をしようとするとき。",
+    explanation: `
+      <p>取締役の<strong>競業取引</strong>・<strong>利益相反取引</strong>を規制する重要条文。執行監査の実務上も頻繁に問題になります。</p>
+      <ul class="point-list">
+        <li><strong>競業取引</strong>（1号）：会社と同種事業を自分や第三者のために行うこと→ 事前に株主総会（取締役会設置会社では取締役会）の承認が必要</li>
+        <li><strong>直接利益相反</strong>（2号）：取締役が自己・第三者のために会社と取引すること（例：会社に自分の不動産を売る）</li>
+        <li><strong>間接利益相反</strong>（3号）：会社が取締役の債務を保証するなど</li>
+      </ul>
+      <p>取締役会設置会社では取締役会の承認が必要（365条）。承認を得ない利益相反取引は無効になりえます。また事後に取締役会への報告義務もあります。</p>
+    `,
+    quiz: {
+      question: "取締役会設置会社において、取締役が会社と利益相反取引を行おうとする場合に必要な手続きはどれですか？",
+      options: ["代表取締役の単独承認", "取締役会の承認と重要事実の開示", "株主全員の同意", "監査役の承認"],
+      correct: 1,
+      explanation: "取締役会設置会社では、競業・利益相反取引には取締役会への重要事実の開示と承認が必要（356条・365条）。違反した場合は損害賠償責任が生じます。"
+    }
+  },
+  {
+    id: 362, chapter: "第四章 機関（取締役会）",
+    title: "取締役会の権限等",
+    text: "取締役会は、すべての取締役で組織する。２ 取締役会は、次に掲げる職務を行う。一 取締役会設置会社の業務執行の決定　二 取締役の職務の執行の監督　三 代表取締役の選定及び解職",
+    explanation: `
+      <p>取締役会の構成と権限を定める中核規定です。執行監査室にとって最重要条文の一つです。</p>
+      <ul class="point-list">
+        <li><strong>業務執行の決定</strong>：会社の重要な業務執行を決定する最高意思決定機関</li>
+        <li><strong>取締役の監督</strong>：各取締役の職務執行を相互監視。社外取締役の独立性が重要</li>
+        <li><strong>代表取締役の選解職</strong>：株主から委託された経営のトップを自ら選任・解任</li>
+      </ul>
+      <p>362条4項は重要事項の取締役会専決事項を列挙（多額の借財、重要な財産の処分・譲受、内部統制体制の整備等）。これらは代表取締役に委任不可です。</p>
+      <p><strong>内部統制体制の整備</strong>（362条4項6号）は監査において特に重要な義務です。</p>
+    `,
+    quiz: {
+      question: "取締役会の職務として会社法362条2項が規定していないものはどれですか？",
+      options: ["業務執行の決定", "取締役の職務執行の監督", "代表取締役の選定及び解職", "計算書類の承認"],
+      correct: 3,
+      explanation: "計算書類の承認は株主総会の権限（438条等）。取締役会の三大職務は①業務執行決定②取締役監督③代表取締役の選解職（362条2項）です。"
+    }
+  },
+  {
+    id: 381, chapter: "第四章 機関（監査役）",
+    title: "監査役の権限",
+    text: "監査役は、取締役（会計参与設置会社にあっては、取締役及び会計参与）の職務の執行を監査する。この場合において、監査役は、法務省令で定めるところにより、監査報告を作成しなければならない。",
+    explanation: `
+      <p><strong>監査役の基本的権限・義務</strong>を定める規定。執行監査室と直接連携する機関です。</p>
+      <ul class="point-list">
+        <li>監査対象：取締役（・会計参与）の職務執行</li>
+        <li>監査の範囲：適法性監査が中心（大会社・上場会社の監査役は妥当性監査も）</li>
+        <li>監査報告：法務省令に従って作成義務あり→ 株主・株主総会への情報提供</li>
+      </ul>
+      <p>監査役の独立性・実効性は機関設計の要。監査役は取締役会に出席・意見陳述できます（383条）。また取締役の不正行為・法令違反には差止請求権もあります（385条）。</p>
+      <p>執行監査室は監査役の補助機関として機能することが多く、この規定の趣旨を十分理解することが重要です。</p>
+    `,
+    quiz: {
+      question: "監査役の監査対象として会社法381条が定めているものはどれですか？",
+      options: ["株主の議決権行使", "取締役の職務の執行", "会社の財産全般", "従業員の業務遂行"],
+      correct: 1,
+      explanation: "381条1項により、監査役は取締役（・会計参与）の職務執行を監査します。適法性監査が基本で、監査報告の作成義務もあります。"
+    }
+  },
+  {
+    id: 385, chapter: "第四章 機関（監査役）",
+    title: "監査役による取締役の行為の差止め",
+    text: "監査役は、取締役が株式会社の目的の範囲外の行為その他法令若しくは定款に違反する行為をし、又はこれらの行為をするおそれがある場合において、当該行為によって当該株式会社に著しい損害が生ずるおそれがあるときは、当該取締役に対し、当該行為をやめることを請求することができる。",
+    explanation: `
+      <p>監査役の強力な権限である<strong>取締役行為差止請求権</strong>を定めます。</p>
+      <p>差止請求が認められる要件：</p>
+      <ul class="point-list">
+        <li>①取締役が目的外行為・法令違反・定款違反行為をし、またはそのおそれがある</li>
+        <li>②その行為によって会社に著しい損害が生ずるおそれがある</li>
+      </ul>
+      <p>裁判所に対して差止の仮処分を申し立てることもできます。これは監査役が持つ最も実効的な権限の一つです。</p>
+      <p>執行監査室の立場では、不正発見時にこの権限行使の可否を監査役と連携して判断することが求められます。</p>
+    `,
+    quiz: {
+      question: "監査役が取締役の行為の差止めを請求できる要件として正しいものはどれですか？",
+      options: ["取締役が軽微な手続き違反をした場合", "取締役の法令違反等の行為により会社に著しい損害が生ずるおそれがある場合", "株主の過半数が差止を求めた場合", "会計監査人が指摘した場合"],
+      correct: 1,
+      explanation: "385条により、①法令等違反またはそのおそれ、②会社への著しい損害のおそれ、の両要件を満たす場合に監査役は差止請求できます。"
+    }
+  },
+  {
+    id: 396, chapter: "第四章 機関（会計監査人）",
+    title: "会計監査人の権限等",
+    text: "会計監査人は、次節の定めるところにより、株式会社の計算書類及びその附属明細書、臨時計算書類並びに連結計算書類を監査する。この場合において、会計監査人は、法務省令で定めるところにより、会計監査報告を作成しなければならない。",
+    explanation: `
+      <p>会計監査人（公認会計士・監査法人）の権限・義務を定めます。</p>
+      <ul class="point-list">
+        <li>監査対象：計算書類・附属明細書・臨時計算書類・連結計算書類</li>
+        <li>会計監査報告：法務省令に従い作成→ 監査役・株主等に提供</li>
+        <li>設置義務：大会社（資本金5億円以上または負債200億円以上）は義務（328条）</li>
+        <li>会計監査人は公認会計士または監査法人でなければならない</li>
+      </ul>
+      <p>会計監査人と監査役は「相互連携」が求められます。不正リスクの共有・情報交換が実務上重要です。</p>
+    `,
+    quiz: {
+      question: "会計監査人による監査の対象として正しいものはどれですか？",
+      options: ["取締役の職務執行全般", "計算書類及びその附属明細書等の財務書類", "内部統制の適切性全般", "株主総会の議事進行"],
+      correct: 1,
+      explanation: "396条1項により、会計監査人は計算書類・附属明細書・臨時計算書類・連結計算書類を監査します。職務執行の適法性は監査役の領域です。"
+    }
+  },
+  // 第五章 計算等
+  {
+    id: 431, chapter: "第五章 計算等",
+    title: "会計の原則",
+    text: "株式会社の会計は、一般に公正妥当と認められる企業会計の慣行に従うものとする。",
+    explanation: `
+      <p>会社の会計は<strong>GAAP（一般に公正妥当と認められる企業会計の慣行）</strong>に従うという原則規定です。</p>
+      <ul class="point-list">
+        <li>具体的には企業会計原則・会計基準（IFRS含む）・関連法令に従う</li>
+        <li>「一般に公正妥当」＝慣行として定着した会計処理方法</li>
+        <li>会計基準は会計基準設定機関（ASBJ等）が策定</li>
+        <li>監査役・会計監査人はこの原則からの逸脱がないかを監視</li>
+      </ul>
+      <p>粉飾決算はこの原則に反する行為であり、会社法・金融商品取引法上の重大な違反です。執行監査室にとって、会計処理の適正性確認は核心業務です。</p>
+    `,
+    quiz: {
+      question: "会社法431条が定める会計の原則として正しいものはどれですか？",
+      options: ["税法上の規定に従う", "一般に公正妥当と認められる企業会計の慣行に従う", "代表取締役が定める方針に従う", "取締役会が決定した方法に従う"],
+      correct: 1,
+      explanation: "431条により株式会社の会計はGAAP（一般に公正妥当と認められる企業会計の慣行）に従います。具体的には企業会計原則・各種会計基準等です。"
+    }
+  },
+  {
+    id: 432, chapter: "第五章 計算等",
+    title: "会計帳簿の作成及び保存",
+    text: "株式会社は、法務省令で定めるところにより、適時に、正確な会計帳簿を作成しなければならない。２ 株式会社は、会計帳簿の閉鎖の時から十年間、その会計帳簿及びその事業に関する重要な資料を保存しなければならない。",
+    explanation: `
+      <p>会計帳簿の<strong>作成義務・保存義務</strong>を定めます。内部統制の基礎となる規定です。</p>
+      <ul class="point-list">
+        <li>作成：適時に・正確に作成する義務（法務省令＝会社計算規則に従う）</li>
+        <li>保存期間：<strong>10年間</strong>（会計帳簿の閉鎖時から）</li>
+        <li>保存対象：会計帳簿本体＋事業に関する重要な資料</li>
+      </ul>
+      <p>10年という長期保存は、訴訟・税務調査・内部監査に備えるためです。保存義務違反は過料（976条）の対象となります。デジタル化した帳簿でも適法に保存できます（電子帳簿保存法と連動）。</p>
+    `,
+    quiz: {
+      question: "会社法432条が定める会計帳簿の保存期間として正しいものはどれですか？",
+      options: ["3年間", "5年間", "7年間", "10年間"],
+      correct: 3,
+      explanation: "432条2項により、会計帳簿および重要資料は会計帳簿の閉鎖から10年間の保存義務があります。"
+    }
+  },
+  {
+    id: 436, chapter: "第五章 計算等",
+    title: "計算書類等の作成及び保存",
+    text: "取締役会設置会社においては、取締役は、法務省令で定めるところにより、各事業年度に係る計算書類（貸借対照表、損益計算書その他株式会社の財産及び損益の状況を示すために必要かつ適切なものとして法務省令で定めるもの）及び事業報告並びにこれらの附属明細書を作成しなければならない。",
+    explanation: `
+      <p>毎事業年度の<strong>計算書類等の作成義務</strong>を定めます。</p>
+      <p>作成が必要な書類：</p>
+      <ul class="point-list">
+        <li><strong>貸借対照表（B/S）</strong>：財産・負債・純資産の状況</li>
+        <li><strong>損益計算書（P/L）</strong>：収益・費用・損益の状況</li>
+        <li><strong>株主資本等変動計算書（S/S）</strong>：純資産の変動</li>
+        <li><strong>注記表</strong>：財務諸表の補足説明</li>
+        <li><strong>事業報告</strong>：会社の状況に関する重要な事項</li>
+        <li>各附属明細書</li>
+      </ul>
+      <p>これらは監査役・会計監査人の監査を経て（大会社の場合）、定時株主総会に提出されます（438条）。</p>
+    `,
+    quiz: {
+      question: "会社法436条が定める計算書類として挙げられているものはどれですか？",
+      options: ["事業計画書", "貸借対照表・損益計算書", "内部監査報告書", "取締役会議事録"],
+      correct: 1,
+      explanation: "計算書類は貸借対照表・損益計算書等（法務省令で規定）です。事業報告は別途作成義務があります。内部監査報告書・取締役会議事録は計算書類ではありません。"
+    }
+  },
+  // 第六章 定款の変更
+  {
+    id: 466, chapter: "第六章 定款の変更",
+    title: "定款の変更",
+    text: "株式会社は、その定款を変更することができる。",
+    explanation: `
+      <p>会社の「憲法」である定款も変更できることを宣言する規定です。</p>
+      <p>定款変更の手続き（466条・309条2項11号）：</p>
+      <ul class="point-list">
+        <li>株主総会の<strong>特別決議</strong>が必要（出席者の2/3以上・定足数は総議決権の過半数）</li>
+        <li>定款変更は設立時と同様の公証人認証は不要（株主総会決議のみ）</li>
+        <li>変更内容によっては登記が必要（商号変更・目的変更・本店移転等）</li>
+        <li>一部の変更は全株主の同意が必要（株主の権利に重大な影響を与える場合等）</li>
+      </ul>
+    `,
+    quiz: {
+      question: "定款変更に必要な株主総会の決議の種類はどれですか？",
+      options: ["普通決議（過半数）", "特別決議（出席者の3分の2以上）", "特殊決議（全株主の同意）", "代表取締役の単独決定"],
+      correct: 1,
+      explanation: "定款変更は株主総会の特別決議が必要（466条・309条2項11号）。特別決議は議決権の過半数を持つ株主出席のもと、出席者の議決権の3分の2以上の賛成が要件です。"
+    }
+  },
+  // 第七章 事業の譲渡等
+  {
+    id: 467, chapter: "第七章 事業の譲渡等",
+    title: "事業譲渡等の承認等",
+    text: "株式会社は、次に掲げる行為をする場合には、当該行為の効力が生ずる日の前日までに、株主総会の決議によって、当該行為に係る契約の承認を受けなければならない。一 事業の全部の譲渡　二 事業の重要な一部の譲渡（略）",
+    explanation: `
+      <p>事業譲渡等の重要な会社行為には<strong>株主総会の承認（特別決議）</strong>が必要です。</p>
+      <p>承認が必要な主な行為：</p>
+      <ul class="point-list">
+        <li><strong>事業の全部の譲渡</strong>：会社の全事業を他社に売却</li>
+        <li><strong>事業の重要な一部の譲渡</strong>：譲渡資産が総資産の1/5超等（略）</li>
+        <li><strong>他社の事業全部の譲受</strong></li>
+        <li><strong>事業の全部の賃貸・経営委任等</strong></li>
+      </ul>
+      <p>これらは会社の根幹を変える重大行為のため、株主総会による民主的コントロールが必要です。取締役会の専決に委ねると株主の利益が損なわれる可能性があります。</p>
+    `,
+    quiz: {
+      question: "事業の全部の譲渡を行う場合、原則としてどの機関の承認が必要ですか？",
+      options: ["代表取締役の決定", "取締役会の決議", "株主総会の決議", "監査役の同意"],
+      correct: 2,
+      explanation: "467条1項1号により、事業の全部の譲渡は株主総会の特別決議による承認が必要です。会社の根幹に関わる重大行為であるため株主の関与が求められます。"
+    }
+  },
+  // 第八章 解散
+  {
+    id: 471, chapter: "第八章 解散",
+    title: "解散の事由",
+    text: "株式会社は、次に掲げる事由によって解散する。一 定款で定めた存続期間の満了　二 定款で定めた解散の事由の発生　三 株主総会の決議　四 合併（合併により当該株式会社が消滅する場合に限る。）　五 破産手続開始の決定　六 第八百二十四条第一項又は第八百三十三条第一項の規定による解散を命ずる裁判",
+    explanation: `
+      <p>株式会社が解散する6つの事由を列挙します。</p>
+      <ul class="point-list">
+        <li><strong>存続期間の満了</strong>：定款で期限を定めた会社（プロジェクト会社等）</li>
+        <li><strong>解散事由の発生</strong>：定款で定めた特定の事由が生じたとき</li>
+        <li><strong>株主総会の決議</strong>：特別決議による自発的解散（最も一般的）</li>
+        <li><strong>合併による消滅</strong>：吸収合併・新設合併で消滅会社となる場合</li>
+        <li><strong>破産手続開始の決定</strong>：倒産による強制的な解散</li>
+        <li><strong>裁判所の命令</strong>：解散命令・解散判決</li>
+      </ul>
+      <p>解散後は清算手続き（会社財産の換価・債権債務の処理）を経て会社が消滅します。</p>
+    `,
+    quiz: {
+      question: "会社法471条が定める株式会社の解散事由として誤っているものはどれですか？",
+      options: ["株主総会の特別決議", "破産手続開始の決定", "取締役全員の辞任", "合併による消滅"],
+      correct: 2,
+      explanation: "取締役全員の辞任は解散事由ではありません（後任者選任で会社は継続可能）。解散事由は①存続期間満了②定款所定事由③株主総会決議④合併消滅⑤破産⑥裁判所命令の6つです（471条）。"
+    }
+  },
+  // 第九章 清算
+  {
+    id: 475, chapter: "第九章 清算",
+    title: "清算の開始原因",
+    text: "株式会社は、次に掲げる場合には、この章の定めるところにより、清算をしなければならない。一 解散した場合（第四百七十一条第四号に掲げる事由（合併）による解散の場合及び破産手続開始の決定による解散の場合を除く。）　二 設立の無効の訴えに係る請求を認容する判決が確定した場合",
+    explanation: `
+      <p>会社が解散した後には<strong>清算手続き</strong>が必要です（合併・破産の場合を除く）。</p>
+      <ul class="point-list">
+        <li>清算開始原因：①解散（合併・破産を除く）②設立無効判決の確定</li>
+        <li>清算中の会社は「清算会社」と呼ばれ、清算の目的の範囲内でのみ存続</li>
+        <li>清算人が選任され（清算株式会社の機関として機能）、財産換価・債権取立・債務弁済・残余財産分配を行う</li>
+        <li>合併の場合は清算不要（合併自体が資産移転の仕組みを持つ）</li>
+        <li>破産の場合は破産法が適用される</li>
+      </ul>
+    `,
+    quiz: {
+      question: "株式会社が清算を行わなくてよい解散の場合はどれですか？",
+      options: ["株主総会決議による解散", "設立無効判決確定による解散", "合併による解散（消滅会社）", "存続期間満了による解散"],
+      correct: 2,
+      explanation: "475条1号のカッコ書きにより、合併による消滅と破産手続開始による解散の場合は清算手続き不要。合併では合併手続きで資産移転が行われるためです。"
+    }
+  },
+  // 第十章 社債
+  {
+    id: 676, chapter: "第十章 社債",
+    title: "社債の募集",
+    text: "会社は、社債を引き受ける者の募集をしようとするときは、その都度、募集社債（当該募集に応じて社債の引受けの申込みをした者に対して割り当てる社債をいう。以下この章において同じ。）について次に掲げる事項を定めなければならない。",
+    explanation: `
+      <p>会社が資金調達のために行う<strong>社債</strong>の発行手続きの出発点です。</p>
+      <ul class="point-list">
+        <li>社債＝会社が発行する債券（借入の有価証券化）。株式と異なり返済義務がある</li>
+        <li>募集のたびに銘柄・金額・利率・償還期限等を定める必要がある</li>
+        <li>社債の発行は取締役会で決定（取締役会設置会社の場合）</li>
+        <li>上場会社が社債を発行する際は金融商品取引法上の開示規制も適用</li>
+      </ul>
+      <p>社債は「社債管理者」の設置が原則（702条。例外あり）で、社債権者の保護機能を果たします。</p>
+    `,
+    quiz: {
+      question: "会社法上、社債について正しい記述はどれですか？",
+      options: ["社債は株式と同様に返済義務がない", "社債は会社の債券であり返済義務がある", "社債の発行には株主総会の特別決議が常に必要", "社債権者は株主と同様の議決権を持つ"],
+      correct: 1,
+      explanation: "社債は会社が発行する債券であり、元本と利息の返済義務があります。株式（返済義務なし・議決権あり）とは性質が全く異なります。"
+    }
+  },
+  // 第十一章 組織変更等
+  {
+    id: 743, chapter: "第十一章 組織変更・合併等",
+    title: "吸収合併契約等の締結",
+    text: "会社は、他の会社と吸収合併をすることができる。この場合においては、吸収合併をする会社のうちいずれか一方を吸収合併後に存続する会社（以下「吸収合併存続会社」という。）とし、他方を吸収合併により消滅する会社（以下「吸収合併消滅会社」という。）とする。",
+    explanation: `
+      <p><strong>吸収合併</strong>の基本的な仕組みを定めます。M&Aの基本形の一つです。</p>
+      <ul class="point-list">
+        <li><strong>存続会社</strong>：合併後も残る会社。消滅会社の権利義務を包括的に承継する</li>
+        <li><strong>消滅会社</strong>：合併により消滅する会社。清算手続き不要で消滅</li>
+        <li>吸収合併には原則として両社の株主総会の特別決議が必要（783条・795条）</li>
+        <li>簡易合併（消滅会社が小規模）・略式合併（完全親子会社間）は例外的に株主総会不要</li>
+      </ul>
+      <p>合併は会社の根幹を変える重要行為のため、反対株主には株式買取請求権が認められます（785条等）。</p>
+    `,
+    quiz: {
+      question: "吸収合併において、合併後も存続する会社を何と呼びますか？",
+      options: ["消滅会社", "承継会社", "吸収合併存続会社", "新設会社"],
+      correct: 2,
+      explanation: "743条により、合併後に残る会社を「吸収合併存続会社」、消滅する会社を「吸収合併消滅会社」といいます。存続会社は消滅会社の権利義務を包括承継します。"
+    }
+  },
+  // 罰則
+  {
+    id: 960, chapter: "第十二章 罰則",
+    title: "特別背任罪",
+    text: "次に掲げる者が、自己若しくは第三者の利益を図り又は株式会社に損害を加える目的で、その任務に背く行為をし、当該株式会社に財産上の損害を加えたときは、十年以下の懲役若しくは千万円以下の罰金に処し、又はこれを併科する。一 発起人　二 設立時取締役又は設立時監査役　三 取締役、会計参与、監査役又は執行役　（以下略）",
+    explanation: `
+      <p>会社役員等の<strong>特別背任罪</strong>を定める刑事罰規定です。執行監査室にとって最も重要な罰則条文の一つです。</p>
+      <p>成立要件：</p>
+      <ul class="point-list">
+        <li>①主体：発起人・取締役・監査役・執行役等の役員等</li>
+        <li>②目的：自己・第三者の利益を図ること、または会社に損害を加えること</li>
+        <li>③行為：任務に背く行為（背任行為）</li>
+        <li>④結果：会社に財産上の損害が発生</li>
+      </ul>
+      <p><strong>法定刑：10年以下の懲役または1,000万円以下の罰金（または併科）</strong></p>
+      <p>一般的な刑法上の背任罪（5年以下の懲役）より厳しい刑罰が科されます。役員という高い信頼関係を裏切る行為の重大性を反映しています。</p>
+    `,
+    quiz: {
+      question: "会社法960条の特別背任罪の法定刑として正しいものはどれですか？",
+      options: ["3年以下の懲役または300万円以下の罰金", "5年以下の懲役または500万円以下の罰金", "10年以下の懲役または1,000万円以下の罰金", "15年以下の懲役または無制限の罰金"],
+      correct: 2,
+      explanation: "特別背任罪（960条）の法定刑は10年以下の懲役または1,000万円以下の罰金（または併科）。一般刑法の背任罪より重い刑罰で、役員の信任関係の重大性を反映します。"
+    }
+  },
+  {
+    id: 976, chapter: "第十二章 罰則",
+    title: "過料（行政罰）",
+    text: "次に掲げる場合には、当該株式会社の取締役、執行役、会計参与、監査役若しくは清算人又はこれらの職務を行うべき者は、百万円以下の過料に処する。（以下各号略）",
+    explanation: `
+      <p>刑事罰ではなく<strong>行政罰（過料）</strong>の対象となる違反行為を規定します。</p>
+      <p>過料の対象となる主な違反（各号）：</p>
+      <ul class="point-list">
+        <li>登記義務の懈怠（登記すべきことをしなかった）</li>
+        <li>公告・通知義務違反</li>
+        <li>計算書類の不作成・虚偽記載</li>
+        <li>会計帳簿の不作成・保存義務違反（432条違反）</li>
+        <li>株主総会の不開催</li>
+      </ul>
+      <p><strong>上限は100万円</strong>（刑事罰ではないため前科はつかないが、会社の評判・信頼への打撃は大きい）。執行監査室では、これらの行政義務の履行状況も監視対象です。</p>
+    `,
+    quiz: {
+      question: "会社法976条の過料（行政罰）の上限額として正しいものはどれですか？",
+      options: ["10万円以下", "50万円以下", "100万円以下", "500万円以下"],
+      correct: 2,
+      explanation: "976条の過料は100万円以下。登記懈怠・計算書類不作成等の義務違反が対象。刑事罰（懲役等）ではないため前科はつきませんが、重大な行政義務違反として扱われます。"
+    }
+  }
+];
+
+// ══════════════════════════════════════════════
+//  STATE MANAGEMENT (localStorage)
+// ══════════════════════════════════════════════
+function getState() {
+  try { return JSON.parse(localStorage.getItem('kaisha_ho_v1') || '{}'); }
+  catch { return {}; }
+}
+function setState(s) {
+  localStorage.setItem('kaisha_ho_v1', JSON.stringify(s));
+}
+function getArticleState(id) {
+  const s = getState();
+  return s[`a_${id}`] || { status: 'unseen', failCount: 0, studiedDates: [], failedQuestion: null };
+}
+function setArticleState(id, data) {
+  const s = getState();
+  s[`a_${id}`] = { ...getArticleState(id), ...data };
+  setState(s);
+}
+function recordStudy(id) {
+  const as = getArticleState(id);
+  const today = new Date().toISOString().slice(0, 10);
+  const dates = as.studiedDates || [];
+  if (!dates.includes(today)) dates.push(today);
+  setArticleState(id, { studiedDates: dates });
+}
+
+// ══════════════════════════════════════════════
+//  SCREEN MANAGEMENT
+// ══════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (name === 'home') {
+    document.querySelectorAll('.nav-btn')[0].classList.add('active');
+    renderHome();
+  } else if (name === 'progress') {
+    document.querySelectorAll('.nav-btn')[1].classList.add('active');
+    renderProgress();
+  }
+}
+
+// ══════════════════════════════════════════════
+//  HOME SCREEN
+// ══════════════════════════════════════════════
+function renderHome() {
+  const passed = ARTICLES.filter(a => getArticleState(a.id).status === 'passed').length;
+  const failed = ARTICLES.filter(a => getArticleState(a.id).status === 'failed').length;
+  const total = ARTICLES.length;
+  document.getElementById('count-passed').textContent = passed;
+  document.getElementById('count-failed').textContent = failed;
+  document.getElementById('count-total').textContent = total;
+  document.getElementById('progress-bar').style.width = (passed / total * 100).toFixed(1) + '%';
+
+  // Group by chapter
+  const chapters = {};
+  ARTICLES.forEach(a => {
+    if (!chapters[a.chapter]) chapters[a.chapter] = [];
+    chapters[a.chapter].push(a);
+  });
+
+  let html = '';
+  html += '<div class="section-title">📖 条文一覧 <span>条文をクリックして学習開始</span></div>';
+  for (const [ch, arts] of Object.entries(chapters)) {
+    html += `<div class="chapter-group">
+      <div class="chapter-label">${ch}</div>
+      <div class="article-grid">`;
+    arts.forEach(a => {
+      const as = getArticleState(a.id);
+      const statusLabel = as.status === 'passed' ? '✓ 合格' : as.status === 'failed' ? '✗ 不正解' : '未学習';
+      const failBadge = as.failCount > 0 ? `<span class="fail-badge">${as.failCount}</span>` : '';
+      html += `<button class="article-btn ${as.status}" onclick="startStudy(${a.id})">
+        ${failBadge}
+        第${a.id}条
+        <span class="art-status">${statusLabel}</span>
+      </button>`;
+    });
+    html += `</div></div>`;
+  }
+  document.getElementById('article-list-container').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+//  STUDY SCREEN
+// ══════════════════════════════════════════════
+let currentArticleId = null;
+
+function startStudy(id) {
+  currentArticleId = id;
+  const art = ARTICLES.find(a => a.id === id);
+  if (!art) return;
+  recordStudy(id);
+
+  // Prev/Next navigation
+  const idx = ARTICLES.findIndex(a => a.id === id);
+  let navHtml = '';
+  if (idx > 0) navHtml += `<button class="back-btn" onclick="startStudy(${ARTICLES[idx-1].id})">← 前の条文</button>`;
+  if (idx < ARTICLES.length - 1) navHtml += `<button class="back-btn" onclick="startStudy(${ARTICLES[idx+1].id})" style="margin-left:auto;">次の条文 →</button>`;
+  document.getElementById('study-nav').innerHTML = navHtml;
+
+  const as = getArticleState(id);
+  const content = `
+    <div class="article-card">
+      <div class="article-number">会社法 第${art.id}条</div>
+      <div class="article-title">${art.title}</div>
+      <div class="article-text">${art.text}</div>
+      <div class="explanation-block">
+        <div class="explanation-label">逐条解説</div>
+        <div class="explanation-text">${art.explanation}</div>
+      </div>
+    </div>
+
+    <div class="quiz-card" id="quiz-card">
+      <div class="quiz-label">● 確認問題</div>
+      <div class="quiz-question">${art.quiz.question}</div>
+      <div class="quiz-options" id="quiz-options">
+        ${art.quiz.options.map((opt, i) => `
+          <button class="quiz-option" onclick="answerQuiz(${i})" data-idx="${i}">
+            <span class="opt-key">${['ア','イ','ウ','エ'][i]}</span>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div class="quiz-result" id="quiz-result"></div>
+      <div class="action-row" id="quiz-actions" style="display:none;">
+        <button class="btn-primary" onclick="showScreen('home')">一覧に戻る</button>
+        ${idx < ARTICLES.length - 1 ? `<button class="btn-secondary" onclick="startStudy(${ARTICLES[idx+1].id})">次の条文へ →</button>` : ''}
+      </div>
+    </div>
+  `;
+  document.getElementById('study-content').innerHTML = content;
+  showScreen('study');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+}
+
+function answerQuiz(selected) {
+  const art = ARTICLES.find(a => a.id === currentArticleId);
+  const as = getArticleState(currentArticleId);
+  const isCorrect = selected === art.quiz.correct;
+
+  // Disable all buttons
+  document.querySelectorAll('.quiz-option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === art.quiz.correct) btn.classList.add('correct');
+    if (i === selected && !isCorrect) btn.classList.add('incorrect');
+  });
+
+  const resultEl = document.getElementById('quiz-result');
+  if (isCorrect) {
+    resultEl.className = 'quiz-result show correct-result';
+    resultEl.innerHTML = `✅ <strong>正解！</strong><br>${art.quiz.explanation}`;
+    setArticleState(currentArticleId, { status: 'passed' });
+    showToast('🎉 正解！この条文は合格です');
+  } else {
+    resultEl.className = 'quiz-result show incorrect-result';
+    resultEl.innerHTML = `❌ <strong>不正解。</strong>正解は「${art.quiz.options[art.quiz.correct]}」<br>${art.quiz.explanation}`;
+    const newFailCount = (as.failCount || 0) + 1;
+    setArticleState(currentArticleId, {
+      status: 'failed',
+      failCount: newFailCount,
+      failedQuestion: art.quiz.question
+    });
+    showToast('❌ 不正解。後で再挑戦しよう！');
+  }
+  document.getElementById('quiz-actions').style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════
+//  PROGRESS SCREEN
+// ══════════════════════════════════════════════
+function renderProgress() {
+  // Donut text
+  const passed = ARTICLES.filter(a => getArticleState(a.id).status === 'passed').length;
+  const failed = ARTICLES.filter(a => getArticleState(a.id).status === 'failed').length;
+  const unseen = ARTICLES.length - passed - failed;
+  const pct = (passed / ARTICLES.length * 100).toFixed(0);
+
+  document.getElementById('progress-donut-text').innerHTML = `
+    <div style="text-align:center;padding:1rem 0;">
+      <div style="font-family:'Noto Serif JP',serif;font-size:3rem;font-weight:700;color:var(--success);">${pct}%</div>
+      <div style="font-size:0.82rem;color:#888;margin-bottom:1rem;">合格率</div>
+      <div style="display:flex;justify-content:center;gap:1.5rem;font-size:0.85rem;">
+        <span style="color:var(--success);">✓ 合格 ${passed}条</span>
+        <span style="color:var(--fail);">✗ 不正解 ${failed}条</span>
+        <span style="color:var(--unseen);">○ 未学習 ${unseen}条</span>
+      </div>
+    </div>
+  `;
+
+  // Calendar
+  const allDates = new Set();
+  ARTICLES.forEach(a => {
+    (getArticleState(a.id).studiedDates || []).forEach(d => allDates.add(d));
+  });
+  const today = new Date();
+  let calHtml = '<div class="calendar-grid">';
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    const isToday = i === 0;
+    const hasStudy = allDates.has(ds);
+    const cls = isToday ? 'today' : hasStudy ? 'has-study' : 'empty';
+    calHtml += `<div class="cal-day ${cls}" title="${ds}">${d.getDate()}</div>`;
+  }
+  calHtml += '</div>';
+  calHtml += '<div style="font-size:0.72rem;color:#aaa;margin-top:0.75rem;text-align:center;">直近30日の学習実績（<span style="color:var(--gold);">■</span>学習日 <span style="background:var(--accent);color:white;padding:0 4px;border-radius:2px;">今日</span>）</div>';
+  document.getElementById('calendar-container').innerHTML = calHtml;
+
+  // Fail list
+  const failedArts = ARTICLES.filter(a => {
+    const as = getArticleState(a.id);
+    return as.status === 'failed' || as.failCount > 0;
+  }).sort((a, b) => (getArticleState(b.id).failCount || 0) - (getArticleState(a.id).failCount || 0));
+
+  if (failedArts.length === 0) {
+    document.getElementById('fail-list').innerHTML = '<li class="empty-msg">不正解の条文はありません 🎉</li>';
+  } else {
+    document.getElementById('fail-list').innerHTML = failedArts.map(a => {
+      const as = getArticleState(a.id);
+      return `<li>
+        <span>第${a.id}条 ${a.title}</span>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+          <span class="fail-count">✗ ${as.failCount}回</span>
+          <button class="retry-btn" onclick="startStudy(${a.id})">再挑戦</button>
+        </div>
+      </li>`;
+    }).join('');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──
+renderHome();
+
+// ══════════════════════════════════════════════
+//  RESET
+// ══════════════════════════════════════════════
+function confirmReset() {
+  document.getElementById('reset-modal').classList.add('show');
+}
+function closeReset() {
+  document.getElementById('reset-modal').classList.remove('show');
+}
+function doReset() {
+  localStorage.removeItem('kaisha_ho_v1');
+  closeReset();
+  showScreen('home');
+  showToast('🗑️ 学習履歴をリセットしました');
+}
+</script>
+</body>
+</html>
