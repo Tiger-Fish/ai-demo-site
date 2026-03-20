@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>フィルムコンデンサ 完全研修ガイド | 指月電機製作所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0a1628;--navy2:#132040;--navy3:#1e3060;--navy4:#2a4080;
+  --accent:#2e7de0;--accent2:#5b9ef7;--accent3:#93c0ff;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --teal:#0d9488;--teal2:#5eead4;
+  --green:#16a34a;--red:#dc2626;--orange:#ea580c;
+  --text:#1a1a2e;--text2:#3a4a6a;--text3:#6a7a9a;
+  --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eef2fa;
+  --border:#dde4f0;--border2:#c8d4ec;
+  --shadow:0 2px 16px rgba(10,22,40,.08);
+  --shadow2:0 8px 32px rgba(10,22,40,.14);
+  --radius:12px;--radius2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;font-size:15px}
+
+/* ===== PROGRESS BAR ===== */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--gold));width:0%;z-index:9999;transition:width .1s}
+
+/* ===== SIDEBAR ===== */
+#sidebar{position:fixed;left:0;top:0;height:100vh;width:220px;background:var(--navy);overflow-y:auto;z-index:100;transform:translateX(-220px);transition:transform .3s;scrollbar-width:thin;scrollbar-color:var(--navy3) var(--navy)}
+#sidebar.open{transform:translateX(0)}
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-track{background:var(--navy)}
+#sidebar::-webkit-scrollbar-thumb{background:var(--navy3);border-radius:2px}
+.sidebar-header{padding:20px 16px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-logo{font-size:11px;color:var(--gold2);letter-spacing:.1em;font-weight:700;margin-bottom:4px}
+.sidebar-title{font-size:13px;color:rgba(255,255,255,.9);font-weight:500;line-height:1.4}
+.sidebar-nav{padding:12px 0}
+.nav-chapter{display:block;padding:8px 16px;font-size:12px;color:rgba(255,255,255,.6);text-decoration:none;border-left:2px solid transparent;transition:all .2s;line-height:1.4}
+.nav-chapter:hover,.nav-chapter.active{color:white;border-left-color:var(--accent2);background:rgba(255,255,255,.06)}
+.nav-chapter span{display:block;font-size:10px;color:rgba(255,255,255,.35);margin-bottom:1px}
+#sidebar-toggle{position:fixed;left:16px;top:16px;z-index:101;background:var(--navy);border:none;color:white;width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow2);transition:background .2s}
+#sidebar-toggle:hover{background:var(--navy3)}
+
+/* ===== HEADER ===== */
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 60%,#1a4080 100%);color:white;padding:0;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(46,125,224,.2),transparent 70%)}
+header::after{content:'';position:absolute;bottom:-100px;left:-60px;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.12),transparent 70%)}
+.header-inner{max-width:960px;margin:0 auto;padding:70px 24px 60px;position:relative;z-index:1}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.2);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:.12em;padding:5px 16px;border-radius:20px;margin-bottom:20px}
+header h1{font-family:'Noto Serif JP',serif;font-size:clamp(28px,5vw,46px);font-weight:700;line-height:1.35;margin-bottom:16px}
+header h1 em{font-style:normal;color:var(--accent3)}
+header .sub{font-size:15px;color:rgba(255,255,255,.7);max-width:560px;line-height:1.7;margin-bottom:28px}
+.header-stats{display:flex;gap:24px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat .num{font-size:28px;font-weight:700;color:var(--gold2);font-family:'JetBrains Mono',monospace}
+.stat .label{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.05em}
+
+/* ===== TOC ===== */
+.toc-bar{background:var(--navy2);border-bottom:2px solid var(--accent);position:sticky;top:0;z-index:50}
+.toc-inner{max-width:960px;margin:0 auto;padding:0 24px;display:flex;overflow-x:auto;scrollbar-width:none;gap:0}
+.toc-inner::-webkit-scrollbar{display:none}
+.toc-inner a{color:rgba(255,255,255,.65);text-decoration:none;font-size:12px;font-weight:500;padding:13px 14px;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
+.toc-inner a:hover{color:white;border-bottom-color:var(--accent2)}
+
+/* ===== MAIN ===== */
+main{max-width:960px;margin:0 auto;padding:52px 24px 100px}
+
+/* ===== SECTION ===== */
+.chapter{margin-bottom:72px;scroll-margin-top:60px}
+.chapter-header{margin-bottom:28px}
+.chapter-num{font-size:11px;font-weight:700;letter-spacing:.15em;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.chapter-num::after{content:'';flex:1;height:1px;background:var(--border)}
+.chapter h2{font-family:'Noto Serif JP',serif;font-size:clamp(22px,3.5vw,30px);font-weight:700;color:var(--navy);line-height:1.35;margin-bottom:8px}
+.chapter-desc{font-size:14px;color:var(--text3);line-height:1.7}
+
+/* ===== CARDS ===== */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s;margin-bottom:16px}
+.card:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}
+.card h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.card-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--navy3));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.card p,.card ul,.card ol{font-size:14px;color:var(--text2);line-height:1.85}
+.card ul,.card ol{padding-left:20px}
+.card li{margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+
+/* ===== POINT BOX ===== */
+.point{background:linear-gradient(135deg,#eef4ff,#f0f8ff);border-left:4px solid var(--accent);border-radius:0 var(--radius2) var(--radius2) 0;padding:16px 20px;margin:20px 0;font-size:14px;color:#2a3a5a}
+.point strong{color:var(--accent)}
+.warn{background:#fff8f0;border-left-color:var(--orange)}
+.warn strong{color:var(--orange)}
+.success{background:#f0fdf4;border-left-color:var(--green)}
+.success strong{color:var(--green)}
+
+/* ===== ANIMATION: CAPACITOR ===== */
+.anim-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px 24px;text-align:center;box-shadow:var(--shadow);margin-bottom:20px}
+.cap-container{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin:24px 0}
+.layers-wrap{display:flex;flex-direction:column;gap:3px;align-items:center}
+.layer-block{width:160px;height:16px;border-radius:3px;position:relative;overflow:hidden}
+.l-metal{background:linear-gradient(90deg,#7a8090,#b8bcc8,#9aa0b0,#b8bcc8,#7a8090)}
+.l-film{background:linear-gradient(90deg,#e8d880,#f5f0b0,#e8d880);border:1px solid #c8b840}
+.l-label{font-size:11px;color:var(--text3);margin-top:3px;font-weight:500}
+.arrow-anim{font-size:32px;color:var(--accent);animation:pulse-arrow 1.5s ease-in-out infinite}
+@keyframes pulse-arrow{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+.roll-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.roll-cap{width:90px;height:90px;border-radius:50%;border:4px solid var(--navy3);background:conic-gradient(#b8bcc8 0 25deg,#f5f0b0 25deg 50deg,#b8bcc8 50deg 75deg,#f5f0b0 75deg 100deg,#b8bcc8 100deg 125deg,#f5f0b0 125deg 150deg,#b8bcc8 150deg 175deg,#f5f0b0 175deg 200deg,#b8bcc8 200deg 225deg,#f5f0b0 225deg 250deg,#b8bcc8 250deg 275deg,#f5f0b0 275deg 300deg,#b8bcc8 300deg 325deg,#f5f0b0 325deg 360deg);animation:rotate-cap 8s linear infinite;box-shadow:0 4px 20px rgba(10,22,40,.2)}
+@keyframes rotate-cap{to{transform:rotate(360deg)}}
+.self-healing-demo{margin-top:24px;padding:20px;background:var(--bg3);border-radius:var(--radius2);text-align:left}
+.sh-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:12px}
+.sh-film{position:relative;height:36px;background:linear-gradient(90deg,#e8d880,#f5f0b0,#e8d880);border-radius:4px;overflow:hidden;cursor:pointer;border:1px solid #c8b840}
+.sh-film::before{content:'クリックして絶縁破壊をシミュレート';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#7a6820;font-weight:500}
+.sh-damage{position:absolute;background:rgba(220,38,38,.7);border-radius:50%;width:0;height:0;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .3s}
+.sh-film.damaged .sh-damage{width:20px;height:36px;border-radius:2px}
+.sh-film.healing .sh-damage{width:4px;height:4px;border-radius:50%;background:rgba(22,163,74,.7)}
+.sh-status{font-size:12px;color:var(--text3);margin-top:8px;text-align:center;min-height:18px}
+
+/* ===== CHARGE/DISCHARGE ANIM ===== */
+.charge-demo{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:16px}
+.cd-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:16px}
+.cd-circuit{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin-bottom:20px}
+.cd-battery,.cd-cap,.cd-lamp{width:60px;height:60px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:24px;border:2px solid var(--border);background:var(--bg3);font-weight:700;position:relative}
+.cd-battery{border-color:var(--green);background:#f0fdf4}
+.cd-cap{border-color:var(--accent);background:#eff6ff}
+.cd-lamp{border-color:var(--gold);background:#fffbeb}
+.cd-wire{width:40px;height:3px;background:var(--border)}
+.cd-wire.active{background:var(--accent);animation:wire-flow .6s ease-in-out infinite alternate}
+@keyframes wire-flow{0%{background:var(--border)}100%{background:var(--gold2)}}
+.cd-charge-bar{height:12px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:8px}
+.cd-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;border-radius:6px;transition:width .1s}
+.cd-label{font-size:12px;color:var(--text3);text-align:center}
+.cd-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cd-btn{padding:8px 20px;border:none;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-charge{background:var(--accent);color:white}
+.btn-charge:hover{background:var(--navy3)}
+.btn-discharge{background:var(--gold);color:var(--navy)}
+.btn-discharge:hover{background:var(--gold2)}
+.btn-reset{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+
+/* ===== PROCESS STEPS ===== */
+.process-steps{display:flex;flex-direction:column;gap:0}
+.process-step{display:flex;gap:20px;position:relative;padding-bottom:24px}
+.process-step:last-child{padding-bottom:0}
+.process-step::before{content:'';position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--border)}
+.process-step:last-child::before{display:none}
+.step-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;box-shadow:0 2px 10px rgba(46,125,224,.3)}
+.step-content{flex:1;padding-top:8px}
+.step-content h4{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.step-content p{font-size:13px;color:var(--text2);line-height:1.7}
+
+/* ===== SPEC TABLE ===== */
+.spec-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--bg2);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border)}
+.spec-table th{background:var(--navy);color:white;padding:13px 16px;text-align:left;font-weight:500;font-size:12px;letter-spacing:.03em}
+.spec-table td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6}
+.spec-table tr:last-child td{border-bottom:none}
+.spec-table tr:nth-child(even) td{background:#f8faff}
+.spec-table .hl{background:rgba(46,125,224,.06)!important;font-weight:600;color:var(--navy)}
+.good{color:var(--green);font-weight:600}
+.mid{color:var(--orange);font-weight:600}
+.bad{color:var(--red)}
+
+/* ===== TYPE CARDS ===== */
+.type-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s}
+.type-card:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}
+.type-abbr{display:inline-block;background:var(--accent);color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px;letter-spacing:.05em;font-family:'JetBrains Mono',monospace}
+.type-name{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.type-card p{font-size:13px;color:var(--text2);line-height:1.75}
+.tags{margin-top:10px;display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:11px;padding:2px 9px;border-radius:10px;border:1px solid var(--border);color:var(--text3);background:var(--bg)}
+
+/* ===== CHARACTERISTIC GRAPH ===== */
+.radar-wrap{display:flex;justify-content:center;padding:20px 0}
+
+/* ===== USE CARDS ===== */
+.use-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px;display:flex;gap:16px;box-shadow:var(--shadow)}
+.use-icon{font-size:28px;width:54px;height:54px;background:linear-gradient(135deg,#eef4ff,#ddeaff);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.use-content h4{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.use-content p{font-size:13px;color:var(--text2);line-height:1.75}
+
+/* ===== CIRCUIT ROLES ===== */
+.circuit-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:16px}
+.circuit-box h4{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.circuit-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:8px;background:var(--accent3);color:var(--navy)}
+
+/* ===== SELECTION GUIDE ===== */
+.sel-step{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:12px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;box-shadow:var(--shadow)}
+.sel-num{width:44px;height:44px;background:linear-gradient(135deg,var(--gold),var(--orange));border-radius:50%;color:white;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sel-content h4{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.sel-content p{font-size:13px;color:var(--text2);line-height:1.75}
+
+/* ===== SHIZUKI SECTION ===== */
+.shizuki-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);border-radius:16px;padding:40px 36px;color:white;position:relative;overflow:hidden;margin-bottom:20px}
+.shizuki-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.15),transparent 70%)}
+.shizuki-hero h3{font-family:'Noto Serif JP',serif;font-size:22px;color:var(--gold2);margin-bottom:8px;position:relative;z-index:1}
+.shizuki-hero p{font-size:14px;color:rgba(255,255,255,.75);max-width:600px;line-height:1.7;position:relative;z-index:1}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.product-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s}
+.product-card:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}
+.prod-series{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--accent);margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+.prod-name{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.prod-specs{display:flex;flex-direction:column;gap:4px}
+.prod-spec{display:flex;justify-content:space-between;font-size:12px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.prod-spec:last-child{border-bottom:none;padding-bottom:0}
+.prod-spec .key{color:var(--text3)}
+.prod-spec .val{font-weight:600;color:var(--navy);font-family:'JetBrains Mono',monospace}
+
+/* ===== SALES Q&A ===== */
+.qa-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px;box-shadow:var(--shadow)}
+.qa-q{padding:18px 22px;cursor:pointer;display:flex;align-items:center;gap:12px;font-weight:600;font-size:14px;color:var(--navy);transition:background .2s;user-select:none}
+.qa-q:hover{background:var(--bg3)}
+.qa-q-badge{background:var(--accent);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.qa-arrow{margin-left:auto;font-size:16px;transition:transform .3s;color:var(--text3)}
+.qa-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.qa-a.open{max-height:400px}
+.qa-a-inner{padding:0 22px 20px;font-size:14px;color:var(--text2);line-height:1.85;border-top:1px solid var(--border)}
+.talk-box{background:var(--bg3);border-radius:var(--radius2);padding:16px 18px;margin-top:12px;font-size:13px;border-left:3px solid var(--gold)}
+.talk-box .talk-label{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.08em;margin-bottom:6px}
+
+/* ===== QUIZ ===== */
+.quiz-section{background:linear-gradient(135deg,var(--navy2),var(--navy));border-radius:16px;padding:36px;margin-top:40px;color:white}
+.quiz-section h3{font-family:'Noto Serif JP',serif;font-size:20px;color:var(--gold2);margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.quiz-item{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:24px;margin-bottom:16px}
+.quiz-item:last-child{margin-bottom:0}
+.quiz-q{font-size:15px;font-weight:600;margin-bottom:16px;line-height:1.6}
+.quiz-q .qnum{font-family:'JetBrains Mono',monospace;color:var(--gold2);margin-right:8px}
+.quiz-options{display:flex;flex-direction:column;gap:8px}
+.quiz-opt{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:12px 16px;cursor:pointer;font-size:14px;color:rgba(255,255,255,.85);transition:all .2s;text-align:left;display:flex;align-items:center;gap:10px}
+.quiz-opt:hover{background:rgba(255,255,255,.12);border-color:var(--accent2)}
+.quiz-opt .opt-key{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent3);min-width:20px}
+.quiz-opt.correct{background:rgba(22,163,74,.25);border-color:var(--teal2);color:white}
+.quiz-opt.wrong{background:rgba(220,38,38,.2);border-color:#f87171;color:rgba(255,255,255,.7)}
+.quiz-opt.disabled{cursor:default;pointer-events:none}
+.quiz-feedback{margin-top:12px;padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.7;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.ok{background:rgba(22,163,74,.2);border:1px solid var(--teal2);color:#a7f3d0}
+.quiz-feedback.ng{background:rgba(220,38,38,.15);border:1px solid #f87171;color:#fca5a5}
+.quiz-score-wrap{text-align:center;margin-top:24px}
+.quiz-score{display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:16px 32px;font-size:18px;color:var(--gold2);font-weight:700}
+.quiz-reset-btn{margin-top:12px;padding:10px 28px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:white;border-radius:8px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;transition:all .2s}
+.quiz-reset-btn:hover{background:rgba(255,255,255,.2)}
+
+/* ===== FINAL TEST ===== */
+.final-test{background:var(--bg2);border:2px solid var(--gold);border-radius:16px;padding:36px;box-shadow:var(--shadow2)}
+.final-test h3{font-family:'Noto Serif JP',serif;font-size:22px;color:var(--navy);margin-bottom:8px}
+.final-test .sub{font-size:14px;color:var(--text3);margin-bottom:28px}
+.test-progress{background:var(--border);border-radius:6px;height:8px;margin-bottom:32px;overflow:hidden}
+.test-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:6px;transition:width .4s ease}
+.test-result{text-align:center;padding:32px;background:var(--bg3);border-radius:var(--radius);margin-top:24px;display:none}
+.test-result.show{display:block}
+.test-score-big{font-size:56px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent);line-height:1}
+.test-score-label{font-size:14px;color:var(--text3);margin-top:8px;margin-bottom:16px}
+.test-msg{font-size:16px;font-weight:600;color:var(--navy)}
+
+/* ===== FOOTER ===== */
+footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:36px 24px;margin-top:60px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);text-decoration:none;padding:10px 22px;border-radius:9px;font-size:13px;margin-bottom:16px;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:white}
+
+/* ===== ANIMATIONS ===== */
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:none}
+
+@media(max-width:640px){
+  .header-inner{padding:50px 16px 40px}
+  main{padding:36px 16px 80px}
+  .shizuki-hero{padding:28px 20px}
+  .quiz-section{padding:24px 16px}
+  .final-test{padding:24px 16px}
+  #sidebar{width:200px;transform:translateX(-200px)}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- Sidebar -->
+<button id="sidebar-toggle" onclick="toggleSidebar()" aria-label="メニュー">☰</button>
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">SHIZUKI ELECTRIC</div>
+    <div class="sidebar-title">フィルムコンデンサ完全ガイド</div>
+  </div>
+  <div class="sidebar-nav">
+    <a class="nav-chapter" href="#ch1"><span>Chapter 01</span>コンデンサの基礎</a>
+    <a class="nav-chapter" href="#ch2"><span>Chapter 02</span>フィルムコンデンサの構造</a>
+    <a class="nav-chapter" href="#ch3"><span>Chapter 03</span>製造プロセス</a>
+    <a class="nav-chapter" href="#ch4"><span>Chapter 04</span>種類・ラインナップ</a>
+    <a class="nav-chapter" href="#ch5"><span>Chapter 05</span>電気特性とスペック</a>
+    <a class="nav-chapter" href="#ch6"><span>Chapter 06</span>他コンデンサとの比較</a>
+    <a class="nav-chapter" href="#ch7"><span>Chapter 07</span>用途・適用分野</a>
+    <a class="nav-chapter" href="#ch8"><span>Chapter 08</span>回路での役割</a>
+    <a class="nav-chapter" href="#ch9"><span>Chapter 09</span>製品の選び方</a>
+    <a class="nav-chapter" href="#ch10"><span>Chapter 10</span>指月電機の製品群</a>
+    <a class="nav-chapter" href="#ch11"><span>Chapter 11</span>営業トーク・Q&A</a>
+    <a class="nav-chapter" href="#ch12"><span>Chapter 12</span>総合確認テスト</a>
+  </div>
+</nav>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <div class="header-badge">📘 新入社員・キャリア採用者向け 製品研修資料</div>
+    <h1>フィルムコンデンサ<br><em>完全研修ガイド</em></h1>
+    <p class="sub">基礎理論から製品特性・営業実践まで。指月電機のフィルムコンデンサを深く理解するための、完全版研修テキストです。</p>
+    <div class="header-stats">
+      <div class="stat"><div class="num">12</div><div class="label">CHAPTERS</div></div>
+      <div class="stat"><div class="num">36</div><div class="label">QUIZ QUESTIONS</div></div>
+      <div class="stat"><div class="num">15</div><div class="label">SALES Q&amp;A</div></div>
+      <div class="stat"><div class="num">∞</div><div class="label">INTERACTIVE</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc-bar">
+  <div class="toc-inner">
+    <a href="#ch1">基礎</a><a href="#ch2">構造</a><a href="#ch3">製造</a>
+    <a href="#ch4">種類</a><a href="#ch5">特性</a><a href="#ch6">比較</a>
+    <a href="#ch7">用途</a><a href="#ch8">回路</a><a href="#ch9">選定</a>
+    <a href="#ch10">製品</a><a href="#ch11">営業</a><a href="#ch12">テスト</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ========== CHAPTER 1 ========== -->
+<section class="chapter fade-in" id="ch1">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 01</div>
+    <h2>コンデンサの基礎</h2>
+    <p class="chapter-desc">まず「コンデンサとは何か」を根本から理解しましょう。電気の基本原理から学ぶことで、フィルムコンデンサの優位性が自然と見えてきます。</p>
+  </div>
+
+  <!-- 充放電インタラクティブデモ -->
+  <div class="charge-demo">
+    <div class="cd-title">⚡ インタラクティブ：充電と放電を体験する</div>
+    <div class="cd-circuit">
+      <div class="cd-battery">🔋<span style="font-size:10px;color:var(--green)">電源</span></div>
+      <div class="cd-wire" id="wire1"></div>
+      <div class="cd-cap">〓<span style="font-size:10px;color:var(--accent)">コンデンサ</span></div>
+      <div class="cd-wire" id="wire2"></div>
+      <div class="cd-lamp">💡<span style="font-size:10px;color:var(--gold)">負荷</span></div>
+    </div>
+    <div style="max-width:400px;margin:0 auto">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:6px">蓄電量</div>
+      <div class="cd-charge-bar"><div class="cd-fill" id="charge-fill"></div></div>
+      <div class="cd-label" id="charge-label">0%</div>
+      <div style="margin-top:16px" class="cd-btns">
+        <button class="cd-btn btn-charge" onclick="startCharge()">▶ 充電する</button>
+        <button class="cd-btn btn-discharge" onclick="startDischarge()">⚡ 放電する</button>
+        <button class="cd-btn btn-reset" onclick="resetCharge()">↺ リセット</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="card-icon">⚡</span>コンデンサの定義</h3>
+      <p>コンデンサ（Capacitor）は、2枚の導体（電極）の間に絶縁体（誘電体）を挟んだ構造で、電荷を蓄える電子部品です。電荷を蓄える能力を「静電容量（C）」といい、単位はファラッド（F）です。</p>
+      <ul style="margin-top:10px">
+        <li>静電容量 C = ε × S / d</li>
+        <li>ε：誘電体の誘電率</li>
+        <li>S：電極の面積</li>
+        <li>d：誘電体の厚さ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon">🔋</span>電池との違い</h3>
+      <p>電池とコンデンサはどちらもエネルギーを蓄えますが、仕組みが根本的に異なります。</p>
+      <ul style="margin-top:10px">
+        <li><strong>電池</strong>：化学反応でエネルギーを蓄える。放電はゆっくり・長持ち</li>
+        <li><strong>コンデンサ</strong>：電場でエネルギーを蓄える。充放電は瞬時・繰り返し可能</li>
+        <li>カメラのフラッシュはコンデンサが一瞬で大電流を供給する典型例</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3><span class="card-icon">📊</span>コンデンサの主な役割</h3>
+      <ul>
+        <li><strong>電源平滑：</strong>交流から直流を作るときの電圧変動を吸収</li>
+        <li><strong>デカップリング：</strong>回路間のノイズを遮断し、動作を安定化</li>
+        <li><strong>フィルタリング：</strong>特定の周波数だけを通過・遮断</li>
+        <li><strong>エネルギー貯蔵：</strong>瞬間的に大電流が必要な場面で放電</li>
+        <li><strong>タイミング制御：</strong>RC回路で一定時間の遅延を生成</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon">🌊</span>交流と直流の特性</h3>
+      <p>コンデンサには「直流を遮断し、交流を通す」という重要な特性があります。</p>
+      <ul style="margin-top:10px">
+        <li><strong>直流（DC）：</strong>充電完了後は電流が流れない（ブロック）</li>
+        <li><strong>交流（AC）：</strong>周波数に応じた電流が流れる（通過）</li>
+        <li>周波数が高いほど電流が流れやすくなる（インピーダンスが低下）</li>
+        <li>容量性リアクタンス：Xc = 1/(2πfC)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="point">💡 <strong>覚えるポイント：</strong>コンデンサは「電気のダム」です。電圧が高いときにため、低くなったとき放出することで、電圧を安定させます。この平滑作用が電子機器の安定動作を支えています。</div>
+
+  <!-- Chapter 1 Quiz -->
+  <div class="quiz-section">
+    <h3>📝 Chapter 01 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>コンデンサの静電容量の単位は何ですか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q1')"><span class="opt-key">A</span>オーム（Ω）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q1')"><span class="opt-key">B</span>ヘンリー（H）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c1q1')"><span class="opt-key">C</span>ファラッド（F）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q1')"><span class="opt-key">D</span>ワット（W）</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c1q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>コンデンサに関する説明として正しいものはどれですか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q2')"><span class="opt-key">A</span>直流を通し、交流を遮断する</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c1q2')"><span class="opt-key">B</span>直流を遮断し、交流を通す</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q2')"><span class="opt-key">C</span>直流・交流ともに通す</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q2')"><span class="opt-key">D</span>直流・交流ともに遮断する</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c1q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>コンデンサの静電容量を大きくするには？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q3')"><span class="opt-key">A</span>電極面積を小さくする</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q3')"><span class="opt-key">B</span>誘電体を厚くする</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c1q3')"><span class="opt-key">C</span>誘電率の高い材料を使い、電極面積を大きく、誘電体を薄くする</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c1q3')"><span class="opt-key">D</span>温度を下げる</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c1q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 2 ========== -->
+<section class="chapter fade-in" id="ch2">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 02</div>
+    <h2>フィルムコンデンサの構造</h2>
+    <p class="chapter-desc">フィルムコンデンサの内部構造と、その優れた特性を生み出す仕組みを詳しく学びます。</p>
+  </div>
+
+  <!-- アニメーション構造図 -->
+  <div class="anim-box">
+    <p style="font-size:13px;color:var(--text3);margin-bottom:16px">プラスチックフィルムと金属電極を交互に積層し、ロール状に巻いた構造です</p>
+    <div class="cap-container">
+      <div class="layers-wrap">
+        <div class="layer-block l-metal"></div>
+        <div class="layer-block l-film"></div>
+        <div class="layer-block l-metal"></div>
+        <div class="layer-block l-film"></div>
+        <div class="layer-block l-metal"></div>
+        <div class="layer-block l-film"></div>
+        <div class="layer-block l-metal"></div>
+        <div class="l-label">積層状態</div>
+      </div>
+      <div class="arrow-anim">→</div>
+      <div class="roll-wrap">
+        <div class="roll-cap"></div>
+        <div class="l-label">巻回後（コイル状）</div>
+      </div>
+      <div class="arrow-anim">→</div>
+      <div style="text-align:center">
+        <div style="width:70px;height:100px;background:linear-gradient(135deg,#c8d4ec,#e8eeff);border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text3)">外装ケース</div>
+        <div class="l-label">完成品</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)"><span style="width:18px;height:10px;background:linear-gradient(90deg,#7a8090,#b8bcc8);border-radius:2px;display:inline-block"></span>金属電極</span>
+      <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)"><span style="width:18px;height:10px;background:#f5f0b0;border:1px solid #c8b840;border-radius:2px;display:inline-block"></span>プラスチックフィルム（誘電体）</span>
+    </div>
+  </div>
+
+  <!-- セルフヒーリングデモ -->
+  <div class="anim-box">
+    <div class="self-healing-demo">
+      <div class="sh-title">🔄 セルフヒーリング機能をシミュレート</div>
+      <div class="sh-film" id="sh-film" onclick="simulateSelfHealing()">
+        <div class="sh-damage" id="sh-damage"></div>
+      </div>
+      <div class="sh-status" id="sh-status">フィルムをクリックして絶縁破壊をシミュレートしてください</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="card-icon">🎞️</span>誘電体：プラスチックフィルム</h3>
+      <ul>
+        <li><strong>ポリプロピレン（PP）：</strong>最高の電気特性。低損失・高絶縁性</li>
+        <li><strong>ポリエチレンテレフタレート（PET）：</strong>汎用性高く低コスト</li>
+        <li><strong>ポリフェニレンサルファイド（PPS）：</strong>高耐熱性</li>
+        <li><strong>ポリエチレンナフタレート（PEN）：</strong>耐熱・耐電圧バランス型</li>
+        <li>フィルム厚は数μm〜数十μm。薄いほど容量は大きくなる</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon">⚙️</span>電極の種類</h3>
+      <ul>
+        <li><strong>金属化フィルム型（Metallized）：</strong>フィルム面にアルミ・亜鉛を真空蒸着。セルフヒーリング機能あり。小型・大容量化に有利</li>
+        <li><strong>金属箔型（Foil Type）：</strong>アルミや錫の箔を使用。損失が極めて低く大電流対応。パワー系に多用</li>
+        <li>金属化フィルムが現在の主流。ただし大電力用途では箔型が優位</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3><span class="card-icon">🔄</span>セルフヒーリングのメカニズム</h3>
+      <p>金属化フィルム型特有の優れた機能です。</p>
+      <ol style="margin-top:10px;padding-left:20px">
+        <li>局所的な絶縁破壊が発生（ピンホール等）</li>
+        <li>発生したアーク放電のエネルギーで周囲の金属蒸着膜が蒸発・飛散</li>
+        <li>破壊箇所が絶縁体（フィルムのみ）になり、絶縁が回復</li>
+        <li>コンデンサとしての機能継続（容量はわずかに低下）</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon">📦</span>外装・封止構造</h3>
+      <ul>
+        <li><strong>樹脂ケース型：</strong>充てん樹脂（エポキシ等）で封止。防湿性・機械的強度優れる</li>
+        <li><strong>テープ巻き型：</strong>絶縁テープで被覆。小型・低コスト</li>
+        <li><strong>金属ケース型：</strong>大容量パワー系に採用。ネジ端子で取付</li>
+        <li>リード線の材質・形状も用途に合わせて選択</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="point">🔬 <strong>構造の核心：</strong>薄いフィルムを何百層も重ねて巻くことで、小さなサイズに大きな電極面積を詰め込んでいます。指月電機はこのフィルムの加工・巻回技術に70年以上の蓄積があります。</div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 02 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>セルフヒーリング機能を持つのはどのタイプですか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q1')"><span class="opt-key">A</span>金属箔型（Foil Type）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c2q1')"><span class="opt-key">B</span>金属化フィルム型（Metallized）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q1')"><span class="opt-key">C</span>電解型</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q1')"><span class="opt-key">D</span>セラミック型</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c2q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>電気特性が最も優れた誘電体フィルム素材は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q2')"><span class="opt-key">A</span>PET（ポリエチレンテレフタレート）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q2')"><span class="opt-key">B</span>PEN（ポリエチレンナフタレート）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c2q2')"><span class="opt-key">C</span>PP（ポリプロピレン）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q2')"><span class="opt-key">D</span>PPS（ポリフェニレンサルファイド）</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c2q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>大電力・大電流用途に適した電極タイプは？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c2q3')"><span class="opt-key">A</span>金属箔型（Foil Type）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q3')"><span class="opt-key">B</span>金属化フィルム型（Metallized）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q3')"><span class="opt-key">C</span>電解型</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c2q3')"><span class="opt-key">D</span>タンタル型</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c2q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 3 ========== -->
+<section class="chapter fade-in" id="ch3">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 03</div>
+    <h2>製造プロセス</h2>
+    <p class="chapter-desc">フィルムコンデンサがどのように作られるかを知ることで、品質・信頼性の根拠が理解できます。</p>
+  </div>
+
+  <div class="process-steps">
+    <div class="process-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>フィルム製造・スリット</h4>
+        <p>原料樹脂を溶融・延伸してマイクロメートル単位の薄いフィルムに仕上げます。幅広フィルムを所定の幅に精密にスリット（裁断）します。この工程のフィルム品質が最終製品の電気特性を大きく左右します。</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>真空蒸着（金属化）</h4>
+        <p>真空チャンバー内でアルミニウムや亜鉛を加熱・蒸発させ、フィルム表面に数十nm（ナノメートル）の薄い金属膜を形成します。セーフティーマージン（余白部分）を設けることでセルフヒーリング特性を制御します。</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>巻回（ワインディング）</h4>
+        <p>金属化フィルムを精密な張力制御のもと巻回機でロール状に巻き上げます。巻き数・张力・アライメントが容量・損失・絶縁性能に影響するため、高度な制御技術が必要です。</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>端面金属化（メタリコン）</h4>
+        <p>巻回後のエレメント両端面に亜鉛を溶射し、電極（メタリコン）を形成します。この工程で内部フィルム電極と外部端子の電気的接続が確立されます。低ESRを実現する重要工程です。</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h4>リード線溶接・端子取付</h4>
+        <p>メタリコン面にリード線や端子をハンダ付け・溶接します。端子の材質・形状・サイズはお客様の実装仕様に合わせてカスタム対応します。</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h4>外装・封止</h4>
+        <p>エポキシ樹脂充てん、テープ巻き、金属ケース収納など用途に応じた外装処理を施します。防湿性・耐振動性・絶縁性を確保します。</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <h4>エージング（老化処理）</h4>
+        <p>製品に定格電圧を印加して一定時間保持します。製造工程で生じた微小な欠陥をセルフヒーリングで修復し、初期故障を排除することで出荷後の信頼性を高めます。</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">8</div>
+      <div class="step-content">
+        <h4>全数検査・出荷</h4>
+        <p>静電容量・ESR・絶縁抵抗・耐電圧などを全品検査します。規格外品はこの工程で除去されます。指月電機では厳格な品質基準のもと、ゼロディフェクトを追求しています。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="point success">✅ <strong>指月電機の製造強み：</strong>真空蒸着からエージング・全数検査まで一貫した自社生産体制により、一般市場品を上回る品質・信頼性を実現しています。</div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 03 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>「メタリコン」とは何の工程ですか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q1')"><span class="opt-key">A</span>フィルムを巻く工程</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q1')"><span class="opt-key">B</span>フィルムを薄く延伸する工程</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c3q1')"><span class="opt-key">C</span>巻回体の端面に亜鉛を溶射して電極を形成する工程</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q1')"><span class="opt-key">D</span>外装ケースに封止する工程</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c3q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>エージング処理の主な目的は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q2')"><span class="opt-key">A</span>容量を増やすため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c3q2')"><span class="opt-key">B</span>初期欠陥をセルフヒーリングで除去し、信頼性を高めるため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q2')"><span class="opt-key">C</span>外装を硬化させるため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q2')"><span class="opt-key">D</span>リード線を溶接するため</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c3q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>真空蒸着工程で金属膜の厚さはおよそ何の単位ですか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q3')"><span class="opt-key">A</span>ミリメートル（mm）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q3')"><span class="opt-key">B</span>マイクロメートル（μm）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c3q3')"><span class="opt-key">C</span>ナノメートル（nm）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c3q3')"><span class="opt-key">D</span>センチメートル（cm）</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c3q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 4 ========== -->
+<section class="chapter fade-in" id="ch4">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 04</div>
+    <h2>種類・ラインナップ</h2>
+    <p class="chapter-desc">フィルム素材・電極構造・用途別に多彩なラインナップがあります。製品提案時の基礎知識です。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="type-card">
+      <div class="type-abbr">MPP / PP</div>
+      <div class="type-name">ポリプロピレンフィルムコンデンサ</div>
+      <p>電気特性が最も優れたタイプ。損失が極めて低く、高周波・高電圧用途の王道。インバータ・パワーエレクトロニクスの主役。</p>
+      <div class="tags"><span class="tag">低損失</span><span class="tag">高耐電圧</span><span class="tag">温度安定性◎</span><span class="tag">高周波◎</span></div>
+    </div>
+    <div class="type-card">
+      <div class="type-abbr">MFT / PET</div>
+      <div class="type-name">ポリエステルフィルムコンデンサ</div>
+      <p>汎用性が高くコストパフォーマンスに優れる。民生機器・一般産業機器向けの標準タイプ。小型化しやすい。</p>
+      <div class="tags"><span class="tag">低コスト</span><span class="tag">小型化◎</span><span class="tag">汎用性◎</span></div>
+    </div>
+    <div class="type-card">
+      <div class="type-abbr">PPS</div>
+      <div class="type-name">PPS（ポリフェニレンサルファイド）</div>
+      <p>高温環境でも安定した特性を維持。車載・エンジンルーム周辺など過酷な温度環境向け。耐熱150℃クラス。</p>
+      <div class="tags"><span class="tag">高耐熱（150℃）</span><span class="tag">車載対応</span><span class="tag">高信頼性</span></div>
+    </div>
+    <div class="type-card">
+      <div class="type-abbr">PEN</div>
+      <div class="type-name">PEN（ポリエチレンナフタレート）</div>
+      <p>PETとPPSの中間的特性。耐熱性・耐電圧性のバランスが良く、産業機器・車載補機系に適する。</p>
+      <div class="tags"><span class="tag">耐熱バランス</span><span class="tag">中耐電圧</span><span class="tag">産業向け</span></div>
+    </div>
+    <div class="type-card">
+      <div class="type-abbr">DC-Link</div>
+      <div class="type-name">DCリンクコンデンサ</div>
+      <p>インバータの直流中間回路（DCリンク）専用設計。EV駆動モーター・産業インバータ向け大容量・高電圧タイプ。</p>
+      <div class="tags"><span class="tag">大容量</span><span class="tag">高電圧（1kV以上）</span><span class="tag">EV◎</span><span class="tag">再エネ◎</span></div>
+    </div>
+    <div class="type-card">
+      <div class="type-abbr">AC-Cap</div>
+      <div class="type-name">交流用フィルムコンデンサ</div>
+      <p>モーター起動・運転用途（Xキャパシタ）および電源ラインノイズフィルタ（Yキャパシタ）。安全規格取得品。</p>
+      <div class="tags"><span class="tag">安全規格取得</span><span class="tag">モーター用</span><span class="tag">EMIフィルタ</span></div>
+    </div>
+  </div>
+
+  <div class="point">📋 <strong>選定の出発点：</strong>まず「電圧範囲」「温度環境」「用途」の3点を確認してください。これで候補フィルム素材が絞り込めます。詳細な選定基準はChapter 09で解説します。</div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 04 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>車載のエンジンルーム周辺など高温環境に最適なフィルム素材は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q1')"><span class="opt-key">A</span>PET（ポリエステル）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q1')"><span class="opt-key">B</span>PP（ポリプロピレン）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c4q1')"><span class="opt-key">C</span>PPS（ポリフェニレンサルファイド）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q1')"><span class="opt-key">D</span>PEN（ポリエチレンナフタレート）</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c4q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>EVの駆動モーター制御インバータに使われる代表的な製品タイプは？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q2')"><span class="opt-key">A</span>交流用フィルムコンデンサ（Xキャパシタ）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c4q2')"><span class="opt-key">B</span>DCリンクコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q2')"><span class="opt-key">C</span>PETフィルムコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q2')"><span class="opt-key">D</span>PPSフィルムコンデンサ</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c4q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>コストパフォーマンスが高く、民生機器に最も多用される素材は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q3')"><span class="opt-key">A</span>PP（ポリプロピレン）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c4q3')"><span class="opt-key">B</span>PET（ポリエステル）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q3')"><span class="opt-key">C</span>PPS（ポリフェニレンサルファイド）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c4q3')"><span class="opt-key">D</span>DC-Linkタイプ</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c4q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 5 ========== -->
+<section class="chapter fade-in" id="ch5">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 05</div>
+    <h2>電気特性とスペックの読み方</h2>
+    <p class="chapter-desc">データシートに記載されている電気特性の意味を理解しましょう。お客様への技術説明でも必須の知識です。</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="card-icon">📋</span>主要スペック一覧</h3>
+    <div style="overflow-x:auto;margin-top:12px">
+      <table class="spec-table">
+        <thead><tr><th>スペック項目</th><th>英語記号</th><th>意味と重要性</th><th>フィルムコンデンサの典型値</th></tr></thead>
+        <tbody>
+          <tr><td>静電容量</td><td class="hl" style="font-family:'JetBrains Mono',monospace">C</td><td>電荷を蓄える量。用途に合わせて選定</td><td>1nF〜数百μF</td></tr>
+          <tr><td>定格電圧</td><td class="hl" style="font-family:'JetBrains Mono',monospace">VR / DC</td><td>連続して印加できる最大電圧</td><td>50V〜数kV</td></tr>
+          <tr><td>損失角の正接</td><td class="hl" style="font-family:'JetBrains Mono',monospace">tanδ</td><td>コンデンサの損失（低いほど高効率）</td><td>PP:0.0001以下（極小）</td></tr>
+          <tr><td>等価直列抵抗</td><td class="hl" style="font-family:'JetBrains Mono',monospace">ESR</td><td>内部損失の抵抗成分。発熱に直結</td><td>mΩオーダー（極めて低い）</td></tr>
+          <tr><td>絶縁抵抗</td><td class="hl" style="font-family:'JetBrains Mono',monospace">IR</td><td>電極間の直流漏れ電流の逆数</td><td>GΩ〜TΩクラス</td></tr>
+          <tr><td>容量温度係数</td><td class="hl" style="font-family:'JetBrains Mono',monospace">TCC</td><td>温度変化による容量変化率</td><td>PP:±2.5%（-40〜+85℃）</td></tr>
+          <tr><td>自己共振周波数</td><td class="hl" style="font-family:'JetBrains Mono',monospace">SRF</td><td>コンデンサが共振する周波数。以上では誘導性</td><td>kHz〜MHz帯</td></tr>
+          <tr><td>リップル電流</td><td class="hl" style="font-family:'JetBrains Mono',monospace">Irms</td><td>流せる交流電流の実効値</td><td>用途に応じてA〜数十A</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3><span class="card-icon">📉</span>tanδ（損失角の正接）の重要性</h3>
+      <p>tanδはコンデンサの「エネルギー効率」を示す最重要パラメータのひとつです。</p>
+      <ul style="margin-top:10px">
+        <li>tanδが低い → 発熱が少なく、エネルギーロスが小さい</li>
+        <li>インバータ・電源回路では高周波電流が流れるため、tanδが重要</li>
+        <li>PPフィルムのtanδ（0.0001以下）は電解コンデンサ（0.05〜0.2）の数百倍優れている</li>
+        <li>省エネ・高効率設計の決め手になるパラメータ</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon">🌡️</span>温度特性の見方</h3>
+      <p>動作温度範囲と容量変化率（TCC）を必ず確認しましょう。</p>
+      <ul style="margin-top:10px">
+        <li>PPフィルム：-40℃〜+85℃（一般品）、+105℃まで対応品も</li>
+        <li>PPSフィルム：-55℃〜+150℃</li>
+        <li>車載向けはAEC-Q200等の信頼性規格への適合も確認</li>
+        <li>高温ほど寿命が短くなるため、余裕のある選定が重要</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="point warn">⚠️ <strong>定格電圧の注意点：</strong>定格電圧は連続使用の最大値です。実際の回路では電圧サージ・ピークが発生するため、一般的に定格の60〜80%以下での使用（ディレーティング）を推奨します。</div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 05 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>tanδ（損失角の正接）が低いことは何を意味しますか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q1')"><span class="opt-key">A</span>コンデンサの容量が小さい</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c5q1')"><span class="opt-key">B</span>エネルギー損失が少なく、発熱が小さい</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q1')"><span class="opt-key">C</span>耐電圧が低い</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q1')"><span class="opt-key">D</span>絶縁抵抗が低い</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c5q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>定格電圧に対してどの程度で使用（ディレーティング）するのが一般的ですか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q2')"><span class="opt-key">A</span>定格の100%（フル使用）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q2')"><span class="opt-key">B</span>定格の20〜30%以下</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c5q2')"><span class="opt-key">C</span>定格の60〜80%以下</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q2')"><span class="opt-key">D</span>定格の110〜120%（オーバー使用）</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c5q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>ESR（等価直列抵抗）が重要な理由は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q3')"><span class="opt-key">A</span>容量を決めるため</span></button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q3')"><span class="opt-key">B</span>絶縁破壊を防ぐため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c5q3')"><span class="opt-key">C</span>内部発熱・損失に直結し、高周波特性・効率に影響するため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c5q3')"><span class="opt-key">D</span>外形サイズを決めるため</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c5q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 6 ========== -->
+<section class="chapter fade-in" id="ch6">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 06</div>
+    <h2>他のコンデンサとの徹底比較</h2>
+    <p class="chapter-desc">電解・セラミック・タンタルコンデンサとの比較を通じて、フィルムコンデンサの強みと弱みを正確に把握しましょう。</p>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table class="spec-table">
+      <thead><tr><th style="width:20%">比較項目</th><th style="background:#1e3080">フィルム</th><th>電解アルミ</th><th>電解タンタル</th><th>セラミック（MLCC）</th></tr></thead>
+      <tbody>
+        <tr><td><strong>容量範囲</strong></td><td class="hl">pF〜数百μF</td><td>μF〜F</td><td>0.1〜数百μF</td><td>pF〜数十μF</td></tr>
+        <tr><td><strong>耐電圧</strong></td><td class="hl"><span class="good">最大数kV◎</span></td><td><span class="mid">〜数百V</span></td><td><span class="bad">低め（〜50V）</span></td><td><span class="mid">〜数kV（品種による）</span></td></tr>
+        <tr><td><strong>tanδ（損失）</strong></td><td class="hl"><span class="good">極めて低い◎◎</span></td><td><span class="bad">高い</span></td><td><span class="mid">中程度</span></td><td><span class="good">低い◎</span></td></tr>
+        <tr><td><strong>ESR</strong></td><td class="hl"><span class="good">非常に低い◎</span></td><td><span class="bad">高い</span></td><td><span class="mid">中程度</span></td><td><span class="good">低い◎</span></td></tr>
+        <tr><td><strong>温度特性</strong></td><td class="hl"><span class="good">安定◎</span></td><td><span class="bad">劣化・温度依存大</span></td><td><span class="mid">まずまず</span></td><td><span class="mid">品種によりDCバイアス劣化</span></td></tr>
+        <tr><td><strong>極性</strong></td><td class="hl"><span class="good">なし（無極性）◎</span></td><td><span class="bad">あり（有極性）</span></td><td><span class="bad">あり（有極性）</span></td><td><span class="good">なし（無極性）</span></td></tr>
+        <tr><td><strong>寿命</strong></td><td class="hl"><span class="good">長寿命◎</span></td><td><span class="bad">電解液蒸発で劣化</span></td><td><span class="mid">まずまず</span></td><td><span class="good">長寿命</span></td></tr>
+        <tr><td><strong>サイズ</strong></td><td class="hl"><span class="mid">中〜大型</span></td><td><span class="mid">中型</span></td><td><span class="good">小型</span></td><td><span class="good">超小型◎</span></td></tr>
+        <tr><td><strong>コスト</strong></td><td class="hl"><span class="mid">中〜高め</span></td><td><span class="good">安価◎</span></td><td><span class="bad">高価</span></td><td><span class="good">品種による</span></td></tr>
+        <tr><td><strong>主要用途</strong></td><td class="hl">インバータ・電源・音響</td><td>電源平滑</td><td>携帯機器</td><td>高周波回路・デカップリング</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2" style="margin-top:20px">
+    <div class="card">
+      <h3><span class="card-icon">✅</span>フィルムが圧倒的に優位な場面</h3>
+      <ul>
+        <li>高電圧回路（数百V以上）</li>
+        <li>高周波・大電流が流れる回路</li>
+        <li>長寿命・高信頼性が必要な産業機器</li>
+        <li>交流電圧が印加される回路（無極性必須）</li>
+        <li>発熱を極力抑えたい高効率設計</li>
+        <li>高音質が求められる音響機器</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="card-icon">⚠️</span>電解・セラミックが有利な場面</h3>
+      <ul>
+        <li>大容量（mF〜F）が必要な電源平滑（→電解）</li>
+        <li>基板実装の超小型化が最優先（→セラミックMLCC）</li>
+        <li>低電圧の携帯機器（→タンタル・セラミック）</li>
+        <li>コスト最優先の汎用民生品（→電解）</li>
+      </ul>
+      <div class="point" style="margin-top:12px;margin-bottom:0">💡 フィルムコンデンサと電解コンデンサは<strong>競合ではなく補完関係</strong>です。電源回路では両方を組み合わせて使うことも多いです。</div>
+    </div>
+  </div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 06 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>フィルムコンデンサが電解コンデンサに対して最も大きく優れている点は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q1')"><span class="opt-key">A</span>静電容量の大きさ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q1')"><span class="opt-key">B</span>小型・軽量</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c6q1')"><span class="opt-key">C</span>低損失・無極性・長寿命・高耐電圧</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q1')"><span class="opt-key">D</span>低価格</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c6q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>電解コンデンサが経年劣化しやすい主な原因は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q2')"><span class="opt-key">A</span>フィルムが溶ける</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q2')"><span class="opt-key">B</span>セラミックが割れる</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c6q2')"><span class="opt-key">C</span>電解液の蒸発・劣化</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q2')"><span class="opt-key">D</span>金属電極の酸化</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c6q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>交流電圧が直接印加される回路にフィルムコンデンサが選ばれる理由は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q3')"><span class="opt-key">A</span>大容量だから</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q3')"><span class="opt-key">B</span>安価だから</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c6q3')"><span class="opt-key">C</span>無極性（極性なし）で逆電圧が印加されても問題ないから</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c6q3')"><span class="opt-key">D</span>小型だから</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c6q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 7 ========== -->
+<section class="chapter fade-in" id="ch7">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 07</div>
+    <h2>用途・適用分野</h2>
+    <p class="chapter-desc">フィルムコンデンサが活躍する主要分野を深掘りします。お客様への提案時の市場理解に直結する内容です。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="use-card">
+      <div class="use-icon">🚗</div>
+      <div class="use-content">
+        <h4>EV・ハイブリッド車（xEV）</h4>
+        <p>駆動モーター制御インバータのDCリンクコンデンサとして核心部品。800V以上の高電圧システムへの対応が急務。急速充電器にも採用。EV普及で最も需要成長が期待される分野。</p>
+      </div>
+    </div>
+    <div class="use-card">
+      <div class="use-icon">☀️</div>
+      <div class="use-content">
+        <h4>太陽光・風力発電（再エネ）</h4>
+        <p>パワーコンディショナー（PCS）のインバータ回路に必須。大容量・高電圧・長寿命が要求される。屋外設置のため温度サイクルへの耐性も重要。</p>
+      </div>
+    </div>
+    <div class="use-card">
+      <div class="use-icon">🔋</div>
+      <div class="use-content">
+        <h4>蓄電システム・UPS</h4>
+        <p>家庭用・産業用蓄電池のパワーコンディショナーに採用。停電補償用UPSのインバータ部にも使用。24時間365日稼働する高信頼性要求環境。</p>
+      </div>
+    </div>
+    <div class="use-card">
+      <div class="use-icon">🏭</div>
+      <div class="use-content">
+        <h4>産業用インバータ・サーボ</h4>
+        <p>工場設備・エレベーター・空調・工作機械のインバータ制御。省エネ法強化により高効率インバータへの置き換え需要が継続拡大中。</p>
+      </div>
+    </div>
+    <div class="use-card">
+      <div class="use-icon">🚆</div>
+      <div class="use-content">
+        <h4>鉄道・交通インフラ</h4>
+        <p>電気機関車・新幹線・路面電車のインバータに採用。高い信頼性・長期供給保証が必要。JIS・EN等の鉄道規格への適合が求められる。</p>
+      </div>
+    </div>
+    <div class="use-card">
+      <div class="use-icon">🎵</div>
+      <div class="use-content">
+        <h4>音響・オーディオ機器</h4>
+        <p>低tanδ・低ノイズ特性からハイエンドオーディオアンプのカップリング・フィルター回路に採用。「音の良いコンデンサ」として音響設計者に高く評価。</p>
+      </div>
+    </div>
+    <div class="use-card">
+      <div class="use-icon">⚕️</div>
+      <div class="use-content">
+        <h4>医療機器</h4>
+        <p>MRI・X線装置・除細動器など高信頼性が生命に直結する機器に採用。長期間の特性維持・厳格な品質管理が必須。</p>
+      </div>
+    </div>
+    <div class="use-card">
+      <div class="use-icon">📡</div>
+      <div class="use-content">
+        <h4>通信インフラ・データセンター</h4>
+        <p>5G基地局・サーバー電源のスイッチング回路に使用。大量の機器が24時間稼働するため、低発熱・長寿命が極めて重要。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="point success">📈 <strong>市場トレンド：</strong>EV・再エネ・省エネ規制の強化により、フィルムコンデンサ市場は今後10年で大幅成長が予測されています。特に電力系（DCリンク・スナバ）が牽引します。指月電機はこの波を正面から捉えています。</div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 07 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>EVの駆動モーターとバッテリーの間に入る電力変換装置は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q1')"><span class="opt-key">A</span>コンバータ（昇降圧）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c7q1')"><span class="opt-key">B</span>インバータ（DC→AC変換）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q1')"><span class="opt-key">C</span>トランス（変圧器）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q1')"><span class="opt-key">D</span>レクティファイア（整流器）</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c7q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>音響機器でフィルムコンデンサが評価される主な理由は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q2')"><span class="opt-key">A</span>大容量だから</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q2')"><span class="opt-key">B</span>安価だから</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c7q2')"><span class="opt-key">C</span>低損失・低ノイズで音質への影響が少ないから</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q2')"><span class="opt-key">D</span>小型だから</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c7q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>再生可能エネルギーの電力を系統に連系するための機器は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q3')"><span class="opt-key">A</span>スイッチギア</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q3')"><span class="opt-key">B</span>変電所トランス</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c7q3')"><span class="opt-key">C</span>パワーコンディショナー（PCS）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c7q3')"><span class="opt-key">D</span>配電盤</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c7q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 8 ========== -->
+<section class="chapter fade-in" id="ch8">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 08</div>
+    <h2>回路での役割</h2>
+    <p class="chapter-desc">インバータ回路の中でフィルムコンデンサが担う具体的な役割を理解します。技術的な会話で差がつく知識です。</p>
+  </div>
+
+  <div class="circuit-box">
+    <h4><span class="circuit-badge">DCリンク</span> DCリンクコンデンサ</h4>
+    <p style="font-size:14px;color:var(--text2);line-height:1.8">インバータの直流中間回路（DCバス）に接続される最も重要なコンデンサです。スイッチングによって生じる急峻な電流変動（リップル電流）を吸収し、DCバス電圧を安定させます。EV・風力・太陽光インバータの心臓部。大容量・高電圧・高リップル電流対応が必須。</p>
+  </div>
+  <div class="circuit-box">
+    <h4><span class="circuit-badge" style="background:var(--teal)">スナバ</span> スナバコンデンサ</h4>
+    <p style="font-size:14px;color:var(--text2);line-height:1.8">パワー半導体（IGBT・MOSFET）のスイッチングで発生するサージ電圧（過電圧スパイク）を吸収します。半導体素子を保護し、EMI（電磁ノイズ）も抑制。非常に高周波の電流が流れるため、低ESR・低ESLのフィルムコンデンサが必須。スイッチング素子のすぐ近くに実装します。</p>
+  </div>
+  <div class="circuit-box">
+    <h4><span class="circuit-badge" style="background:var(--gold);color:var(--navy)">共振</span> 共振コンデンサ</h4>
+    <p style="font-size:14px;color:var(--text2);line-height:1.8">LLC共振コンバーターや超音波発生装置など、インダクタと組み合わせてLC共振回路を形成します。特定の周波数で効率よくエネルギーを転送します。精密な容量値と高Q（低損失）が求められるため、PPフィルムコンデンサが最適です。</p>
+  </div>
+  <div class="circuit-box">
+    <h4><span class="circuit-badge" style="background:var(--teal2);color:var(--navy)">フィルタ</span> EMIフィルタコンデンサ（X/Y）</h4>
+    <p style="font-size:14px;color:var(--text2);line-height:1.8">電源ラインのノイズ（EMI）を除去するための安全規格適合コンデンサです。Xコンデンサはライン間（差動ノイズ用）、Yコンデンサはライン-GND間（コモンモードノイズ用）に使用します。安全規格（IEC、UL等）への適合が必須。</p>
+  </div>
+  <div class="circuit-box">
+    <h4><span class="circuit-badge" style="background:var(--orange)">進相</span> 進相コンデンサ（力率改善）</h4>
+    <p style="font-size:14px;color:var(--text2);line-height:1.8">工場の電力設備の力率（力率：有効電力/皮相電力）を改善するための大型コンデンサです。遅れ力率を改善することで、電力使用効率を高め、電力会社からのペナルティ（力率割引）を回避します。指月電機の伝統的な主力製品のひとつ。</p>
+  </div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 08 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>インバータのDCバス電圧を安定させるコンデンサは？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q1')"><span class="opt-key">A</span>スナバコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q1')"><span class="opt-key">B</span>Xコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c8q1')"><span class="opt-key">C</span>DCリンクコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q1')"><span class="opt-key">D</span>共振コンデンサ</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c8q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>スナバコンデンサの主な目的は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q2')"><span class="opt-key">A</span>電源の平滑化</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q2')"><span class="opt-key">B</span>力率の改善</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c8q2')"><span class="opt-key">C</span>半導体素子のスイッチング時のサージ電圧吸収・保護</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q2')"><span class="opt-key">D</span>共振回路の形成</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c8q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>工場の電力設備で力率を改善するために使われるのは？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q3')"><span class="opt-key">A</span>DCリンクコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q3')"><span class="opt-key">B</span>スナバコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c8q3')"><span class="opt-key">C</span>Yコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c8q3')"><span class="opt-key">D</span>進相コンデンサ</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c8q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 9 ========== -->
+<section class="chapter fade-in" id="ch9">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 09</div>
+    <h2>製品の選び方</h2>
+    <p class="chapter-desc">お客様から「どのコンデンサを選べばいい？」と聞かれたとき、正確に答えられるようになりましょう。</p>
+  </div>
+
+  <div class="sel-step">
+    <div class="sel-num">①</div>
+    <div class="sel-content">
+      <h4>用途・回路タイプを確認</h4>
+      <p>DCリンク？スナバ？EMIフィルタ？進相？共振？まず回路での役割を特定します。用途が決まると候補製品が大幅に絞り込めます。Chapter 08の回路別ガイドを参照してください。</p>
+    </div>
+  </div>
+  <div class="sel-step">
+    <div class="sel-num">②</div>
+    <div class="sel-content">
+      <h4>電圧条件を確認（定格・ピーク・サージ）</h4>
+      <p>連続印加電圧・ピーク電圧・サージ電圧を確認します。定格電圧はピーク電圧の1.2〜2倍以上が推奨（ディレーティング）。交流回路では実効値ではなくピーク電圧で選定します。</p>
+    </div>
+  </div>
+  <div class="sel-step">
+    <div class="sel-num">③</div>
+    <div class="sel-content">
+      <h4>動作温度範囲を確認</h4>
+      <p>機器の動作温度範囲（周囲温度＋自己発熱）を確認します。一般産業：-25〜+85℃、車載：-40〜+125℃（AEC-Q200）。温度が高いほど寿命が短くなるため、余裕のある選定が重要です。</p>
+    </div>
+  </div>
+  <div class="sel-step">
+    <div class="sel-num">④</div>
+    <div class="sel-content">
+      <h4>必要容量とリップル電流を確認</h4>
+      <p>回路シミュレーション・設計仕様から必要静電容量（μF）とリップル電流（Arms）を確認します。DCリンクでは容量だけでなくリップル電流許容値が重要な選定基準です。</p>
+    </div>
+  </div>
+  <div class="sel-step">
+    <div class="sel-num">⑤</div>
+    <div class="sel-content">
+      <h4>実装・外形条件を確認</h4>
+      <p>基板実装スペース・端子形状（リード・ネジ端子等）・外形サイズ制限を確認します。特にパワー系の大型品は取付方法（ネジ固定・ブラケット等）の仕様も重要です。</p>
+    </div>
+  </div>
+  <div class="sel-step">
+    <div class="sel-num">⑥</div>
+    <div class="sel-content">
+      <h4>信頼性・認証要件を確認</h4>
+      <p>車載（AEC-Q200）・医療（IEC 60601）・鉄道（EN 50155）・EMI（IEC 60384等）など、適用する安全規格・認証を確認します。指月電機の各製品シリーズの認証状況を営業担当に確認してください。</p>
+    </div>
+  </div>
+
+  <div class="point">🔑 <strong>選定に迷ったら：</strong>お客様の設計条件を①〜⑥のチェックリストに沿って聞き出し、技術部門と連携して最適品を提案します。「なんとなく」の選定を避け、根拠を持った提案がお客様の信頼につながります。</div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 09 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>定格電圧を選定するとき、推奨されるディレーティング率は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q1')"><span class="opt-key">A</span>ピーク電圧の0.5〜0.8倍</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c9q1')"><span class="opt-key">B</span>ピーク電圧の1.2〜2倍以上</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q1')"><span class="opt-key">C</span>実効値の0.9倍</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q1')"><span class="opt-key">D</span>ピーク電圧と同じ値</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c9q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>車載向けコンデンサに要求される信頼性規格は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q2')"><span class="opt-key">A</span>IEC 60601</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q2')"><span class="opt-key">B</span>EN 50155</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c9q2')"><span class="opt-key">C</span>AEC-Q200</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q2')"><span class="opt-key">D</span>MIL-SPEC</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c9q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>DCリンクコンデンサ選定で、容量値と並んで重要なパラメータは？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q3')"><span class="opt-key">A</span>絶縁抵抗値（IR）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c9q3')"><span class="opt-key">B</span>リップル電流許容値（Arms）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q3')"><span class="opt-key">C</span>端子のリード線長さ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c9q3')"><span class="opt-key">D</span>外装の色</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c9q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 10 ========== -->
+<section class="chapter fade-in" id="ch10">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 10</div>
+    <h2>指月電機の製品群</h2>
+    <p class="chapter-desc">主要製品シリーズの特徴とスペック概要です。提案活動の武器として活用してください。</p>
+  </div>
+
+  <div class="shizuki-hero">
+    <h3>🏢 株式会社指月電機製作所 — コンデンサ専業の高信頼性メーカー</h3>
+    <p>1945年創業。フィルムコンデンサを中核に、電力・産業・車載・再エネ分野の demanding なアプリケーションへ高品質部品を供給し続けています。</p>
+  </div>
+
+  <div class="product-grid">
+    <div class="product-card">
+      <div class="prod-series">Series: PP-DC</div>
+      <div class="prod-name">DCリンク用 PPフィルムコンデンサ</div>
+      <div class="prod-specs">
+        <div class="prod-spec"><span class="key">電圧範囲</span><span class="val">450V〜1200VDC</span></div>
+        <div class="prod-spec"><span class="key">容量範囲</span><span class="val">1μF〜1000μF</span></div>
+        <div class="prod-spec"><span class="key">主な用途</span><span class="val">EV・産業インバータ</span></div>
+        <div class="prod-spec"><span class="key">特徴</span><span class="val">高リップル電流対応</span></div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="prod-series">Series: PP-SN</div>
+      <div class="prod-name">スナバ用 PPフィルムコンデンサ</div>
+      <div class="prod-specs">
+        <div class="prod-spec"><span class="key">電圧範囲</span><span class="val">500V〜3000VDC</span></div>
+        <div class="prod-spec"><span class="key">容量範囲</span><span class="val">0.01μF〜10μF</span></div>
+        <div class="prod-spec"><span class="key">主な用途</span><span class="val">IGBT保護回路</span></div>
+        <div class="prod-spec"><span class="key">特徴</span><span class="val">低ESL・低インダクタンス</span></div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="prod-series">Series: AEC</div>
+      <div class="prod-name">車載用 フィルムコンデンサ</div>
+      <div class="prod-specs">
+        <div class="prod-spec"><span class="key">耐熱温度</span><span class="val">最大+150℃</span></div>
+        <div class="prod-spec"><span class="key">規格</span><span class="val">AEC-Q200準拠</span></div>
+        <div class="prod-spec"><span class="key">主な用途</span><span class="val">EV・HEV車載回路</span></div>
+        <div class="prod-spec"><span class="key">特徴</span><span class="val">高温安定性◎</span></div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="prod-series">Series: AC-X/Y</div>
+      <div class="prod-name">EMIフィルタ用 X/Yコンデンサ</div>
+      <div class="prod-specs">
+        <div class="prod-spec"><span class="key">規格</span><span class="val">IEC/UL/CSA認証</span></div>
+        <div class="prod-spec"><span class="key">クラス</span><span class="val">X1/X2/Y1/Y2</span></div>
+        <div class="prod-spec"><span class="key">主な用途</span><span class="val">電源ノイズフィルタ</span></div>
+        <div class="prod-spec"><span class="key">特徴</span><span class="val">安全規格完全対応</span></div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="prod-series">Series: SC-PF</div>
+      <div class="prod-name">進相用 コンデンサ（低圧・高圧）</div>
+      <div class="prod-specs">
+        <div class="prod-spec"><span class="key">電圧</span><span class="val">低圧〜6.6kV</span></div>
+        <div class="prod-spec"><span class="key">容量</span><span class="val">数kvar〜数百kvar</span></div>
+        <div class="prod-spec"><span class="key">主な用途</span><span class="val">工場力率改善</span></div>
+        <div class="prod-spec"><span class="key">特徴</span><span class="val">長寿命・国内実績多数</span></div>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="prod-series">Series: PV-DC</div>
+      <div class="prod-name">太陽光・蓄電用 フィルムコンデンサ</div>
+      <div class="prod-specs">
+        <div class="prod-spec"><span class="key">電圧</span><span class="val">600V〜1500VDC</span></div>
+        <div class="prod-spec"><span class="key">特徴</span><span class="val">屋外耐候・長寿命</span></div>
+        <div class="prod-spec"><span class="key">主な用途</span><span class="val">PCS・蓄電PCS</span></div>
+        <div class="prod-spec"><span class="key">認証</span><span class="val">IEC 62109対応</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="point warn" style="margin-top:20px">⚠️ <strong>注意：</strong>上記は代表的な製品カテゴリの概要です。最新の製品ラインナップ・詳細スペックは必ず社内の製品カタログ・技術部門に確認してください。</div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 10 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>指月電機の主力事業の核心となる部品は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q1')"><span class="opt-key">A</span>半導体デバイス</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q1')"><span class="opt-key">B</span>トランス・コイル</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c10q1')"><span class="opt-key">C</span>フィルムコンデンサ（コンデンサ専業）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q1')"><span class="opt-key">D</span>モーター・アクチュエータ</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c10q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>EV向けDCリンクコンデンサの一般的な定格電圧範囲は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q2')"><span class="opt-key">A</span>5V〜50VDC</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q2')"><span class="opt-key">B</span>50V〜200VDC</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c10q2')"><span class="opt-key">C</span>450V〜1200VDC</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q2')"><span class="opt-key">D</span>10kV〜100kVDC</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c10q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>工場の電力設備の力率改善に使われる指月電機の主力製品は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q3')"><span class="opt-key">A</span>スナバコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q3')"><span class="opt-key">B</span>Xコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c10q3')"><span class="opt-key">C</span>DCリンクコンデンサ</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c10q3')"><span class="opt-key">D</span>進相コンデンサ</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c10q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 11 ========== -->
+<section class="chapter fade-in" id="ch11">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 11</div>
+    <h2>営業トーク例・よくある質問 Q&amp;A</h2>
+    <p class="chapter-desc">実際の商談でよく出る質問と、説得力ある回答例をまとめました。クリックして回答を確認してください。</p>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 01</span>フィルムコンデンサと電解コンデンサ、どちらを選べばいいですか？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>用途によって使い分けます。「高電圧（数百V以上）」「交流が印加される回路」「長寿命・高信頼性が必要」「発熱を抑えたい高効率設計」の場合はフィルムコンデンサが最適です。一方、「大容量（mF以上）」「低電圧の電源平滑」「コスト最優先」の場合は電解コンデンサが適しています。インバータ設計では両者を組み合わせて使うことも多いです。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「お客様の回路の動作電圧と、どんな環境で使われるかを教えていただけますか？電圧が高く長寿命が必要な場合は、指月電機のフィルムコンデンサが圧倒的に有利です。特にEV・インバータ向けでは業界トップクラスの実績がございます。」</div>
+    </div></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 02</span>フィルムコンデンサは高いですが、なぜそのコストが正当化できますか？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>フィルムコンデンサのLCC（ライフサイクルコスト）は電解コンデンサより有利なケースが多いです。電解コンデンサは5〜10年で電解液が蒸発し交換が必要ですが、フィルムコンデンサは適切に使用すれば20年以上の寿命が期待できます。工場設備や電力インフラでは、交換工事のダウンタイムコストが部品コストを大幅に上回ることがあります。また低損失により省エネ効果も数字で示せます。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「初期コストだけでなく、ライフサイクルで比較していただきたいです。弊社のフィルムコンデンサは適切な条件下で20年以上の寿命実績があります。電解コンデンサを5年ごとに交換する工事費用を含めると、トータルではコスト優位な場合が多いです。省エネ効果の試算もご提示できます。」</div>
+    </div></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 03</span>他社製品との違いは何ですか？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>指月電機はフィルムコンデンサ専業メーカーとして70年以上の実績があります。フィルムの選定から蒸着・巻回・検査まで一貫した自社製造により、汎用品では対応困難な高電圧・高リップル・高耐熱・カスタム仕様に対応できます。また国内製造による品質管理と長期供給保証は、グローバル量産品にはない安心感として評価いただいています。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「指月電機はコンデンサ専業メーカーとして70年超の歴史があります。一般品メーカーには困難な高スペック・特注品への対応力と、日本国内一貫製造による品質の安定性が最大の強みです。実際に○○社様でも採用いただいており、長期安定供給の実績がございます。」</div>
+    </div></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 04</span>サンプルはすぐもらえますか？量産はいつから可能ですか？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>標準品については在庫対応可能な場合が多いです。特注・カスタム品については、仕様確認→サンプル製作→評価のフローで進めます。サンプルリードタイムは仕様の複雑さによりますが、目安として4〜12週間程度です。量産移行は評価完了後の承認確認後となります。詳細は技術部門との打合せで確定します。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「まずご要求仕様をお聞かせください。標準品であれば在庫確認の上サンプルご提供できます。カスタム品の場合は、仕様を確定後にサンプル製作スケジュールをご提示します。評価〜量産移行のスケジュールも一緒に立てさせてください。」</div>
+    </div></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 05</span>RoHS・HalogenFree対応していますか？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>製品シリーズによりRoHS指令対応・ハロゲンフリー対応品を揃えています。環境規制への適合証明書（RoHS適合宣言書・REACH・SVHC確認書）の発行にも対応しています。詳細は対象製品シリーズと営業担当にご確認ください。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「RoHS対応品・ハロゲンフリー品はシリーズによりご用意しています。環境規制対応の証明書も発行可能です。どの認証書類が必要かお知らせいただければ、品質保証部門と連携して準備します。」</div>
+    </div></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 06</span>寿命はどのくらいですか？寿命の計算方法は？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>フィルムコンデンサの寿命は主に動作温度・印加電圧によって決まります。一般的に、10℃温度が下がると寿命は約2倍になる（アレニウス則）とされています。定格より低い電圧・温度での使用（ディレーティング）は大幅に寿命を延ばします。具体的な寿命計算はデータシートの寿命計算式を使用します。技術部門による寿命試算サービスも提供できます。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「寿命はお客様の使用条件（温度・電圧）によって大きく変わります。データシートの計算式と、お客様の使用条件をお聞かせいただければ、技術部門で寿命の試算をご提供できます。設計マージンの検討にお役立てください。」</div>
+    </div></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 07</span>中国・台湾製の安価品と比べて何が違いますか？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>コスト競争では価格重視の汎用品には及ばない場合があります。ただし指月電機の強みは「高スペック対応力」「品質安定性」「長期供給保証」「技術サポート力」です。特に高電圧・高リップル・高耐熱・カスタム仕様や、信頼性基準が厳しいEV・産業・インフラ用途では、安価品のリスク（品質バラツキ・供給不安定・サポート困難）を避けて指月電機を選ぶお客様が多いです。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「汎用民生品のコスト競争では海外製品に価格面で差があります。ただ、設備の信頼性・安全性が重要なお客様には、品質の安定性と万が一の際の技術サポートをトータルで評価いただいています。特にEV・電力インフラでは、部品不具合による損失が数百万円規模になることもあり、部品コストより信頼性で選ばれています。」</div>
+    </div></div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-q" onclick="toggleQA(this)"><span class="qa-q-badge">Q 08</span>急に大量に注文できますか？供給安定性は？<span class="qa-arrow">▾</span></div>
+    <div class="qa-a"><div class="qa-a-inner">
+      <p>国内製造体制を基盤とした安定供給が指月電機の強みです。ただし急激な増量は製造キャパシティの都合でお時間をいただく場合があります。年度初めに年間需要計画をご共有いただくことで、原材料・製造計画を事前に準備し、安定供給の確率を高めることができます。</p>
+      <div class="talk-box"><div class="talk-label">💼 営業トーク例</div>「安定供給は指月電機の最大の強みのひとつです。ただ突然の大増量にはリードタイムが必要な場合があります。年間の需要見通しをお聞かせいただければ、製造側と事前に計画を立てて安定供給体制を整えます。内示情報の共有をぜひご検討ください。」</div>
+    </div></div>
+  </div>
+
+  <div class="quiz-section">
+    <h3>📝 Chapter 11 確認クイズ</h3>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q1.</span>お客様から「フィルムコンデンサは高い」と言われたとき、最も有効な反論は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q1')"><span class="opt-key">A</span>「その通りです、安くできません」</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q1')"><span class="opt-key">B</span>「競合より品質が高いから当然です」</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c11q1')"><span class="opt-key">C</span>ライフサイクルコストで比較し、交換・ダウンタイムコストを含めると優位性があることを数字で示す</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q1')"><span class="opt-key">D</span>「値引きします」とすぐ答える</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c11q1"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q2.</span>温度が10℃下がると寿命はどうなりますか？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q2')"><span class="opt-key">A</span>変わらない</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q2')"><span class="opt-key">B</span>約1.5倍になる</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c11q2')"><span class="opt-key">C</span>約2倍になる（アレニウス則）</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q2')"><span class="opt-key">D</span>約10倍になる</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c11q2"></div>
+    </div>
+    <div class="quiz-item">
+      <div class="quiz-q"><span class="qnum">Q3.</span>お客様の年間需要計画を聞く主な目的は？</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q3')"><span class="opt-key">A</span>値引き交渉のため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q3')"><span class="opt-key">B</span>競合他社を調べるため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'correct','c11q3')"><span class="opt-key">C</span>製造側が原材料・製造計画を事前に立て、安定供給体制を整えるため</button>
+        <button class="quiz-opt" onclick="checkQuiz(this,'wrong','c11q3')"><span class="opt-key">D</span>在庫を減らすため</button>
+      </div>
+      <div class="quiz-feedback" id="fb-c11q3"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CHAPTER 12 ========== -->
+<section class="chapter fade-in" id="ch12">
+  <div class="chapter-header">
+    <div class="chapter-num">Chapter 12</div>
+    <h2>総合確認テスト</h2>
+    <p class="chapter-desc">全章の内容を総合的にテストします。全12問に挑戦して、研修の習熟度を確認しましょう。</p>
+  </div>
+
+  <div class="final-test">
+    <h3>🎓 総合テスト — 全12問</h3>
+    <p class="sub">全問回答すると結果が表示されます。各問1回のみ回答可能です。</p>
+    <div class="test-progress"><div class="test-progress-fill" id="test-progress-fill"></div></div>
+
+    <div id="final-quiz-container">
+      <!-- Q1 -->
+      <div class="quiz-item" data-qid="ft1">
+        <div class="quiz-q"><span class="qnum">Q1.</span>フィルムコンデンサの誘電体として使用されるのは？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft1')"><span class="opt-key">A</span>酸化アルミニウム</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft1')"><span class="opt-key">B</span>プラスチックフィルム（PP・PET等）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft1')"><span class="opt-key">C</span>セラミック磁器</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft1')"><span class="opt-key">D</span>電解液</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft1"></div>
+      </div>
+      <!-- Q2 -->
+      <div class="quiz-item" data-qid="ft2">
+        <div class="quiz-q"><span class="qnum">Q2.</span>セルフヒーリング機能とは？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft2')"><span class="opt-key">A</span>コンデンサが自動で充電する機能</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft2')"><span class="opt-key">B</span>局所的な絶縁破壊が起きても電極膜が蒸発して絶縁を自動回復する機能</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft2')"><span class="opt-key">C</span>外装ケースの傷が自動修復される機能</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft2')"><span class="opt-key">D</span>容量が自動調整される機能</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft2"></div>
+      </div>
+      <!-- Q3 -->
+      <div class="quiz-item" data-qid="ft3">
+        <div class="quiz-q"><span class="qnum">Q3.</span>「tanδ」が意味するのは？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft3')"><span class="opt-key">A</span>静電容量の温度変化率</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft3')"><span class="opt-key">B</span>絶縁破壊電圧</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft3')"><span class="opt-key">C</span>損失角の正接（エネルギー損失の指標）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft3')"><span class="opt-key">D</span>定格電流値</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft3"></div>
+      </div>
+      <!-- Q4 -->
+      <div class="quiz-item" data-qid="ft4">
+        <div class="quiz-q"><span class="qnum">Q4.</span>製造工程の「エージング」の目的は？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft4')"><span class="opt-key">A</span>外観の色を均一にする</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft4')"><span class="opt-key">B</span>電圧を印加して初期欠陥を除去し、出荷後の信頼性を高める</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft4')"><span class="opt-key">C</span>フィルムを延伸して薄くする</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft4')"><span class="opt-key">D</span>外装ケースを固める</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft4"></div>
+      </div>
+      <!-- Q5 -->
+      <div class="quiz-item" data-qid="ft5">
+        <div class="quiz-q"><span class="qnum">Q5.</span>DCリンクコンデンサの主な役割は？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft5')"><span class="opt-key">A</span>電源ラインのノイズを除去する</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft5')"><span class="opt-key">B</span>力率を改善する</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft5')"><span class="opt-key">C</span>インバータのDCバス電圧を安定させ、リップル電流を吸収する</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft5')"><span class="opt-key">D</span>半導体のサージ電圧を吸収する</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft5"></div>
+      </div>
+      <!-- Q6 -->
+      <div class="quiz-item" data-qid="ft6">
+        <div class="quiz-q"><span class="qnum">Q6.</span>フィルムコンデンサが電解コンデンサより優れている点として正しくないものは？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft6')"><span class="opt-key">A</span>無極性（交流印加可能）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft6')"><span class="opt-key">B</span>低損失（低tanδ）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft6')"><span class="opt-key">C</span>大容量（mF〜Fクラス）が得意</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft6')"><span class="opt-key">D</span>長寿命</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft6"></div>
+      </div>
+      <!-- Q7 -->
+      <div class="quiz-item" data-qid="ft7">
+        <div class="quiz-q"><span class="qnum">Q7.</span>最も高温環境（150℃）に対応するフィルム素材は？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft7')"><span class="opt-key">A</span>PP（ポリプロピレン）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft7')"><span class="opt-key">B</span>PET（ポリエステル）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft7')"><span class="opt-key">C</span>PPS（ポリフェニレンサルファイド）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft7')"><span class="opt-key">D</span>PEN（ポリエチレンナフタレート）</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft7"></div>
+      </div>
+      <!-- Q8 -->
+      <div class="quiz-item" data-qid="ft8">
+        <div class="quiz-q"><span class="qnum">Q8.</span>定格電圧に対してどの比率で使用（ディレーティング）するのが推奨されますか？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft8')"><span class="opt-key">A</span>100%（フル使用）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft8')"><span class="opt-key">B</span>30〜40%</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft8')"><span class="opt-key">C</span>60〜80%</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft8')"><span class="opt-key">D</span>110〜120%（超過使用）</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft8"></div>
+      </div>
+      <!-- Q9 -->
+      <div class="quiz-item" data-qid="ft9">
+        <div class="quiz-q"><span class="qnum">Q9.</span>スナバコンデンサが設置される場所は？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft9')"><span class="opt-key">A</span>電源ラインのラインとグラウンドの間</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft9')"><span class="opt-key">B</span>パワー半導体（IGBT・MOSFET）のすぐ近く</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft9')"><span class="opt-key">C</span>モーターの端子間</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft9')"><span class="opt-key">D</span>バッテリーの正負極間</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft9"></div>
+      </div>
+      <!-- Q10 -->
+      <div class="quiz-item" data-qid="ft10">
+        <div class="quiz-q"><span class="qnum">Q10.</span>太陽光発電の電力を系統に送るための機器名は？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft10')"><span class="opt-key">A</span>配電盤（分電盤）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft10')"><span class="opt-key">B</span>変圧器（トランス）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft10')"><span class="opt-key">C</span>パワーコンディショナー（PCS）</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft10')"><span class="opt-key">D</span>ブレーカー</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft10"></div>
+      </div>
+      <!-- Q11 -->
+      <div class="quiz-item" data-qid="ft11">
+        <div class="quiz-q"><span class="qnum">Q11.</span>お客様が「安い海外品で十分では？」と言ったとき、最も効果的な対応は？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft11')"><span class="opt-key">A</span>「そうですね、ご検討ください」と引き下がる</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft11')"><span class="opt-key">B</span>「品質が全然違います」とだけ言う</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft11')"><span class="opt-key">C</span>用途・信頼性要求を確認した上で、LCCや技術サポート・供給安定性の優位性を具体的に示す</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft11')"><span class="opt-key">D</span>すぐに値引きを提示する</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft11"></div>
+      </div>
+      <!-- Q12 -->
+      <div class="quiz-item" data-qid="ft12">
+        <div class="quiz-q"><span class="qnum">Q12.</span>コンデンサ選定で最初に確認すべき3つの条件は？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft12')"><span class="opt-key">A</span>色・形・重量</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft12')"><span class="opt-key">B</span>ブランド・価格・入手性</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'correct','ft12')"><span class="opt-key">C</span>用途（回路タイプ）・電圧条件・温度環境</button>
+          <button class="quiz-opt" onclick="finalQuiz(this,'wrong','ft12')"><span class="opt-key">D</span>容量・ESR・絶縁抵抗</button>
+        </div>
+        <div class="quiz-feedback" id="fb-ft12"></div>
+      </div>
+    </div>
+
+    <div class="test-result" id="test-result">
+      <div class="test-score-big" id="final-score">0</div>
+      <div class="test-score-label">/ 12問正解</div>
+      <div class="test-msg" id="final-msg"></div>
+      <button class="quiz-reset-btn" onclick="resetFinalTest()" style="margin-top:16px">↺ テストをリセット</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
+  <p style="margin-top:8px">© 株式会社指月電機製作所 | 社内研修用資料 — フィルムコンデンサ完全研修ガイド</p>
+</footer>
+
+<script>
+// ===== SIDEBAR =====
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  const sb=document.getElementById('sidebar');
+  const btn=document.getElementById('sidebar-toggle');
+  if(sb.classList.contains('open')&&!sb.contains(e.target)&&!btn.contains(e.target)){
+    sb.classList.remove('open');
+  }
+});
+
+// ===== PROGRESS BAR =====
+window.addEventListener('scroll',function(){
+  const doc=document.documentElement;
+  const total=doc.scrollHeight-doc.clientHeight;
+  const pct=total>0?(window.scrollY/total)*100:0;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  // active nav
+  document.querySelectorAll('.chapter').forEach(function(ch){
+    const rect=ch.getBoundingClientRect();
+    if(rect.top<=100&&rect.bottom>100){
+      document.querySelectorAll('.nav-chapter').forEach(function(a){a.classList.remove('active')});
+      const id=ch.id;
+      const a=document.querySelector('.nav-chapter[href="#'+id+'"]');
+      if(a) a.classList.add('active');
+    }
+  });
+});
+
+// ===== FADE IN =====
+const observer=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting) e.target.classList.add('visible')});
+},{threshold:0.08});
+document.querySelectorAll('.fade-in').forEach(function(el){observer.observe(el)});
+
+// ===== CHARGE/DISCHARGE =====
+let chargeLevel=0,chargeTimer=null;
+function startCharge(){
+  clearInterval(chargeTimer);
+  chargeTimer=setInterval(function(){
+    if(chargeLevel>=100){clearInterval(chargeTimer);return;}
+    chargeLevel=Math.min(100,chargeLevel+2);
+    updateCharge();
+  },40);
+  document.getElementById('wire1').classList.add('active');
+}
+function startDischarge(){
+  clearInterval(chargeTimer);
+  chargeTimer=setInterval(function(){
+    if(chargeLevel<=0){clearInterval(chargeTimer);document.getElementById('wire2').classList.remove('active');return;}
+    chargeLevel=Math.max(0,chargeLevel-3);
+    updateCharge();
+  },40);
+  document.getElementById('wire1').classList.remove('active');
+  document.getElementById('wire2').classList.add('active');
+}
+function resetCharge(){
+  clearInterval(chargeTimer);chargeLevel=0;updateCharge();
+  document.getElementById('wire1').classList.remove('active');
+  document.getElementById('wire2').classList.remove('active');
+}
+function updateCharge(){
+  document.getElementById('charge-fill').style.width=chargeLevel+'%';
+  document.getElementById('charge-label').textContent=chargeLevel+'%';
+}
+
+// ===== SELF HEALING =====
+let shState='idle';
+function simulateSelfHealing(){
+  const film=document.getElementById('sh-film');
+  const status=document.getElementById('sh-status');
+  if(shState==='idle'){
+    shState='damaged';film.classList.add('damaged');
+    status.textContent='⚡ 絶縁破壊発生！アーク放電により金属膜が蒸発中...';
+    film.style.cursor='default';
+    setTimeout(function(){
+      shState='healing';film.classList.remove('damaged');film.classList.add('healing');
+      status.textContent='✅ セルフヒーリング完了！破壊箇所が絶縁回復しました（容量はわずかに低下）';
+      setTimeout(function(){
+        film.classList.remove('healing');shState='idle';film.style.cursor='pointer';
+        status.textContent='フィルムをクリックして絶縁破壊をシミュレートしてください';
+      },2000);
+    },1200);
+  }
+}
+
+// ===== QUIZ (CHAPTER) =====
+const feedbackMsg={
+  correct:'✅ 正解です！',
+  wrong:'❌ 不正解です。正しい答えを確認してください。'
+};
+function checkQuiz(btn,result,qid){
+  const item=btn.closest('.quiz-item');
+  if(item.dataset.answered) return;
+  item.dataset.answered='1';
+  const opts=item.querySelectorAll('.quiz-opt');
+  opts.forEach(function(o){
+    o.classList.add('disabled');
+    if(o===btn) o.classList.add(result);
+    if(result==='wrong'&&o.onclick&&o.onclick.toString().includes("'correct'")){o.classList.add('correct');}
+  });
+  const fb=document.getElementById('fb-'+qid);
+  if(fb){
+    fb.textContent=result==='correct'?feedbackMsg.correct:feedbackMsg.wrong;
+    fb.className='quiz-feedback show '+(result==='correct'?'ok':'ng');
+  }
+}
+
+// ===== FINAL TEST =====
+let ftCorrect=0,ftAnswered=0,ftTotal=12;
+function finalQuiz(btn,result,qid){
+  const item=btn.closest('.quiz-item');
+  if(item.dataset.answered) return;
+  item.dataset.answered='1';
+  ftAnswered++;
+  if(result==='correct') ftCorrect++;
+  const opts=item.querySelectorAll('.quiz-opt');
+  opts.forEach(function(o){
+    o.classList.add('disabled');
+    if(o===btn) o.classList.add(result);
+    if(result==='wrong'&&o.onclick&&o.onclick.toString().includes("'correct'")){o.classList.add('correct');}
+  });
+  const fb=document.getElementById('fb-'+qid);
+  if(fb){
+    fb.textContent=result==='correct'?feedbackMsg.correct:feedbackMsg.wrong;
+    fb.className='quiz-feedback show '+(result==='correct'?'ok':'ng');
+  }
+  const pct=(ftAnswered/ftTotal)*100;
+  document.getElementById('test-progress-fill').style.width=pct+'%';
+  if(ftAnswered>=ftTotal) showFinalResult();
+}
+function showFinalResult(){
+  const res=document.getElementById('test-result');
+  document.getElementById('final-score').textContent=ftCorrect;
+  const pct=Math.round((ftCorrect/ftTotal)*100);
+  let msg='';
+  if(pct>=90) msg='🎉 優秀！フィルムコンデンサのエキスパートです！';
+  else if(pct>=70) msg='👍 合格！引き続き現場で実践しながら深めていきましょう！';
+  else if(pct>=50) msg='📚 もう一度テキストを読み直して、再チャレンジしましょう！';
+  else msg='🔄 基礎からもう一度確認しましょう。各章のクイズを復習してください。';
+  document.getElementById('final-msg').textContent=msg;
+  res.classList.add('show');
+  res.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function resetFinalTest(){
+  ftCorrect=0;ftAnswered=0;
+  document.querySelectorAll('[data-qid]').forEach(function(item){
+    delete item.dataset.answered;
+    item.querySelectorAll('.quiz-opt').forEach(function(o){
+      o.classList.remove('correct','wrong','disabled');
+    });
+    const qid=item.dataset.qid;
+    const fb=document.getElementById('fb-'+qid);
+    if(fb){fb.className='quiz-feedback';fb.textContent='';}
+  });
+  document.getElementById('test-progress-fill').style.width='0%';
+  document.getElementById('test-result').classList.remove('show');
+}
+
+// ===== Q&A ACCORDION =====
+function toggleQA(qEl){
+  const ans=qEl.nextElementSibling;
+  const arrow=qEl.querySelector('.qa-arrow');
+  const isOpen=ans.classList.contains('open');
+  ans.classList.toggle('open',!isOpen);
+  arrow.textContent=isOpen?'▾':'▴';
+}
+</script>
+</body>
+</html>
