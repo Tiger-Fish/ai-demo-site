@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>議事録メーカー | 指月電機製作所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628;--navy2:#132040;--navy3:#1e3060;
+  --accent:#2e7de0;--accent2:#5b9ef7;--accent3:#93c0ff;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --green:#16a34a;--teal:#0d9488;--orange:#ea580c;--red:#dc2626;
+  --text:#1a1a2e;--text2:#3a4a6a;--text3:#6a7a9a;
+  --bg:#f4f6fb;--bg2:#fff;--bg3:#eef2fa;
+  --border:#dde4f0;
+  --shadow:0 2px 16px rgba(10,22,40,.08);
+  --shadow2:0 8px 32px rgba(10,22,40,.14);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ヘッダー */
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);color:white;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(46,125,224,.2),transparent 70%)}
+.header-inner{max-width:900px;margin:0 auto;padding:36px 24px 32px;position:relative;z-index:1}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.2);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:20px;margin-bottom:14px}
+header h1{font-size:clamp(22px,4vw,30px);font-weight:700;line-height:1.35;margin-bottom:6px}
+header h1 span{color:var(--accent3)}
+header p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.7}
+
+/* タブ */
+.tab-bar{background:var(--navy2);border-bottom:2px solid var(--accent)}
+.tab-inner{max-width:900px;margin:0 auto;padding:0 24px;display:flex}
+.tab-btn{padding:13px 20px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,.6);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.tab-btn:hover{color:white}
+.tab-btn.active{color:white;border-bottom-color:var(--accent2)}
+
+/* メイン */
+main{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+
+/* パネル */
+.panel{display:none}
+.panel.active{display:block}
+
+/* フォームカード */
+.form-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:20px}
+.form-card h2{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.form-card h2 .icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--navy3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em}
+.form-input,.form-select,.form-textarea{padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--bg3);transition:border .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);background:white}
+.form-textarea{resize:vertical;line-height:1.7}
+
+/* 出席者タグ */
+.attendee-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.attendee-tag{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:white;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px}
+.attendee-tag button{background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:14px;line-height:1;padding:0;transition:color .2s}
+.attendee-tag button:hover{color:white}
+.attendee-input-wrap{display:flex;gap:8px}
+.attendee-input-wrap .form-input{flex:1}
+.add-btn{padding:10px 16px;background:var(--accent);color:white;border:none;border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+.add-btn:hover{filter:brightness(1.1)}
+
+/* 議題・メモ */
+.agenda-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;position:relative}
+.agenda-item:last-child{margin-bottom:0}
+.agenda-num{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.08em;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.agenda-remove{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;transition:color .2s}
+.agenda-remove:hover{color:var(--red)}
+.add-agenda-btn{width:100%;padding:11px;background:var(--bg3);border:1.5px dashed var(--border);border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;color:var(--text3);cursor:pointer;transition:all .2s;margin-top:8px}
+.add-agenda-btn:hover{border-color:var(--accent);color:var(--accent);background:#eff6ff}
+
+/* 生成ボタン */
+.gen-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;border:none;border-radius:var(--radius);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.gen-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+/* 議事録プレビュー */
+.minutes-doc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow2)}
+.minutes-header{background:linear-gradient(135deg,var(--navy),var(--navy3));color:white;padding:32px 36px}
+.minutes-header .company{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.1em;margin-bottom:6px}
+.minutes-header h2{font-size:clamp(18px,3vw,24px);font-weight:700;line-height:1.4;margin-bottom:14px}
+.minutes-meta{display:flex;gap:20px;flex-wrap:wrap}
+.minutes-meta span{font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:5px}
+.minutes-body{padding:32px 36px}
+.minutes-section{margin-bottom:28px}
+.minutes-section h3{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--border);position:relative}
+.minutes-section h3::after{content:'';position:absolute;bottom:-2px;left:0;width:36px;height:2px;background:var(--accent)}
+.minutes-section p,.minutes-section li{font-size:14px;color:var(--text2);line-height:1.85}
+.minutes-section ul,.minutes-section ol{padding-left:18px}
+.minutes-section li{margin-bottom:4px}
+.action-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(234,88,12,.1);border:1px solid rgba(234,88,12,.3);color:var(--orange);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-right:6px}
+.decision-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-right:6px}
+.minutes-footer{background:var(--bg3);border-top:1px solid var(--border);padding:18px 36px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.minutes-footer p{font-size:12px;color:var(--text3)}
+
+/* アクションボタン */
+.action-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.action-btn{padding:11px 22px;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn-print{background:var(--navy);color:white;border:none}
+.btn-print:hover{background:var(--navy3)}
+.btn-reset{background:var(--bg3);color:var(--text2);border:1.5px solid var(--border)}
+.btn-reset:hover{border-color:var(--accent);color:var(--accent)}
+.btn-edit{background:var(--accent);color:white;border:none}
+.btn-edit:hover{filter:brightness(1.1)}
+
+/* デモメッセージ */
+.demo-msg{text-align:center;padding:40px 24px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.demo-msg .key-icon{font-size:40px;margin-bottom:16px}
+.demo-msg h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:10px}
+.demo-msg p{font-size:14px;color:var(--text2);line-height:1.85;max-width:400px;margin:0 auto 20px;background:var(--bg3);padding:14px 18px;border-radius:10px;border-left:4px solid var(--gold)}
+.demo-msg p small{font-size:12px;color:var(--text3);display:block;margin-top:4px}
+
+/* ローディング */
+.loading{display:none;text-align:center;padding:48px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ポイントボックス */
+.point{background:linear-gradient(135deg,#eef4ff,#f0f8ff);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;font-size:13px;color:#2a3a5a;line-height:1.75}
+
+/* メール変換 */
+.paste-area{width:100%;padding:14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--bg3);resize:vertical;min-height:180px;line-height:1.7;transition:border .2s}
+.paste-area:focus{outline:none;border-color:var(--accent);background:white}
+
+/* 音声入力 */
+.voice-circle{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--navy3));border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:24px auto;font-size:36px;color:white;box-shadow:0 4px 20px rgba(46,125,224,.4);transition:all .2s;position:relative}
+.voice-circle:hover{transform:scale(1.05);box-shadow:0 6px 28px rgba(46,125,224,.5)}
+.voice-circle.recording{background:linear-gradient(135deg,var(--red),#ef4444);box-shadow:0 4px 20px rgba(220,38,38,.5);animation:pulse-rec 1.2s ease-in-out infinite}
+@keyframes pulse-rec{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.voice-circle .mic-label{font-size:11px;font-weight:700;letter-spacing:.08em;margin-top:4px}
+.voice-transcript{background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:16px;min-height:100px;font-size:13px;color:var(--text2);line-height:1.8;margin-top:16px;white-space:pre-wrap}
+.voice-status{text-align:center;font-size:13px;color:var(--text3);margin-top:8px;min-height:20px}
+
+/* 画像アップロード */
+.drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:#eff6ff}
+.drop-zone .dz-icon{font-size:40px;margin-bottom:12px}
+.drop-zone p{font-size:14px;color:var(--text3);line-height:1.7}
+.drop-zone strong{color:var(--accent)}
+#image-input{display:none}
+.image-preview{margin-top:16px;border-radius:10px;overflow:hidden;border:1px solid var(--border);max-height:300px;width:100%;object-fit:contain;background:#000}
+
+color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px;margin-top:40px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);text-decoration:none;padding:8px 18px;border-radius:8px;font-size:12px;margin-bottom:12px;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:white}
+
+@media print{header,footer,.tab-bar,.action-btns,#form-panel,#loading{display:none!important}.minutes-doc{box-shadow:none;border:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">📋 議事録メーカー</div>
+    <h1>議事録<span>メーカー</span></h1>
+    <p>会議情報・メモを入力するだけで、プロ品質の議事録を自動生成します。決定事項・アクションアイテムも自動抽出。</p>
+  </div>
+</header>
+
+<nav class="tab-bar">
+  <div class="tab-inner">
+    <button class="tab-btn active" onclick="switchTab('input')" id="tab-input">✏️ フォーム入力</button>
+    <button class="tab-btn" onclick="switchTab('email')" id="tab-email">📧 メール変換</button>
+    <button class="tab-btn" onclick="switchTab('voice')" id="tab-voice">🎤 音声入力</button>
+    <button class="tab-btn" onclick="switchTab('image')" id="tab-image">🖼️ 画像読取</button>
+    <button class="tab-btn" onclick="switchTab('preview')" id="tab-preview">📄 議事録</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- 入力パネル -->
+  <div class="panel active" id="input-panel">
+
+    <!-- 基本情報 -->
+    <div class="form-card">
+      <h2><span class="icon">📅</span>会議の基本情報</h2>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>会議名・件名</label>
+          <input class="form-input" id="meeting-title" type="text" placeholder="例：2025年3月 営業企画部 月次会議">
+        </div>
+        <div class="form-group">
+          <label>開催日</label>
+          <input class="form-input" id="meeting-date" type="date">
+        </div>
+        <div class="form-group">
+          <label>開催時間</label>
+          <input class="form-input" id="meeting-time" type="text" placeholder="例：14:00〜15:30">
+        </div>
+        <div class="form-group">
+          <label>開催場所</label>
+          <input class="form-input" id="meeting-place" type="text" placeholder="例：本社 第2会議室 / オンライン">
+        </div>
+        <div class="form-group">
+          <label>司会者</label>
+          <input class="form-input" id="meeting-chair" type="text" placeholder="例：山田 太郎">
+        </div>
+        <div class="form-group">
+          <label>記録者</label>
+          <input class="form-input" id="meeting-recorder" type="text" placeholder="例：鈴木 花子">
+        </div>
+      </div>
+    </div>
+
+    <!-- 出席者 -->
+    <div class="form-card">
+      <h2><span class="icon">👥</span>出席者</h2>
+      <div class="attendee-input-wrap">
+        <input class="form-input" id="attendee-input" type="text" placeholder="氏名を入力してEnterまたは追加ボタン" onkeydown="if(event.key==='Enter'){addAttendee()}">
+        <button class="add-btn" onclick="addAttendee()">＋ 追加</button>
+      </div>
+      <div class="attendee-wrap" id="attendee-list"></div>
+    </div>
+
+    <!-- 議題・メモ -->
+    <div class="form-card">
+      <h2><span class="icon">📝</span>議題・メモ</h2>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.7">各議題のメモを箇条書きや走り書きで入力してください。AIが整形します。</p>
+      <div id="agenda-list">
+        <div class="agenda-item" data-idx="0">
+          <div class="agenda-num">AGENDA 01</div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label>議題タイトル</label>
+            <input class="form-input agenda-title" type="text" placeholder="例：4月度 売上計画の確認">
+          </div>
+          <div class="form-group">
+            <label>メモ・発言内容（箇条書きでOK）</label>
+            <textarea class="form-textarea agenda-memo" rows="4" placeholder="例：&#10;・4月売上目標は前年比110%の2億円&#10;・EV向け案件3件が進行中&#10;・来月のサンプル提出スケジュールを確認が必要&#10;・山田さんが○○社へフォロー訪問する"></textarea>
+          </div>
+          <button class="agenda-remove" onclick="removeAgenda(this)" title="削除">×</button>
+        </div>
+      </div>
+      <button class="add-agenda-btn" onclick="addAgenda()">＋ 議題を追加</button>
+    </div>
+
+    <!-- 次回予定 -->
+    <div class="form-card">
+      <h2><span class="icon">📆</span>次回会議（任意）</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>次回開催予定日</label>
+          <input class="form-input" id="next-date" type="text" placeholder="例：2025年4月○日">
+        </div>
+        <div class="form-group">
+          <label>次回議題（予定）</label>
+          <input class="form-input" id="next-agenda" type="text" placeholder="例：4月売上進捗報告">
+        </div>
+      </div>
+    </div>
+
+    <div class="point">💡 <strong>AIによる自動整形：</strong>メモの箇条書きをもとに、決定事項・アクションアイテム・議論内容を自動で整理します。APIキーを設定することで動作します。</div>
+
+    <button class="gen-btn" onclick="generateMinutes()">📋 議事録を生成する</button>
+
+  </div>
+
+  <!-- メール変換パネル -->
+  <div class="panel" id="email-panel">
+    <div class="form-card">
+      <h2><span class="icon">📧</span>メール本文から議事録を生成</h2>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.7">
+        会議の議事メモや報告メールをそのまま貼り付けてください。AIが議事録形式に整形します。
+      </p>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>会議名・件名（任意）</label>
+        <input class="form-input" id="email-title" type="text" placeholder="例：3月営業会議">
+      </div>
+      <div class="form-group">
+        <label>メール本文・テキストを貼り付け</label>
+        <textarea class="paste-area" id="email-body" placeholder="ここにメール本文や議事メモをそのまま貼り付けてください。
+
+例：
+件名：3月度 営業会議メモ
+日時：3月21日 14:00〜
+出席：山田、鈴木、佐藤
+
+・4月売上目標を前年比110%に設定
+・EV向けA社案件は来月サンプル提出予定
+・鈴木さんがB社への訪問を4月3日に実施
+・次回会議は4月18日14時"></textarea>
+      </div>
+      <button class="gen-btn" style="margin-top:14px" onclick="generateFromEmail()">
+        📋 議事録に変換する
+      </button>
+    </div>
+    <div class="point">💡 <strong>このモードの使い方：</strong>会議後に送るメモメール、チャットのコピー、走り書きのテキストなど何でも貼り付けられます。APIキー設定で決定事項・アクションが自動抽出されます。</div>
+  </div>
+
+  <!-- 音声入力パネル -->
+  <div class="panel" id="voice-panel">
+    <div class="form-card">
+      <h2><span class="icon">🎤</span>音声入力から議事録を生成</h2>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:8px;line-height:1.7">
+        マイクボタンを押して話してください。ブラウザの音声認識で文字起こしを行い、議事録に整形します。
+      </p>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>会議名（任意）</label>
+        <input class="form-input" id="voice-title" type="text" placeholder="例：3月営業会議">
+      </div>
+      <button class="voice-circle" id="voice-btn" onclick="toggleVoice()">
+        <span id="voice-icon">🎤</span>
+        <span class="mic-label" id="voice-label">タップして開始</span>
+      </button>
+      <div class="voice-status" id="voice-status">マイクボタンを押すと録音が始まります</div>
+      <div class="voice-transcript" id="voice-transcript">話した内容がここに表示されます...</div>
+      <button class="gen-btn" style="margin-top:14px" onclick="generateFromVoice()">
+        📋 議事録に変換する
+      </button>
+    </div>
+    <div class="point">🎤 <strong>音声認識について：</strong>ブラウザ標準のWeb Speech APIを使用します。Chrome推奨。マイクの使用許可が必要です。APIキー設定でAIによる整形・抽出が有効になります。</div>
+  </div>
+
+  <!-- 画像アップロードパネル -->
+  <div class="panel" id="image-panel">
+    <div class="form-card">
+      <h2><span class="icon">🖼️</span>ホワイトボード画像から議事録を生成</h2>
+      <p style="font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.7">
+        ホワイトボードや手書きメモの写真をアップロードすると、AIが内容を読み取って議事録を生成します。
+      </p>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>会議名（任意）</label>
+        <input class="form-input" id="image-title" type="text" placeholder="例：3月営業会議">
+      </div>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('image-input').click()"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleDrop(event)">
+        <div class="dz-icon">📷</div>
+        <p><strong>クリックまたはドラッグ＆ドロップ</strong>で画像をアップロード<br>
+        ホワイトボード・手書きメモ・付箋などの写真に対応</p>
+      </div>
+      <input type="file" id="image-input" accept="image/*" onchange="handleImageSelect(event)">
+      <img id="image-preview" class="image-preview" style="display:none">
+      <button class="gen-btn" style="margin-top:14px" id="image-gen-btn" onclick="generateFromImage()" disabled style="opacity:.5">
+        📋 画像から議事録を生成する
+      </button>
+    </div>
+    <div class="point">🖼️ <strong>対応画像：</strong>ホワイトボード写真・手書きメモ・付箋の写真・スライドのスクリーンショットなど。<strong>APIキーの設定が必要です</strong>（画像認識にはVision機能を使用）。</div>
+  </div>
+
+
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <p style="color:var(--text3);font-size:14px;font-weight:500">議事録を生成中...</p>
+  </div>
+
+  <!-- プレビューパネル -->
+  <div class="panel" id="preview-panel">
+    <div id="minutes-output"></div>
+    <div class="action-btns">
+      <button class="action-btn btn-print" onclick="window.print()">🖨️ 印刷・PDF保存</button>
+      <button class="action-btn btn-edit" onclick="switchTab('input')">✏️ 編集に戻る</button>
+      <button class="action-btn btn-reset" onclick="resetAll()">↺ 新しい議事録</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
+  <p>© 株式会社指月電機製作所 | 議事録メーカー（デモ）</p>
+</footer>
+
+<script>
+// ===== タブ切り替え =====
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab + '-panel').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ===== メール変換 =====
+async function generateFromEmail() {
+  const title = document.getElementById('email-title').value || '会議';
+  const body = document.getElementById('email-body').value;
+  if (!body.trim()) { alert('テキストを入力してください'); return; }
+
+  document.getElementById('email-panel').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  const prompt = `以下のメール・テキストから議事録を生成してください。
+
+【テキスト内容】
+${body}
+
+以下のJSON形式のみで回答してください：
+{
+  "meeting_title": "会議名",
+  "date": "日時（テキストから抽出、なければ空）",
+  "place": "場所（テキストから抽出、なければ空）",
+  "attendees": ["出席者1", "出席者2"],
+  "agendas": [
+    {
+      "title": "議題タイトル",
+      "discussion": "議論・報告内容（2〜3文）",
+      "decisions": ["決定事項"],
+      "actions": [{"item": "アクション内容", "owner": "担当者", "due": "期限"}]
+    }
+  ],
+  "summary": "会議全体のまとめ（1〜2文）"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const r = JSON.parse(text);
+    // 出席者をグローバルに反映
+    r.attendees && r.attendees.forEach(a => { if(!attendees.includes(a)) attendees.push(a); });
+    const info = {
+      title: r.meeting_title || title,
+      dateStr: r.date || '',
+      time: '',
+      place: r.place || '',
+      chair: '',
+      recorder: '',
+      nextDate: '',
+      nextAgenda: ''
+    };
+    showMinutes(r, info);
+  } catch(e) {
+    showDemoMessageFull('メール変換');
+  }
+}
+
+// ===== 音声入力 =====
+let recognition = null;
+let isRecording = false;
+let fullTranscript = '';
+
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('お使いのブラウザは音声認識に対応していません。Chrome推奨です。');
+    return;
+  }
+  if (isRecording) {
+    stopVoice();
+  } else {
+    startVoice();
+  }
+}
+
+function startVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('voice-btn').classList.add('recording');
+    document.getElementById('voice-icon').textContent = '⏹';
+    document.getElementById('voice-label').textContent = '録音中...';
+    document.getElementById('voice-status').textContent = '🔴 録音中 — 話してください';
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        final += e.results[i][0].transcript;
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    fullTranscript += final;
+    document.getElementById('voice-transcript').textContent =
+      fullTranscript + (interim ? '\n[認識中: ' + interim + ']' : '');
+  };
+
+  recognition.onerror = (e) => {
+    document.getElementById('voice-status').textContent = 'エラー: ' + e.error;
+    stopVoice();
+  };
+
+  recognition.onend = () => {
+    if (isRecording) recognition.start(); // 自動継続
+  };
+
+  recognition.start();
+}
+
+function stopVoice() {
+  isRecording = false;
+  if (recognition) recognition.stop();
+  document.getElementById('voice-btn').classList.remove('recording');
+  document.getElementById('voice-icon').textContent = '🎤';
+  document.getElementById('voice-label').textContent = 'タップして開始';
+  document.getElementById('voice-status').textContent = '録音停止。「議事録に変換する」を押してください。';
+}
+
+async function generateFromVoice() {
+  const title = document.getElementById('voice-title').value || '会議';
+  const text = fullTranscript.trim() || document.getElementById('voice-transcript').textContent;
+  if (!text || text === '話した内容がここに表示されます...') {
+    alert('音声を録音してください'); return;
+  }
+
+  document.getElementById('voice-panel').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  const prompt = `以下の音声文字起こしから議事録を生成してください。
+
+【文字起こし内容】
+${text}
+
+JSON形式のみで回答（フォーマットはメール変換と同じ）：
+{
+  "meeting_title": "${title}",
+  "date": "",
+  "place": "",
+  "attendees": [],
+  "agendas": [{"title": "議題", "discussion": "内容", "decisions": [], "actions": []}],
+  "summary": "まとめ"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const txt = data.content[0].text.replace(/```json|```/g, '').trim();
+    const r = JSON.parse(txt);
+    r.attendees && r.attendees.forEach(a => { if(!attendees.includes(a)) attendees.push(a); });
+    const info = { title: r.meeting_title || title, dateStr: r.date || '', time: '', place: r.place || '', chair: '', recorder: '', nextDate: '', nextAgenda: '' };
+    showMinutes(r, info);
+  } catch(e) {
+    showDemoMessageFull('音声入力');
+  }
+}
+
+// ===== 画像アップロード =====
+let uploadedImageBase64 = null;
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImage(file);
+}
+
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+  if (file) loadImage(file);
+}
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    uploadedImageBase64 = e.target.result.split(',')[1];
+    const preview = document.getElementById('image-preview');
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    document.getElementById('image-gen-btn').disabled = false;
+    document.getElementById('image-gen-btn').style.opacity = '1';
+    document.getElementById('drop-zone').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function generateFromImage() {
+  const title = document.getElementById('image-title').value || '会議';
+  if (!uploadedImageBase64) { alert('画像をアップロードしてください'); return; }
+
+  document.getElementById('image-panel').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  const prompt = `この画像はホワイトボードや手書きメモの写真です。画像に書かれている内容を読み取り、議事録を生成してください。
+
+JSON形式のみで回答してください：
+{
+  "meeting_title": "${title}",
+  "date": "日時（画像から読み取れた場合）",
+  "place": "",
+  "attendees": ["読み取れた出席者"],
+  "agendas": [{"title": "議題", "discussion": "内容", "decisions": ["決定事項"], "actions": [{"item": "アクション", "owner": "担当者", "due": "期限"}]}],
+  "summary": "まとめ"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: uploadedImageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    const txt = data.content[0].text.replace(/```json|```/g, '').trim();
+    const r = JSON.parse(txt);
+    r.attendees && r.attendees.forEach(a => { if(!attendees.includes(a)) attendees.push(a); });
+    const info = { title: r.meeting_title || title, dateStr: r.date || '', time: '', place: r.place || '', chair: '', recorder: '', nextDate: '', nextAgenda: '' };
+    showMinutes(r, info);
+  } catch(e) {
+    showDemoMessageFull('画像読取');
+  }
+}
+
+// ===== デモメッセージ（API未設定時） =====
+function showDemoMessageFull(mode) {
+  document.getElementById('loading').style.display = 'none';
+  document.querySelectorAll('.panel').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+  document.getElementById('preview-panel').style.display = 'block';
+  document.getElementById('preview-panel').classList.add('active');
+  document.getElementById('tab-preview').classList.add('active');
+  document.getElementById('minutes-output').innerHTML = `
+    <div class="demo-msg">
+      <div class="key-icon">🔑</div>
+      <h3>デモのため回答は生成されません</h3>
+      <p>APIキーを設定することで動作します。<br>
+      <small>※ APIキーの利用には別途課金が必要になります。</small></p>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:16px">
+        【${mode}モード】APIキーを設定すると、この入力内容からAIが自動で議事録を生成します。
+      </div>
+      <button class="action-btn btn-reset" onclick="resetAll()" style="margin:0 auto">↺ 最初に戻る</button>
+    </div>
+  `;
+}
+
+
+
+// ===== 出席者 =====
+const attendees = [];
+function addAttendee() {
+  const input = document.getElementById('attendee-input');
+  const name = input.value.trim();
+  if (!name) return;
+  attendees.push(name);
+  renderAttendees();
+  input.value = '';
+  input.focus();
+}
+function removeAttendee(idx) {
+  attendees.splice(idx, 1);
+  renderAttendees();
+}
+function renderAttendees() {
+  const wrap = document.getElementById('attendee-list');
+  wrap.innerHTML = attendees.map((a, i) =>
+    `<div class="attendee-tag">${a}<button onclick="removeAttendee(${i})">×</button></div>`
+  ).join('');
+}
+
+// ===== 議題 =====
+let agendaCount = 1;
+function addAgenda() {
+  agendaCount++;
+  const num = String(agendaCount).padStart(2, '0');
+  const div = document.createElement('div');
+  div.className = 'agenda-item';
+  div.dataset.idx = agendaCount - 1;
+  div.innerHTML = `
+    <div class="agenda-num">AGENDA ${num}</div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label>議題タイトル</label>
+      <input class="form-input agenda-title" type="text" placeholder="議題タイトルを入力">
+    </div>
+    <div class="form-group">
+      <label>メモ・発言内容（箇条書きでOK）</label>
+      <textarea class="form-textarea agenda-memo" rows="4" placeholder="メモを箇条書きで入力してください"></textarea>
+    </div>
+    <button class="agenda-remove" onclick="removeAgenda(this)" title="削除">×</button>
+  `;
+  document.getElementById('agenda-list').appendChild(div);
+}
+function removeAgenda(btn) {
+  const item = btn.closest('.agenda-item');
+  const list = document.getElementById('agenda-list');
+  if (list.children.length <= 1) { alert('議題は1つ以上必要です'); return; }
+  item.remove();
+  // 番号振り直し
+  list.querySelectorAll('.agenda-num').forEach((el, i) => {
+    el.textContent = 'AGENDA ' + String(i + 1).padStart(2, '0');
+  });
+}
+
+// ===== 日付のデフォルト設定 =====
+document.getElementById('meeting-date').value = new Date().toISOString().split('T')[0];
+
+// ===== 議事録生成 =====
+async function generateMinutes() {
+  const title = document.getElementById('meeting-title').value || '会議';
+  const date = document.getElementById('meeting-date').value;
+  const time = document.getElementById('meeting-time').value;
+  const place = document.getElementById('meeting-place').value;
+  const chair = document.getElementById('meeting-chair').value;
+  const recorder = document.getElementById('meeting-recorder').value;
+  const nextDate = document.getElementById('next-date').value;
+  const nextAgenda = document.getElementById('next-agenda').value;
+
+  const agendaItems = [];
+  document.querySelectorAll('.agenda-item').forEach(item => {
+    const t = item.querySelector('.agenda-title').value;
+    const m = item.querySelector('.agenda-memo').value;
+    if (t || m) agendaItems.push({ title: t || '（タイトルなし）', memo: m });
+  });
+
+  const dateStr = date ? new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+
+  // AI生成を試みる
+  document.getElementById('input-panel').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  const prompt = `あなたは議事録作成の専門家です。以下の情報から正式な議事録を作成してください。
+
+【会議情報】
+- 会議名: ${title}
+- 日時: ${dateStr} ${time}
+- 場所: ${place}
+- 司会: ${chair}
+- 記録: ${recorder}
+- 出席者: ${attendees.join('、') || '未入力'}
+
+【議題・メモ】
+${agendaItems.map((a, i) => `議題${i+1}「${a.title}」\nメモ: ${a.memo}`).join('\n\n')}
+
+【次回】日時: ${nextDate} 議題: ${nextAgenda}
+
+以下のJSON形式のみで回答してください：
+{
+  "agendas": [
+    {
+      "title": "議題タイトル",
+      "discussion": "議論・報告内容（2〜4文で整形）",
+      "decisions": ["決定事項1", "決定事項2"],
+      "actions": [{"item": "アクション内容", "owner": "担当者名", "due": "期限"}]
+    }
+  ],
+  "summary": "会議全体のまとめ（2文程度）"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(text);
+    showMinutes(result, { title, dateStr, time, place, chair, recorder, nextDate, nextAgenda });
+  } catch(e) {
+    showDemoMinutes({ title, dateStr, time, place, chair, recorder, agendaItems, nextDate, nextAgenda });
+  }
+}
+
+// ===== API成功時の表示 =====
+function showMinutes(r, info) {
+  document.getElementById('loading').style.display = 'none';
+
+  const agendasHTML = r.agendas.map((a, i) => {
+    const decisionsHTML = a.decisions && a.decisions.length > 0
+      ? `<p style="margin-bottom:6px"><span class="decision-tag">✅ 決定</span></p><ul>${a.decisions.map(d => `<li>${d}</li>`).join('')}</ul>`
+      : '';
+    const actionsHTML = a.actions && a.actions.length > 0
+      ? `<p style="margin:10px 0 6px"><span class="action-tag">📌 Action</span></p><ul>${a.actions.map(ac => `<li><strong>${ac.item}</strong>${ac.owner ? `（担当：${ac.owner}）` : ''}${ac.due ? `　期限：${ac.due}` : ''}</li>`).join('')}</ul>`
+      : '';
+    return `
+      <div class="minutes-section">
+        <h3>${i + 1}. ${a.title}</h3>
+        <p style="margin-bottom:${decisionsHTML ? '12px' : '0'}">${a.discussion}</p>
+        ${decisionsHTML}${actionsHTML}
+      </div>`;
+  }).join('');
+
+  renderDoc(info, agendasHTML, r.summary);
+}
+
+// ===== AI未設定時のデモ表示 =====
+function showDemoMinutes(info) {
+  document.getElementById('loading').style.display = 'none';
+
+  const agendasHTML = info.agendaItems.map((a, i) => `
+    <div class="minutes-section">
+      <h3>${i + 1}. ${a.title}</h3>
+      <div style="background:var(--bg3);border-radius:9px;padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap">${a.memo || '（メモなし）'}</div>
+      <div style="margin-top:10px;padding:12px 16px;background:#fff8f0;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;font-size:13px;color:#7a5a10">
+        🔑 <strong>APIキーを設定すると</strong>、このメモをAIが整形し、決定事項・アクションアイテムを自動で抽出します。
+      </div>
+    </div>`
+  ).join('');
+
+  renderDoc(info, agendasHTML, 'APIキーを設定することでAIによる要約・整形が利用できます。');
+}
+
+// ===== 議事録HTML描画 =====
+function renderDoc(info, agendasHTML, summary) {
+  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('minutes-output').innerHTML = `
+    <div class="minutes-doc">
+      <div class="minutes-header">
+        <div class="company">株式会社指月電機製作所</div>
+        <h2>${info.title}</h2>
+        <div class="minutes-meta">
+          ${info.dateStr ? `<span>📅 ${info.dateStr}${info.time ? ' ' + info.time : ''}</span>` : ''}
+          ${info.place ? `<span>📍 ${info.place}</span>` : ''}
+          ${info.chair ? `<span>🎤 司会：${info.chair}</span>` : ''}
+          ${info.recorder ? `<span>📝 記録：${info.recorder}</span>` : ''}
+        </div>
+      </div>
+      <div class="minutes-body">
+        ${attendees.length > 0 ? `
+        <div class="minutes-section">
+          <h3>出席者</h3>
+          <p>${attendees.join('　／　')}</p>
+        </div>` : ''}
+        ${agendasHTML}
+        ${summary ? `
+        <div class="minutes-section">
+          <h3>まとめ</h3>
+          <p>${summary}</p>
+        </div>` : ''}
+        ${info.nextDate || info.nextAgenda ? `
+        <div class="minutes-section">
+          <h3>次回会議</h3>
+          ${info.nextDate ? `<p>📅 開催予定：${info.nextDate}</p>` : ''}
+          ${info.nextAgenda ? `<p>議題予定：${info.nextAgenda}</p>` : ''}
+        </div>` : ''}
+      </div>
+      <div class="minutes-footer">
+        <div class="company-info" style="font-size:12px;color:var(--text3)">株式会社指月電機製作所</div>
+        <div style="font-size:11px;color:var(--text3)">作成日：${today}</div>
+      </div>
+    </div>
+  `;
+
+  switchTab('preview');
+}
+
+function resetAll() {
+  uploadedImageBase64 = null;
+  fullTranscript = '';
+  document.querySelectorAll('.panel').forEach(p => { p.style.display = ''; p.classList.remove('active'); });
+  document.getElementById('input-panel').style.display = 'block';
+  document.getElementById('minutes-output').innerHTML = '';
+  document.getElementById('image-preview').style.display = 'none';
+  document.getElementById('drop-zone').style.display = 'block';
+  document.getElementById('voice-transcript').textContent = '話した内容がここに表示されます...';
+  document.getElementById('loading').style.display = 'none';
+  switchTab('input');
+}
+</script>
+</body>
+</html>
