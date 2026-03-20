@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>名刺管理アプリ | 指月電機製作所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628;--navy2:#132040;--navy3:#1e3060;
+  --accent:#2e7de0;--accent2:#5b9ef7;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --green:#16a34a;--teal:#0d9488;--orange:#ea580c;--red:#dc2626;--purple:#7c3aed;
+  --text:#1a1a2e;--text2:#3a4a6a;--text3:#6a7a9a;
+  --bg:#f4f6fb;--bg2:#fff;--bg3:#eef2fa;
+  --border:#dde4f0;
+  --shadow:0 2px 16px rgba(10,22,40,.08);
+  --shadow2:0 8px 32px rgba(10,22,40,.14);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ヘッダー */
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);color:white;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(46,125,224,.2),transparent 70%)}
+.header-inner{max-width:1100px;margin:0 auto;padding:32px 24px 28px;position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.header-left{}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.2);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+header h1{font-size:clamp(20px,3.5vw,28px);font-weight:700;line-height:1.3}
+header h1 span{color:var(--accent2)}
+.header-count{font-size:13px;color:rgba(255,255,255,.65);margin-top:4px}
+.add-btn-header{padding:11px 22px;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;border:none;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.add-btn-header:hover{filter:brightness(1.1);transform:translateY(-1px)}
+
+/* 検索・フィルターバー */
+.search-bar{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(10,22,40,.06)}
+.search-inner{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.search-input-wrap{flex:1;min-width:200px;position:relative}
+.search-input-wrap::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px}
+.search-input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid var(--border);border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;background:var(--bg3);transition:border .2s}
+.search-input:focus{outline:none;border-color:var(--accent);background:white}
+.filter-select{padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;background:var(--bg3);color:var(--text);cursor:pointer;transition:border .2s}
+.filter-select:focus{outline:none;border-color:var(--accent)}
+.view-btns{display:flex;gap:6px}
+.view-btn{width:36px;height:36px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
+.view-btn.active{background:var(--accent);border-color:var(--accent);color:white}
+.view-btn:hover:not(.active){border-color:var(--accent)}
+
+/* メイン */
+main{max-width:1100px;margin:0 auto;padding:28px 24px 80px}
+
+/* カードグリッド */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.cards-list{display:flex;flex-direction:column;gap:10px}
+
+/* 名刺カード */
+.biz-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:box-shadow .2s,transform .2s;cursor:pointer;position:relative}
+.biz-card:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}
+.biz-card-top{height:6px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.biz-card-body{padding:20px}
+.biz-card-image{width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:14px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px}
+.biz-card-image img{width:100%;height:110px;object-fit:cover;border-radius:8px}
+.biz-name{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.biz-company{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:2px}
+.biz-dept{font-size:12px;color:var(--text3);margin-bottom:10px}
+.biz-info{display:flex;flex-direction:column;gap:4px}
+.biz-info-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+.biz-info-item .icon{width:18px;text-align:center;font-size:12px;flex-shrink:0}
+.biz-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.biz-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;border:1px solid var(--border);color:var(--text3);background:var(--bg3)}
+.biz-card-actions{position:absolute;top:14px;right:12px;display:flex;gap:6px;opacity:0;transition:opacity .2s}
+.biz-card:hover .biz-card-actions{opacity:1}
+.card-action-btn{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.btn-edit-card{background:#eef4ff;color:var(--accent)}
+.btn-edit-card:hover{background:var(--accent);color:white}
+.btn-del-card{background:#fff0f0;color:var(--red)}
+.btn-del-card:hover{background:var(--red);color:white}
+
+/* リスト表示 */
+.biz-list-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);transition:box-shadow .2s;cursor:pointer;position:relative}
+.biz-list-item:hover{box-shadow:var(--shadow2)}
+.list-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.list-info{flex:1;min-width:0}
+.list-name{font-size:14px;font-weight:700;color:var(--navy)}
+.list-company{font-size:12px;color:var(--accent);font-weight:600}
+.list-contact{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.list-actions{display:flex;gap:6px;opacity:0;transition:opacity .2s;flex-shrink:0}
+.biz-list-item:hover .list-actions{opacity:1}
+
+/* 空状態 */
+.empty-state{text-align:center;padding:72px 24px}
+.empty-icon{font-size:56px;margin-bottom:16px}
+.empty-title{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.empty-desc{font-size:14px;color:var(--text3);line-height:1.7;margin-bottom:24px}
+
+/* モーダル */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,22,40,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--bg2);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow2);transform:translateY(20px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{padding:24px 28px 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg2);z-index:1}
+.modal-title{font-size:18px;font-weight:700;color:var(--navy)}
+.modal-close{width:32px;height:32px;border:none;background:var(--bg3);border-radius:8px;cursor:pointer;font-size:18px;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{background:var(--red);color:white}
+.modal-body{padding:20px 28px 28px}
+
+/* フォーム */
+.form-section{margin-bottom:20px}
+.form-section h3{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.1em;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em}
+.form-input,.form-select,.form-textarea{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--bg3);transition:border .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);background:white}
+.form-textarea{resize:vertical;min-height:72px;line-height:1.7}
+
+/* 画像アップロード */
+.img-upload-area{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.img-upload-area:hover{border-color:var(--accent);background:#eff6ff}
+.img-upload-area .up-icon{font-size:28px;margin-bottom:8px}
+.img-upload-area p{font-size:12px;color:var(--text3);line-height:1.6}
+.img-preview-wrap{position:relative;display:inline-block}
+.img-preview{width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+.img-remove{position:absolute;top:6px;right:6px;background:rgba(220,38,38,.9);color:white;border:none;border-radius:6px;width:24px;height:24px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+
+/* タグ入力 */
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg3);min-height:42px;cursor:text;transition:border .2s}
+.tag-input-wrap:focus-within{border-color:var(--accent);background:white}
+.tag-chip{display:inline-flex;align-items:center;gap:4px;background:var(--accent);color:white;font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px}
+.tag-chip button{background:none;border:none;color:rgba(255,255,255,.8);cursor:pointer;font-size:13px;line-height:1;padding:0}
+.tag-chip button:hover{color:white}
+.tag-raw-input{border:none;background:none;font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--text);outline:none;min-width:80px;flex:1}
+
+/* カラーアクセント選択 */
+.color-picks{display:flex;gap:8px;flex-wrap:wrap}
+.color-pick{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s}
+.color-pick.selected{border-color:white;box-shadow:0 0 0 2px var(--text)}
+.color-pick:hover{transform:scale(1.15)}
+
+/* 保存ボタン */
+.save-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;border:none;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px}
+.save-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+/* 詳細モーダル */
+.detail-card-top{height:8px;border-radius:8px 8px 0 0;margin:-1px -1px 0}
+.detail-header{padding:24px 28px 16px;text-align:center}
+.detail-avatar{width:72px;height:72px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white}
+.detail-name{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.detail-company{font-size:14px;color:var(--accent);font-weight:600;margin-bottom:2px}
+.detail-dept{font-size:13px;color:var(--text3)}
+.detail-image{width:100%;max-height:180px;object-fit:cover;border-radius:10px;border:1px solid var(--border);margin:12px 0}
+.detail-section{padding:16px 28px;border-top:1px solid var(--border)}
+.detail-section h4{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.1em;margin-bottom:10px}
+.detail-info-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);margin-bottom:8px}
+.detail-info-row:last-child{margin-bottom:0}
+.detail-info-row .di-icon{width:32px;height:32px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.detail-info-row a{color:var(--accent);text-decoration:none}
+.detail-info-row a:hover{text-decoration:underline}
+.detail-actions{padding:16px 28px 24px;display:flex;gap:10px}
+.detail-act-btn{flex:1;padding:11px;border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-edit-detail{background:var(--accent);color:white;border:none}
+.btn-edit-detail:hover{filter:brightness(1.1)}
+.btn-del-detail{background:#fff0f0;color:var(--red);border:1.5px solid #fecaca}
+.btn-del-detail:hover{background:var(--red);color:white;border-color:var(--red)}
+
+footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px;margin-top:40px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);text-decoration:none;padding:8px 18px;border-radius:8px;font-size:12px;margin-bottom:12px;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:white}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .search-inner{gap:8px}
+  .modal-body{padding:16px 20px 24px}
+  .modal-header{padding:20px 20px 0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-badge">💼 名刺管理</div>
+      <h1>名刺<span>管理アプリ</span></h1>
+      <div class="header-count" id="header-count">0件の名刺</div>
+    </div>
+    <button class="add-btn-header" onclick="openAddModal()">＋ 名刺を追加</button>
+  </div>
+</header>
+
+<div class="search-bar">
+  <div class="search-inner">
+    <div class="search-input-wrap">
+      <input class="search-input" id="search-input" type="text" placeholder="名前・会社・メールで検索..." oninput="renderCards()">
+    </div>
+    <select class="filter-select" id="group-filter" onchange="renderCards()">
+      <option value="">すべてのグループ</option>
+    </select>
+    <select class="filter-select" id="sort-select" onchange="renderCards()">
+      <option value="newest">登録順（新しい順）</option>
+      <option value="oldest">登録順（古い順）</option>
+      <option value="name">名前順</option>
+      <option value="company">会社名順</option>
+    </select>
+    <div class="view-btns">
+      <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="グリッド表示">⊞</button>
+      <button class="view-btn" id="btn-list" onclick="setView('list')" title="リスト表示">☰</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div id="cards-container"></div>
+</main>
+
+<!-- 追加・編集モーダル -->
+<div class="modal-overlay" id="form-modal" onclick="closeModalIfOverlay(event,'form-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="form-modal-title">名刺を追加</div>
+      <button class="modal-close" onclick="closeModal('form-modal')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 名刺画像 -->
+      <div class="form-section">
+        <h3>名刺画像（任意）</h3>
+        <div id="img-upload-area" class="img-upload-area" onclick="document.getElementById('card-image-input').click()">
+          <div class="up-icon">📷</div>
+          <p>クリックして名刺の写真をアップロード<br>または撮影した画像をドロップ</p>
+        </div>
+        <div id="img-preview-wrap" class="img-preview-wrap" style="display:none;width:100%">
+          <img id="img-preview" class="img-preview" src="" alt="名刺画像">
+          <button class="img-remove" onclick="removeImage()">×</button>
+        </div>
+        <input type="file" id="card-image-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+      </div>
+
+      <!-- 基本情報 -->
+      <div class="form-section">
+        <h3>基本情報</h3>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>氏名 *</label>
+            <input class="form-input" id="f-name" type="text" placeholder="山田 太郎">
+          </div>
+          <div class="form-group full">
+            <label>会社名</label>
+            <input class="form-input" id="f-company" type="text" placeholder="○○株式会社">
+          </div>
+          <div class="form-group">
+            <label>部署</label>
+            <input class="form-input" id="f-dept" type="text" placeholder="営業部">
+          </div>
+          <div class="form-group">
+            <label>役職</label>
+            <input class="form-input" id="f-title" type="text" placeholder="部長">
+          </div>
+        </div>
+      </div>
+
+      <!-- 連絡先 -->
+      <div class="form-section">
+        <h3>連絡先</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>電話番号</label>
+            <input class="form-input" id="f-phone" type="tel" placeholder="06-1234-5678">
+          </div>
+          <div class="form-group">
+            <label>携帯電話</label>
+            <input class="form-input" id="f-mobile" type="tel" placeholder="090-1234-5678">
+          </div>
+          <div class="form-group full">
+            <label>メールアドレス</label>
+            <input class="form-input" id="f-email" type="email" placeholder="yamada@example.com">
+          </div>
+          <div class="form-group full">
+            <label>会社URL</label>
+            <input class="form-input" id="f-url" type="url" placeholder="https://www.example.com">
+          </div>
+          <div class="form-group full">
+            <label>住所</label>
+            <input class="form-input" id="f-address" type="text" placeholder="大阪府大阪市○○区...">
+          </div>
+        </div>
+      </div>
+
+      <!-- グループ・タグ -->
+      <div class="form-section">
+        <h3>グループ・タグ</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>グループ</label>
+            <select class="form-select" id="f-group">
+              <option value="">未分類</option>
+              <option value="顧客">顧客</option>
+              <option value="仕入先">仕入先</option>
+              <option value="パートナー">パートナー</option>
+              <option value="社内">社内</option>
+              <option value="その他">その他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>カラー</label>
+            <div class="color-picks" id="color-picks">
+              <div class="color-pick selected" data-color="#2e7de0" style="background:#2e7de0" onclick="selectColor(this)"></div>
+              <div class="color-pick" data-color="#16a34a" style="background:#16a34a" onclick="selectColor(this)"></div>
+              <div class="color-pick" data-color="#ea580c" style="background:#ea580c" onclick="selectColor(this)"></div>
+              <div class="color-pick" data-color="#7c3aed" style="background:#7c3aed" onclick="selectColor(this)"></div>
+              <div class="color-pick" data-color="#c9a84c" style="background:#c9a84c" onclick="selectColor(this)"></div>
+              <div class="color-pick" data-color="#0d9488" style="background:#0d9488" onclick="selectColor(this)"></div>
+              <div class="color-pick" data-color="#dc2626" style="background:#dc2626" onclick="selectColor(this)"></div>
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>タグ（Enterで追加）</label>
+            <div class="tag-input-wrap" id="tag-input-wrap" onclick="document.getElementById('tag-raw-input').focus()">
+              <input class="tag-raw-input" id="tag-raw-input" type="text" placeholder="タグを入力..." onkeydown="handleTagInput(event)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- メモ -->
+      <div class="form-section">
+        <h3>メモ</h3>
+        <div class="form-group">
+          <textarea class="form-textarea" id="f-memo" placeholder="初回面談：2025年3月21日&#10;EV向け案件で接触&#10;次回フォロー予定..."></textarea>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="saveCard()">💾 保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 詳細モーダル -->
+<div class="modal-overlay" id="detail-modal" onclick="closeModalIfOverlay(event,'detail-modal')">
+  <div class="modal">
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<footer>
+  <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
+  <p>© 株式会社指月電機製作所 | 名刺管理アプリ（デモ）</p>
+</footer>
+
+<script>
+const STORAGE_KEY = 'bizcard_app_v1';
+let cards = [];
+let editingId = null;
+let currentTags = [];
+let currentColor = '#2e7de0';
+let currentImageData = null;
+let currentView = 'grid';
+
+// ===== 初期化 =====
+function init() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { cards = JSON.parse(saved); } catch(e) { cards = []; }
+  } else {
+    // サンプルデータ
+    cards = [
+      {id:1, name:'田中 誠', company:'ABC電機株式会社', dept:'技術開発部', title:'課長', phone:'06-1234-5678', mobile:'090-1234-5678', email:'tanaka@abc.co.jp', url:'https://www.abc.co.jp', address:'大阪府大阪市北区○○1-2-3', group:'顧客', tags:['EV', 'インバータ'], memo:'EV向けDCリンク案件で接触。来月サンプル提出予定。', color:'#2e7de0', image:null, createdAt: Date.now()-86400000*5},
+      {id:2, name:'佐藤 花子', company:'XYZ商事株式会社', dept:'購買部', title:'部長', phone:'03-9876-5432', mobile:'080-9876-5432', email:'sato@xyz.co.jp', url:'', address:'東京都千代田区△△2-3-4', group:'顧客', tags:['進相', '力率改善'], memo:'年間購買予算の決裁者。Q3に提案予定。', color:'#7c3aed', image:null, createdAt: Date.now()-86400000*3},
+      {id:3, name:'鈴木 一郎', company:'株式会社DEF製作所', dept:'資材調達課', title:'主任', phone:'052-1111-2222', mobile:'', email:'suzuki@def.co.jp', url:'https://www.def.co.jp', address:'愛知県名古屋市中区■■3-4-5', group:'仕入先', tags:['フィルムコンデンサ', '車載'], memo:'AEC-Q200対応品の問い合わせあり。', color:'#16a34a', image:null, createdAt: Date.now()-86400000*1}
+    ];
+    saveToStorage();
+  }
+  renderCards();
+  updateGroupFilter();
+  updateHeaderCount();
+}
+
+function saveToStorage() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+}
+
+function updateHeaderCount() {
+  const count = cards.length;
+  document.getElementById('header-count').textContent = count + '件の名刺';
+}
+
+// ===== グループフィルター更新 =====
+function updateGroupFilter() {
+  const groups = [...new Set(cards.map(c => c.group).filter(g => g))];
+  const sel = document.getElementById('group-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">すべてのグループ</option>' +
+    groups.map(g => `<option value="${g}"${cur===g?' selected':''}>${g}</option>`).join('');
+}
+
+// ===== 表示切替 =====
+function setView(v) {
+  currentView = v;
+  document.getElementById('btn-grid').classList.toggle('active', v==='grid');
+  document.getElementById('btn-list').classList.toggle('active', v==='list');
+  renderCards();
+}
+
+// ===== カード描画 =====
+function renderCards() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const gf = document.getElementById('group-filter').value;
+  const sort = document.getElementById('sort-select').value;
+  const container = document.getElementById('cards-container');
+
+  let filtered = cards.filter(c => {
+    const match = !q || [c.name,c.company,c.dept,c.email,c.memo].join(' ').toLowerCase().includes(q);
+    const grp = !gf || c.group === gf;
+    return match && grp;
+  });
+
+  if (sort === 'newest') filtered.sort((a,b) => b.createdAt - a.createdAt);
+  else if (sort === 'oldest') filtered.sort((a,b) => a.createdAt - b.createdAt);
+  else if (sort === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name,'ja'));
+  else if (sort === 'company') filtered.sort((a,b) => (a.company||'').localeCompare(b.company||'','ja'));
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${q || gf ? '🔍' : '💼'}</div>
+        <div class="empty-title">${q || gf ? '該当する名刺がありません' : 'まだ名刺が登録されていません'}</div>
+        <div class="empty-desc">${q || gf ? '検索条件を変えてお試しください' : '「＋ 名刺を追加」ボタンから登録してください'}</div>
+      </div>`;
+    return;
+  }
+
+  if (currentView === 'grid') {
+    container.className = 'cards-grid';
+    container.innerHTML = filtered.map(c => cardGridHTML(c)).join('');
+  } else {
+    container.className = 'cards-list';
+    container.innerHTML = filtered.map(c => cardListHTML(c)).join('');
+  }
+}
+
+function cardGridHTML(c) {
+  const initial = c.name ? c.name.charAt(0) : '?';
+  const imgHTML = c.image
+    ? `<div class="biz-card-image"><img src="${c.image}" alt="名刺画像"></div>`
+    : '';
+  const tagsHTML = c.tags && c.tags.length > 0
+    ? `<div class="biz-tags">${c.tags.map(t=>`<span class="biz-tag">${t}</span>`).join('')}</div>` : '';
+  return `
+    <div class="biz-card" onclick="openDetail(${c.id})">
+      <div class="biz-card-top" style="background:linear-gradient(90deg,${c.color||'#2e7de0'},${c.color||'#2e7de0'}88)"></div>
+      <div class="biz-card-body">
+        ${imgHTML}
+        <div class="biz-name">${c.name}</div>
+        <div class="biz-company">${c.company||''}</div>
+        <div class="biz-dept">${[c.dept,c.title].filter(Boolean).join(' / ')}</div>
+        <div class="biz-info">
+          ${c.phone?`<div class="biz-info-item"><span class="icon">📞</span>${c.phone}</div>`:''}
+          ${c.email?`<div class="biz-info-item"><span class="icon">✉️</span>${c.email}</div>`:''}
+        </div>
+        ${tagsHTML}
+      </div>
+      <div class="biz-card-actions">
+        <button class="card-action-btn btn-edit-card" onclick="event.stopPropagation();openEditModal(${c.id})" title="編集">✏️</button>
+        <button class="card-action-btn btn-del-card" onclick="event.stopPropagation();deleteCard(${c.id})" title="削除">🗑️</button>
+      </div>
+    </div>`;
+}
+
+function cardListHTML(c) {
+  const initial = c.name ? c.name.charAt(0) : '?';
+  const tagsHTML = c.tags && c.tags.length > 0
+    ? `<div class="list-tags">${c.tags.map(t=>`<span class="biz-tag">${t}</span>`).join('')}</div>` : '';
+  return `
+    <div class="biz-list-item" onclick="openDetail(${c.id})">
+      <div class="list-avatar" style="background:linear-gradient(135deg,${c.color||'#2e7de0'},${c.color||'#2e7de0'}aa)">${initial}</div>
+      <div class="list-info">
+        <div class="list-name">${c.name}</div>
+        <div class="list-company">${c.company||''}${c.dept?' — '+c.dept:''}</div>
+        <div class="list-contact">${[c.phone,c.email].filter(Boolean).join('　')}</div>
+        ${tagsHTML}
+      </div>
+      <div class="list-actions">
+        <button class="card-action-btn btn-edit-card" onclick="event.stopPropagation();openEditModal(${c.id})" title="編集">✏️</button>
+        <button class="card-action-btn btn-del-card" onclick="event.stopPropagation();deleteCard(${c.id})" title="削除">🗑️</button>
+      </div>
+    </div>`;
+}
+
+// ===== モーダル制御 =====
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeModalIfOverlay(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+// ===== 追加モーダル =====
+function openAddModal() {
+  editingId = null;
+  currentTags = [];
+  currentColor = '#2e7de0';
+  currentImageData = null;
+  resetForm();
+  document.getElementById('form-modal-title').textContent = '名刺を追加';
+  openModal('form-modal');
+}
+
+function openEditModal(id) {
+  const c = cards.find(x => x.id === id);
+  if (!c) return;
+  editingId = id;
+  currentTags = [...(c.tags || [])];
+  currentColor = c.color || '#2e7de0';
+  currentImageData = c.image || null;
+  document.getElementById('f-name').value = c.name || '';
+  document.getElementById('f-company').value = c.company || '';
+  document.getElementById('f-dept').value = c.dept || '';
+  document.getElementById('f-title').value = c.title || '';
+  document.getElementById('f-phone').value = c.phone || '';
+  document.getElementById('f-mobile').value = c.mobile || '';
+  document.getElementById('f-email').value = c.email || '';
+  document.getElementById('f-url').value = c.url || '';
+  document.getElementById('f-address').value = c.address || '';
+  document.getElementById('f-group').value = c.group || '';
+  document.getElementById('f-memo').value = c.memo || '';
+  renderTagChips();
+  renderColorPicks();
+  if (c.image) {
+    document.getElementById('img-preview').src = c.image;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+    document.getElementById('img-upload-area').style.display = 'none';
+  } else {
+    document.getElementById('img-preview-wrap').style.display = 'none';
+    document.getElementById('img-upload-area').style.display = 'block';
+  }
+  document.getElementById('form-modal-title').textContent = '名刺を編集';
+  closeModal('detail-modal');
+  openModal('form-modal');
+}
+
+function resetForm() {
+  ['f-name','f-company','f-dept','f-title','f-phone','f-mobile','f-email','f-url','f-address','f-memo'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-group').value = '';
+  document.getElementById('img-preview-wrap').style.display = 'none';
+  document.getElementById('img-upload-area').style.display = 'block';
+  renderTagChips();
+  renderColorPicks();
+}
+
+// ===== 保存 =====
+function saveCard() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('氏名を入力してください'); return; }
+  const card = {
+    id: editingId || Date.now(),
+    name,
+    company: document.getElementById('f-company').value.trim(),
+    dept: document.getElementById('f-dept').value.trim(),
+    title: document.getElementById('f-title').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    mobile: document.getElementById('f-mobile').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    url: document.getElementById('f-url').value.trim(),
+    address: document.getElementById('f-address').value.trim(),
+    group: document.getElementById('f-group').value,
+    tags: [...currentTags],
+    memo: document.getElementById('f-memo').value.trim(),
+    color: currentColor,
+    image: currentImageData,
+    createdAt: editingId ? cards.find(c=>c.id===editingId)?.createdAt || Date.now() : Date.now()
+  };
+  if (editingId) {
+    const idx = cards.findIndex(c => c.id === editingId);
+    if (idx >= 0) cards[idx] = card;
+  } else {
+    cards.unshift(card);
+  }
+  saveToStorage();
+  renderCards();
+  updateGroupFilter();
+  updateHeaderCount();
+  closeModal('form-modal');
+}
+
+// ===== 削除 =====
+function deleteCard(id) {
+  if (!confirm('この名刺を削除しますか？')) return;
+  cards = cards.filter(c => c.id !== id);
+  saveToStorage();
+  renderCards();
+  updateGroupFilter();
+  updateHeaderCount();
+  closeModal('detail-modal');
+}
+
+// ===== 詳細 =====
+function openDetail(id) {
+  const c = cards.find(x => x.id === id);
+  if (!c) return;
+  const initial = c.name ? c.name.charAt(0) : '?';
+  const tagsHTML = c.tags && c.tags.length > 0
+    ? c.tags.map(t=>`<span class="biz-tag">${t}</span>`).join(' ') : '';
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-card-top" style="background:linear-gradient(90deg,${c.color||'#2e7de0'},${c.color||'#2e7de0'}66)"></div>
+    <div class="detail-header">
+      <div class="detail-avatar" style="background:linear-gradient(135deg,${c.color||'#2e7de0'},${c.color||'#2e7de0'}88)">${initial}</div>
+      <div class="detail-name">${c.name}</div>
+      <div class="detail-company">${c.company||''}</div>
+      <div class="detail-dept">${[c.dept,c.title].filter(Boolean).join(' / ')}</div>
+      ${tagsHTML ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px;justify-content:center">${tagsHTML}</div>` : ''}
+    </div>
+    ${c.image ? `<div style="padding:0 28px"><img src="${c.image}" class="detail-image" alt="名刺画像"></div>` : ''}
+    <div class="detail-section">
+      <h4>連絡先</h4>
+      ${c.phone?`<div class="detail-info-row"><div class="di-icon">📞</div><a href="tel:${c.phone}">${c.phone}</a></div>`:''}
+      ${c.mobile?`<div class="detail-info-row"><div class="di-icon">📱</div><a href="tel:${c.mobile}">${c.mobile}</a></div>`:''}
+      ${c.email?`<div class="detail-info-row"><div class="di-icon">✉️</div><a href="mailto:${c.email}">${c.email}</a></div>`:''}
+      ${c.url?`<div class="detail-info-row"><div class="di-icon">🌐</div><a href="${c.url}" target="_blank">${c.url}</a></div>`:''}
+      ${c.address?`<div class="detail-info-row"><div class="di-icon">📍</div>${c.address}</div>`:''}
+    </div>
+    ${c.group?`<div class="detail-section"><h4>グループ</h4><div class="detail-info-row"><div class="di-icon">🗂️</div>${c.group}</div></div>`:''}
+    ${c.memo?`<div class="detail-section"><h4>メモ</h4><div style="font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap">${c.memo}</div></div>`:''}
+    <div class="detail-actions">
+      <button class="detail-act-btn btn-edit-detail" onclick="openEditModal(${c.id})">✏️ 編集</button>
+      <button class="detail-act-btn btn-del-detail" onclick="deleteCard(${c.id})">🗑️ 削除</button>
+    </div>
+  `;
+  openModal('detail-modal');
+}
+
+// ===== 画像アップロード =====
+function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentImageData = ev.target.result;
+    document.getElementById('img-preview').src = ev.target.result;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+    document.getElementById('img-upload-area').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage() {
+  currentImageData = null;
+  document.getElementById('img-preview-wrap').style.display = 'none';
+  document.getElementById('img-upload-area').style.display = 'block';
+  document.getElementById('card-image-input').value = '';
+}
+
+// ===== タグ管理 =====
+function handleTagInput(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,/g,'');
+    if (val && !currentTags.includes(val)) {
+      currentTags.push(val);
+      renderTagChips();
+    }
+    e.target.value = '';
+  } else if (e.key === 'Backspace' && !e.target.value && currentTags.length > 0) {
+    currentTags.pop();
+    renderTagChips();
+  }
+}
+function removeTag(idx) {
+  currentTags.splice(idx, 1);
+  renderTagChips();
+}
+function renderTagChips() {
+  const wrap = document.getElementById('tag-input-wrap');
+  const input = document.getElementById('tag-raw-input');
+  wrap.innerHTML = '';
+  currentTags.forEach((t, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${t}<button onclick="removeTag(${i})">×</button>`;
+    wrap.appendChild(chip);
+  });
+  wrap.appendChild(input);
+}
+
+// ===== カラー選択 =====
+function selectColor(el) {
+  currentColor = el.dataset.color;
+  renderColorPicks();
+}
+function renderColorPicks() {
+  document.querySelectorAll('.color-pick').forEach(el => {
+    el.classList.toggle('selected', el.dataset.color === currentColor);
+  });
+}
+
+// 起動
+init();
+</script>
+</body>
+</html>
