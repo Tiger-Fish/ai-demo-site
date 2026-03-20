@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提案書ジェネレーター | 指月電機製作所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628;--navy2:#132040;--navy3:#1e3060;
+  --accent:#2e7de0;--accent2:#5b9ef7;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --green:#16a34a;--teal:#0d9488;--orange:#ea580c;
+  --text:#1a1a2e;--text2:#3a4a6a;--text3:#6a7a9a;
+  --bg:#f4f6fb;--bg2:#fff;--bg3:#eef2fa;
+  --border:#dde4f0;
+  --shadow:0 2px 16px rgba(10,22,40,.08);
+  --shadow2:0 8px 32px rgba(10,22,40,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);color:white;padding:0;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.15),transparent 70%)}
+.header-inner{max-width:860px;margin:0 auto;padding:40px 24px 36px;position:relative;z-index:1}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.2);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:20px;margin-bottom:14px}
+header h1{font-size:clamp(22px,4vw,32px);font-weight:700;line-height:1.35;margin-bottom:8px}
+header h1 span{color:var(--gold2)}
+header p{font-size:14px;color:rgba(255,255,255,.7);line-height:1.7}
+
+main{max-width:860px;margin:0 auto;padding:40px 24px 80px}
+
+.form-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:32px;box-shadow:var(--shadow);margin-bottom:20px}
+.form-card h2{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.form-card h2 .icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--navy3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.05em}
+.form-input,.form-select,.form-textarea{padding:11px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:var(--text);background:var(--bg3);transition:border .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent);background:white}
+.form-textarea{min-height:90px;resize:vertical}
+.form-select{cursor:pointer}
+
+.generate-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;border:none;border-radius:12px;font-family:'Noto Sans JP',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.generate-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.generate-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* ローディング */
+#loading{display:none;text-align:center;padding:48px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-steps{display:flex;flex-direction:column;gap:8px;max-width:280px;margin:20px auto 0}
+.loading-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3);opacity:.4;transition:opacity .3s}
+.loading-step.active{opacity:1;color:var(--accent)}
+.loading-step.done{opacity:.7;color:var(--green)}
+
+/* 結果 */
+#result-section{display:none}
+.proposal-doc{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow2)}
+.doc-header{background:linear-gradient(135deg,var(--navy),var(--navy3));color:white;padding:36px 40px}
+.doc-header .company{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.1em;margin-bottom:6px}
+.doc-header h2{font-size:clamp(18px,3vw,26px);font-weight:700;line-height:1.4;margin-bottom:12px}
+.doc-header .meta{display:flex;gap:20px;flex-wrap:wrap}
+.doc-header .meta span{font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:6px}
+.doc-body{padding:36px 40px}
+.doc-section{margin-bottom:28px}
+.doc-section h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border);position:relative}
+.doc-section h3::after{content:'';position:absolute;bottom:-2px;left:0;width:40px;height:2px;background:var(--accent)}
+.doc-section p,.doc-section li{font-size:14px;color:var(--text2);line-height:1.85}
+.doc-section ul{padding-left:20px}
+.doc-section li{margin-bottom:4px}
+.highlight-box{background:linear-gradient(135deg,#eef4ff,#f0f8ff);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:16px 20px;font-size:14px;color:#2a3a5a;line-height:1.85;margin:12px 0}
+.spec-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.spec-table th{background:var(--navy);color:white;padding:10px 14px;text-align:left;font-weight:500;font-size:12px}
+.spec-table td{padding:10px 14px;border-bottom:1px solid var(--border);line-height:1.6}
+.spec-table tr:nth-child(even) td{background:#f8faff}
+.doc-footer{background:var(--bg3);border-top:1px solid var(--border);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.doc-footer .company-info{font-size:12px;color:var(--text3);line-height:1.6}
+
+.action-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.action-btn{padding:11px 22px;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-print{background:var(--navy);color:white;border:none}
+.btn-print:hover{background:var(--navy3)}
+.btn-reset{background:var(--bg3);color:var(--text2);border:1.5px solid var(--border)}
+.btn-reset:hover{border-color:var(--accent);color:var(--accent)}
+
+footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);text-decoration:none;padding:8px 18px;border-radius:8px;font-size:12px;margin-bottom:12px;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:white}
+
+@media print{header,footer,.action-btns,#form-section{display:none!important}.proposal-doc{box-shadow:none;border:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">📝 AI提案書ジェネレーター</div>
+    <h1>営業<span>提案書</span><br>ジェネレーター</h1>
+    <p>顧客情報と条件を入力するだけで、プロ品質の提案書ドラフトをAIが即時生成します。</p>
+  </div>
+</header>
+
+<main>
+  <div id="form-section">
+    <div class="form-card">
+      <h2><span class="icon">🏢</span>顧客・商談情報</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>顧客会社名</label>
+          <input class="form-input" id="customer" placeholder="例：○○電機株式会社" type="text">
+        </div>
+        <div class="form-group">
+          <label>担当者名</label>
+          <input class="form-input" id="contact" placeholder="例：山田 太郎 様" type="text">
+        </div>
+        <div class="form-group">
+          <label>顧客業種</label>
+          <select class="form-select" id="industry">
+            <option value="">選択してください</option>
+            <option>自動車・EV メーカー</option>
+            <option>産業機器メーカー</option>
+            <option>電力・エネルギー</option>
+            <option>鉄道・交通インフラ</option>
+            <option>医療機器メーカー</option>
+            <option>音響・電子機器メーカー</option>
+            <option>その他製造業</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>提案製品カテゴリ</label>
+          <select class="form-select" id="product">
+            <option value="">選択してください</option>
+            <option>DCリンク用フィルムコンデンサ</option>
+            <option>スナバ用フィルムコンデンサ</option>
+            <option>PPフィルムコンデンサ（汎用）</option>
+            <option>車載用フィルムコンデンサ</option>
+            <option>EMIフィルタ用（X/Yコンデンサ）</option>
+            <option>進相コンデンサ</option>
+            <option>フィルムコンデンサ全般</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>顧客の課題・ニーズ（わかっている範囲で）</label>
+          <textarea class="form-textarea" id="needs" placeholder="例：現在使用中の電解コンデンサの寿命が短く、設備の定期メンテナンスコストが課題。EVインバータ向けに高電圧・高リップル電流対応のコンデンサを探している。"></textarea>
+        </div>
+        <div class="form-group full">
+          <label>技術仕様・要件（わかっている範囲で）</label>
+          <textarea class="form-textarea" id="specs" placeholder="例：定格電圧800VDC、静電容量200〜500μF、動作温度-40〜+105℃、AEC-Q200対応希望"></textarea>
+        </div>
+        <div class="form-group">
+          <label>提案の目的・ゴール</label>
+          <select class="form-select" id="goal">
+            <option value="">選択してください</option>
+            <option>新規採用の獲得</option>
+            <option>既存製品からの切り替え</option>
+            <option>追加ラインへの横展開</option>
+            <option>サンプル評価の依頼</option>
+            <option>技術相談・ヒアリング</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>提案トーン</label>
+          <select class="form-select" id="tone">
+            <option value="技術訴求型">技術訴求型（スペック・信頼性重視）</option>
+            <option value="コスト訴求型">コスト訴求型（LCC・費用対効果重視）</option>
+            <option value="パートナーシップ型">パートナーシップ型（長期関係・サポート重視）</option>
+          </select>
+        </div>
+      </div>
+      <button class="generate-btn" id="gen-btn" onclick="generateProposal()">
+        🤖 提案書を自動生成する
+      </button>
+    </div>
+  </div>
+
+  <div id="loading">
+    <div class="loading-spinner"></div>
+    <p style="color:var(--text3);font-size:14px;font-weight:500">AIが提案書を作成中...</p>
+    <div class="loading-steps">
+      <div class="loading-step active" id="ls1">📊 顧客ニーズを分析中</div>
+      <div class="loading-step" id="ls2">🔍 最適製品を選定中</div>
+      <div class="loading-step" id="ls3">✍️ 提案文を生成中</div>
+      <div class="loading-step" id="ls4">📄 文書を整形中</div>
+    </div>
+  </div>
+
+  <div id="result-section">
+    <div class="proposal-doc" id="proposal-doc"></div>
+    <div class="action-btns">
+      <button class="action-btn btn-print" onclick="window.print()">🖨️ 印刷・PDF保存</button>
+      <button class="action-btn btn-reset" onclick="location.reload()">↺ 新しい提案書を作成</button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
+  <p>© 株式会社指月電機製作所 | AI提案書ジェネレーター（デモ）</p>
+</footer>
+
+<script>
+function animateLoading() {
+  const steps = ['ls1','ls2','ls3','ls4'];
+  let i = 0;
+  document.getElementById('ls1').classList.add('active');
+  const timer = setInterval(() => {
+    if(i < steps.length - 1) {
+      document.getElementById(steps[i]).classList.remove('active');
+      document.getElementById(steps[i]).classList.add('done');
+      document.getElementById(steps[i]).textContent = '✓ ' + document.getElementById(steps[i]).textContent.slice(2);
+      i++;
+      document.getElementById(steps[i]).classList.add('active');
+    } else {
+      clearInterval(timer);
+    }
+  }, 900);
+}
+
+async function generateProposal() {
+  const customer = document.getElementById('customer').value || '○○株式会社';
+  const contact = document.getElementById('contact').value || 'ご担当者';
+  const industry = document.getElementById('industry').value || '製造業';
+  const product = document.getElementById('product').value || 'フィルムコンデンサ';
+  const needs = document.getElementById('needs').value || '高信頼性・長寿命のコンデンサを求めている';
+  const specs = document.getElementById('specs').value || '要確認';
+  const goal = document.getElementById('goal').value || '新規採用の獲得';
+  const tone = document.getElementById('tone').value || '技術訴求型';
+
+  document.getElementById('form-section').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  animateLoading();
+
+  const today = new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+
+  const prompt = `あなたは指月電機製作所の優秀な営業担当者です。以下の条件で営業提案書を作成してください。
+
+【商談情報】
+- 顧客: ${customer}（${industry}）
+- 担当者: ${contact}
+- 提案製品: ${product}
+- 顧客の課題・ニーズ: ${needs}
+- 技術仕様・要件: ${specs}
+- 提案目標: ${goal}
+- 提案トーン: ${tone}
+
+以下のJSON形式のみで回答してください：
+{
+  "title": "提案書タイトル",
+  "executive_summary": "エグゼクティブサマリー（3〜4文）",
+  "customer_challenges": ["課題1", "課題2", "課題3"],
+  "proposed_solution": "提案ソリューションの説明（150字程度）",
+  "product_name": "提案製品名",
+  "product_features": [
+    {"name": "特徴名", "detail": "詳細説明"},
+    {"name": "特徴名", "detail": "詳細説明"},
+    {"name": "特徴名", "detail": "詳細説明"}
+  ],
+  "specs": [
+    {"item": "項目名", "value": "値"},
+    {"item": "項目名", "value": "値"},
+    {"item": "項目名", "value": "値"},
+    {"item": "項目名", "value": "値"}
+  ],
+  "why_shizuki": "指月電機を選ぶ理由（100字程度）",
+  "expected_benefits": ["期待効果1", "期待効果2", "期待効果3"],
+  "next_action": "次のアクション提案（具体的に）"
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1500,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await response.json();
+    const text = data.content[0].text.replace(/```json|```/g,'').trim();
+    const r = JSON.parse(text);
+    showProposal(r, customer, contact, today);
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('result-section').style.display = 'block';
+    document.getElementById('proposal-doc').innerHTML = `
+      <div style="text-align:center;padding:48px 24px">
+        <div style="font-size:40px;margin-bottom:16px">🔑</div>
+        <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:12px">デモのため回答は生成されません</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.85;max-width:400px;margin:0 auto 24px;background:var(--bg3);border-radius:10px;padding:16px 20px;border-left:4px solid var(--gold)">
+          APIキーを設定することで動作します。<br>
+          <span style="font-size:12px;color:var(--text3)">※ APIキーの利用には別途課金が必要になります。</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function showProposal(r, customer, contact, today) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('result-section').style.display = 'block';
+
+  const challengesHTML = r.customer_challenges.map(c => `<li>${c}</li>`).join('');
+  const featuresHTML = r.product_features.map(f =>
+    `<div style="background:var(--bg3);border-radius:9px;padding:14px 16px;margin-bottom:10px"><strong style="color:var(--navy);font-size:14px">✦ ${f.name}</strong><p style="font-size:13px;color:var(--text2);margin-top:4px;line-height:1.7">${f.detail}</p></div>`
+  ).join('');
+  const specsHTML = r.specs.map(s =>
+    `<tr><td style="font-weight:600;color:var(--navy);width:40%">${s.item}</td><td style="font-family:'JetBrains Mono',monospace">${s.value}</td></tr>`
+  ).join('');
+  const benefitsHTML = r.expected_benefits.map(b => `<li>${b}</li>`).join('');
+
+  document.getElementById('proposal-doc').innerHTML = `
+    <div class="doc-header">
+      <div class="company">${customer} 御中</div>
+      <h2>${r.title}</h2>
+      <div class="meta">
+        <span>📅 ${today}</span>
+        <span>👤 ${contact}</span>
+        <span>🏢 株式会社指月電機製作所 営業企画部</span>
+      </div>
+    </div>
+    <div class="doc-body">
+      <div class="doc-section">
+        <h3>エグゼクティブサマリー</h3>
+        <div class="highlight-box">${r.executive_summary}</div>
+      </div>
+      <div class="doc-section">
+        <h3>貴社の課題認識</h3>
+        <ul>${challengesHTML}</ul>
+      </div>
+      <div class="doc-section">
+        <h3>提案ソリューション</h3>
+        <p>${r.proposed_solution}</p>
+        <div style="margin-top:16px">${featuresHTML}</div>
+      </div>
+      <div class="doc-section">
+        <h3>製品仕様概要（${r.product_name}）</h3>
+        <table class="spec-table">
+          <thead><tr><th>仕様項目</th><th>値・内容</th></tr></thead>
+          <tbody>${specsHTML}</tbody>
+        </table>
+      </div>
+      <div class="doc-section">
+        <h3>指月電機製作所を選ぶ理由</h3>
+        <p>${r.why_shizuki}</p>
+      </div>
+      <div class="doc-section">
+        <h3>期待される導入効果</h3>
+        <ul>${benefitsHTML}</ul>
+      </div>
+      <div class="doc-section">
+        <h3>次のステップ</h3>
+        <div class="highlight-box" style="background:linear-gradient(135deg,#fffbf0,#fff8e8);border-left-color:var(--gold)">
+          <strong>📋 ${r.next_action}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="doc-footer">
+      <div class="company-info">
+        株式会社指月電機製作所<br>
+        営業企画部<br>
+        ※ 本提案書はAIが生成したドラフトです。詳細は担当営業にご確認ください。
+      </div>
+      <div style="font-size:11px;color:var(--text3)">作成日：${today}</div>
+    </div>
+  `;
+
+  document.getElementById('result-section').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
