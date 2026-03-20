@@ -239,6 +239,13 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;paddi
           <button class="img-remove" onclick="removeImage()">×</button>
         </div>
         <input type="file" id="card-image-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+        <!-- AI読取ボタン -->
+        <div id="ai-scan-wrap" style="display:none;margin-top:10px">
+          <button onclick="scanCardImage()" style="width:100%;padding:11px;background:linear-gradient(135deg,var(--teal),var(--green));color:white;border:none;border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s" id="ai-scan-btn">
+            🤖 AIで名刺を読み取ってフォームに自動入力
+          </button>
+          <div id="ai-scan-status" style="font-size:12px;color:var(--text3);text-align:center;margin-top:6px;min-height:16px"></div>
+        </div>
       </div>
 
       <!-- 基本情報 -->
@@ -650,6 +657,7 @@ function handleImageUpload(e) {
     document.getElementById('img-preview').src = ev.target.result;
     document.getElementById('img-preview-wrap').style.display = 'block';
     document.getElementById('img-upload-area').style.display = 'none';
+    document.getElementById('ai-scan-wrap').style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
@@ -657,7 +665,79 @@ function removeImage() {
   currentImageData = null;
   document.getElementById('img-preview-wrap').style.display = 'none';
   document.getElementById('img-upload-area').style.display = 'block';
+  document.getElementById('ai-scan-wrap').style.display = 'none';
   document.getElementById('card-image-input').value = '';
+}
+
+// ===== AI名刺読取 =====
+async function scanCardImage() {
+  if (!currentImageData) return;
+  const btn = document.getElementById('ai-scan-btn');
+  const status = document.getElementById('ai-scan-status');
+  btn.disabled = true;
+  btn.textContent = '🔄 読み取り中...';
+  status.textContent = '';
+
+  // base64のデータ部分だけ取得
+  const base64 = currentImageData.split(',')[1];
+  const mimeType = currentImageData.split(';')[0].split(':')[1] || 'image/jpeg';
+
+  const prompt = `この名刺画像から情報を読み取ってください。
+
+以下のJSON形式のみで回答してください（読み取れない項目は空文字）：
+{
+  "name": "氏名（フルネーム）",
+  "company": "会社名",
+  "dept": "部署名",
+  "title": "役職",
+  "phone": "電話番号（会社）",
+  "mobile": "携帯電話番号",
+  "email": "メールアドレス",
+  "url": "WebサイトURL",
+  "address": "住所"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const r = JSON.parse(text);
+
+    // フォームに転記
+    if (r.name) document.getElementById('f-name').value = r.name;
+    if (r.company) document.getElementById('f-company').value = r.company;
+    if (r.dept) document.getElementById('f-dept').value = r.dept;
+    if (r.title) document.getElementById('f-title').value = r.title;
+    if (r.phone) document.getElementById('f-phone').value = r.phone;
+    if (r.mobile) document.getElementById('f-mobile').value = r.mobile;
+    if (r.email) document.getElementById('f-email').value = r.email;
+    if (r.url) document.getElementById('f-url').value = r.url;
+    if (r.address) document.getElementById('f-address').value = r.address;
+
+    btn.textContent = '✅ 読み取り完了！内容を確認してください';
+    btn.style.background = 'linear-gradient(135deg,var(--green),var(--teal))';
+    status.textContent = '内容を確認・修正して「保存する」を押してください';
+    status.style.color = 'var(--green)';
+  } catch(e) {
+    btn.textContent = '🤖 AIで名刺を読み取ってフォームに自動入力';
+    btn.disabled = false;
+    status.innerHTML = '🔑 <strong>デモのため読み取りは動作しません。</strong>APIキーを設定することで動作します。<br><small>※ APIキーの利用には別途課金が必要です。</small>';
+    status.style.color = 'var(--orange)';
+  }
 }
 
 // ===== タグ管理 =====
