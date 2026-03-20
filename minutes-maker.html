@@ -373,7 +373,10 @@ color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px;margin-
 <script>
 // ===== タブ切り替え =====
 function switchTab(tab) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = '';  // display:noneを必ずリセット
+  });
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(tab + '-panel').classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
@@ -386,7 +389,7 @@ async function generateFromEmail() {
   const body = document.getElementById('email-body').value;
   if (!body.trim()) { alert('テキストを入力してください'); return; }
 
-  document.getElementById('email-panel').style.display = 'none';
+  document.getElementById('email-panel').classList.remove('active');
   document.getElementById('loading').style.display = 'block';
 
   const prompt = `以下のメール・テキストから議事録を生成してください。
@@ -517,7 +520,7 @@ async function generateFromVoice() {
     alert('音声を録音してください'); return;
   }
 
-  document.getElementById('voice-panel').style.display = 'none';
+  document.getElementById('voice-panel').classList.remove('active');
   document.getElementById('loading').style.display = 'block';
 
   const prompt = `以下の音声文字起こしから議事録を生成してください。
@@ -589,7 +592,7 @@ async function generateFromImage() {
   const title = document.getElementById('image-title').value || '会議';
   if (!uploadedImageBase64) { alert('画像をアップロードしてください'); return; }
 
-  document.getElementById('image-panel').style.display = 'none';
+  document.getElementById('image-panel').classList.remove('active');
   document.getElementById('loading').style.display = 'block';
 
   const prompt = `この画像はホワイトボードや手書きメモの写真です。画像に書かれている内容を読み取り、議事録を生成してください。
@@ -634,8 +637,8 @@ JSON形式のみで回答してください：
 // ===== デモメッセージ（API未設定時） =====
 function showDemoMessageFull(mode) {
   document.getElementById('loading').style.display = 'none';
-  document.querySelectorAll('.panel').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
-  document.getElementById('preview-panel').style.display = 'block';
+  
+  document.getElementById('preview-panel').classList.add('active'); document.getElementById('tab-preview').classList.add('active');
   document.getElementById('preview-panel').classList.add('active');
   document.getElementById('tab-preview').classList.add('active');
   document.getElementById('minutes-output').innerHTML = `
@@ -733,7 +736,7 @@ async function generateMinutes() {
   const dateStr = date ? new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
   // AI生成を試みる
-  document.getElementById('input-panel').style.display = 'none';
+  document.getElementById('input-panel').classList.remove('active');
   document.getElementById('loading').style.display = 'block';
 
   const prompt = `あなたは議事録作成の専門家です。以下の情報から正式な議事録を作成してください。
@@ -870,7 +873,7 @@ function resetAll() {
   uploadedImageBase64 = null;
   fullTranscript = '';
   document.querySelectorAll('.panel').forEach(p => { p.style.display = ''; p.classList.remove('active'); });
-  document.getElementById('input-panel').style.display = 'block';
+  
   document.getElementById('minutes-output').innerHTML = '';
   document.getElementById('image-preview').style.display = 'none';
   document.getElementById('drop-zone').style.display = 'block';
