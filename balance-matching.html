@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>残高照合アプリ | 指月電機製作所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#132040;--navy3:#1e3060;
+  --accent:#2e7de0;--accent2:#5b9ef7;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --green:#16a34a;--teal:#0d9488;
+  --orange:#ea580c;--red:#dc2626;--yellow:#d97706;
+  --purple:#7c3aed;
+  --text:#1a1a2e;--text2:#3a4a6a;--text3:#6a7a9a;
+  --bg:#f4f6fb;--bg2:#fff;--bg3:#eef2fa;
+  --border:#dde4f0;
+  --shadow:0 2px 16px rgba(10,22,40,.08);
+  --shadow2:0 8px 32px rgba(10,22,40,.14);
+  --radius:12px;
+
+  /* 差異カラー */
+  --c-miss:#fef2f2;--c-miss-b:#dc2626;--c-miss-t:#991b1b;   /* 未検収：赤 */
+  --c-price:#fff7ed;--c-price-b:#ea580c;--c-price-t:#9a3412; /* 単価差異：オレンジ */
+  --c-tax:#fefce8;--c-tax-b:#d97706;--c-tax-t:#92400e;       /* 消費税誤差：黄 */
+  --c-delay:#f0fdf4;--c-delay-b:#16a34a;--c-delay-t:#14532d; /* 計上遅れ：緑 */
+  --c-ok:#f0f9ff;--c-ok-b:#2e7de0;--c-ok-t:#1e3a6e;         /* 一致：青 */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);color:white;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(46,125,224,.2),transparent 70%)}
+.header-inner{max-width:1100px;margin:0 auto;padding:36px 24px 32px;position:relative;z-index:1}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.2);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:20px;margin-bottom:14px}
+header h1{font-size:clamp(20px,3.5vw,28px);font-weight:700;line-height:1.3;margin-bottom:6px}
+header h1 span{color:var(--accent2)}
+header p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.7}
+
+main{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+
+/* ===== STEP カード ===== */
+.steps-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+@media(max-width:700px){.steps-wrap{grid-template-columns:1fr}}
+.step-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.step-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-title{font-size:15px;font-weight:700;color:var(--navy)}
+.step-sub{font-size:12px;color:var(--text3);margin-top:1px}
+
+/* ファイルアップロードゾーン */
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:#eff6ff}
+.upload-zone.has-file{border-color:var(--green);background:#f0fdf4;border-style:solid}
+.upload-zone .uz-icon{font-size:28px;margin-bottom:8px}
+.upload-zone p{font-size:12px;color:var(--text3);line-height:1.6}
+.upload-zone .file-name{font-size:13px;font-weight:700;color:var(--green);margin-top:6px}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* 列マッピング */
+.mapping-wrap{margin-top:16px;display:none}
+.mapping-wrap.show{display:block}
+.mapping-title{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.08em;margin-bottom:8px}
+.mapping-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:500px){.mapping-grid{grid-template-columns:1fr}}
+.mapping-row{display:flex;flex-direction:column;gap:3px}
+.mapping-row label{font-size:11px;color:var(--text3);font-weight:600}
+.mapping-select{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'Noto Sans JP',sans-serif;font-size:12px;background:var(--bg3);color:var(--text);transition:border .2s}
+.mapping-select:focus{outline:none;border-color:var(--accent)}
+.mapping-select.required-field{border-color:var(--accent)}
+
+/* オプション */
+.options-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow);margin-bottom:24px}
+.options-card h3{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px}
+.options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.option-group{display:flex;flex-direction:column;gap:4px}
+.option-group label{font-size:11px;font-weight:700;color:var(--text3)}
+.option-input{padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'Noto Sans JP',sans-serif;font-size:13px;background:var(--bg3)}
+.option-input:focus{outline:none;border-color:var(--accent)}
+
+/* 照合ボタン */
+.match-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;border:none;border-radius:var(--radius);font-family:'Noto Sans JP',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px}
+.match-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.match-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* サマリー */
+.summary-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+.summary-card{border-radius:10px;padding:16px 18px;border:1px solid}
+.summary-card .s-count{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1}
+.summary-card .s-label{font-size:11px;font-weight:700;letter-spacing:.05em;margin-top:4px}
+.summary-card .s-amount{font-size:12px;font-family:'JetBrains Mono',monospace;margin-top:4px;opacity:.8}
+.s-ok{background:var(--c-ok);border-color:var(--c-ok-b);color:var(--c-ok-t)}
+.s-miss{background:var(--c-miss);border-color:var(--c-miss-b);color:var(--c-miss-t)}
+.s-price{background:var(--c-price);border-color:var(--c-price-b);color:var(--c-price-t)}
+.s-tax{background:var(--c-tax);border-color:var(--c-tax-b);color:var(--c-tax-t)}
+.s-delay{background:var(--c-delay);border-color:var(--c-delay-b);color:var(--c-delay-t)}
+
+/* フィルターバー */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.filter-btn{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg3);font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text2)}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+.filter-btn.active{background:var(--navy);border-color:var(--navy);color:white}
+.filter-btn.f-miss.active{background:var(--c-miss-b);border-color:var(--c-miss-b)}
+.filter-btn.f-price.active{background:var(--c-price-b);border-color:var(--c-price-b)}
+.filter-btn.f-tax.active{background:var(--c-tax-b);border-color:var(--c-tax-b)}
+.filter-btn.f-delay.active{background:var(--c-delay-b);border-color:var(--c-delay-b)}
+.filter-btn.f-ok.active{background:var(--c-ok-b);border-color:var(--c-ok-b)}
+.dl-btn{margin-left:auto;padding:8px 18px;background:linear-gradient(135deg,var(--green),var(--teal));color:white;border:none;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.dl-btn:hover{filter:brightness(1.08)}
+.print-btn{padding:8px 18px;background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--text2);transition:all .2s}
+.print-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* 照合結果テーブル */
+.result-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.result-table-wrap{overflow-x:auto}
+.result-table{width:100%;border-collapse:collapse;font-size:12px}
+.result-table th{background:var(--navy);color:white;padding:10px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.03em;white-space:nowrap;position:sticky;top:0}
+.result-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.result-table tr:last-child td{border-bottom:none}
+.result-table .num{font-family:'JetBrains Mono',monospace;text-align:right}
+.result-table .diff-num{font-family:'JetBrains Mono',monospace;text-align:right;font-weight:700}
+
+/* 差異バッジ */
+.diff-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap}
+.badge-ok{background:var(--c-ok);color:var(--c-ok-t);border:1px solid var(--c-ok-b)}
+.badge-miss{background:var(--c-miss);color:var(--c-miss-t);border:1px solid var(--c-miss-b)}
+.badge-price{background:var(--c-price);color:var(--c-price-t);border:1px solid var(--c-price-b)}
+.badge-tax{background:var(--c-tax);color:var(--c-tax-t);border:1px solid var(--c-tax-b)}
+.badge-delay{background:var(--c-delay);color:var(--c-delay-t);border:1px solid var(--c-delay-b)}
+
+/* 行カラー */
+.row-ok td{background:var(--c-ok)}
+.row-miss td{background:var(--c-miss)}
+.row-price td{background:var(--c-price)}
+.row-tax td{background:var(--c-tax)}
+.row-delay td{background:var(--c-delay)}
+
+/* 差異金額 */
+.diff-pos{color:var(--red)}
+.diff-neg{color:var(--green)}
+.diff-zero{color:var(--text3)}
+
+/* ポイントボックス */
+.point{background:linear-gradient(135deg,#eef4ff,#f0f8ff);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#2a3a5a;line-height:1.8}
+.point strong{color:var(--accent)}
+
+/* 凡例 */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* サンプルデータボタン */
+.sample-btn{font-size:11px;color:var(--accent);background:none;border:1px solid var(--accent);border-radius:6px;padding:3px 8px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:600;transition:all .2s;margin-top:8px;display:inline-block}
+.sample-btn:hover{background:var(--accent);color:white}
+
+/* 空状態 */
+.empty-result{text-align:center;padding:60px 24px;color:var(--text3)}
+.empty-result .ei{font-size:48px;margin-bottom:16px}
+
+footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px;margin-top:40px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);text-decoration:none;padding:8px 18px;border-radius:8px;font-size:12px;margin-bottom:12px;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:white}
+
+@media print{
+  header,footer,.steps-wrap,.options-card,.match-btn,.filter-bar,.sample-btn{display:none!important}
+  .result-wrap{box-shadow:none;border:1px solid #ccc}
+  body{background:white}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">🔍 残高照合</div>
+    <h1>残高<span>照合アプリ</span></h1>
+    <p>売掛金管理台帳と客先検収明細書を注文番号で自動照合。差異（未検収・単価差異・消費税誤差・計上遅れ）を色分け表示します。</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="point">
+    📋 <strong>使い方：</strong>①売掛金台帳と②検収明細書をアップロード → 列の対応を設定 → 「照合実行」ボタンを押すだけ。Excel/CSV両対応。データはブラウザ内で処理され、外部送信されません。
+  </div>
+
+  <!-- ファイルアップロード -->
+  <div class="steps-wrap">
+
+    <!-- STEP 1: 売掛金台帳 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">売掛金管理台帳</div>
+          <div class="step-sub">自社の売掛金データ（Excel/CSV）</div>
+        </div>
+      </div>
+      <div class="upload-zone" id="ar-zone"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleDrop(event,'ar')">
+        <div class="uz-icon">📊</div>
+        <p>クリックまたはドラッグ＆ドロップ<br>.xlsx / .xls / .csv 対応</p>
+        <div class="file-name" id="ar-filename"></div>
+        <input type="file" id="ar-file" accept=".xlsx,.xls,.csv" onchange="handleFile(event,'ar')">
+      </div>
+      <button class="sample-btn" onclick="loadSampleAR()">📋 サンプルデータを読込</button>
+
+      <!-- 列マッピング（AR） -->
+      <div class="mapping-wrap" id="ar-mapping">
+        <div class="mapping-title">列の対応設定（必須列：*)）</div>
+        <div class="mapping-grid">
+          <div class="mapping-row"><label>* 注文番号</label><select class="mapping-select required-field" id="ar-col-order"></select></div>
+          <div class="mapping-row"><label>* 得意先コード/名</label><select class="mapping-select required-field" id="ar-col-customer"></select></div>
+          <div class="mapping-row"><label>* 売上金額（税抜）</label><select class="mapping-select required-field" id="ar-col-amount"></select></div>
+          <div class="mapping-row"><label>消費税額</label><select class="mapping-select" id="ar-col-tax"></select></div>
+          <div class="mapping-row"><label>売上金額（税込）</label><select class="mapping-select" id="ar-col-total"></select></div>
+          <div class="mapping-row"><label>単価</label><select class="mapping-select" id="ar-col-price"></select></div>
+          <div class="mapping-row"><label>数量</label><select class="mapping-select" id="ar-col-qty"></select></div>
+          <div class="mapping-row"><label>売上日</label><select class="mapping-select" id="ar-col-date"></select></div>
+          <div class="mapping-row"><label>品名/品番</label><select class="mapping-select" id="ar-col-item"></select></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: 検収明細書 -->
+    <div class="step-card">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">客先検収明細書</div>
+          <div class="step-sub">客先から来るデータ（Excel/CSV）</div>
+        </div>
+      </div>
+      <div class="upload-zone" id="inv-zone"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleDrop(event,'inv')">
+        <div class="uz-icon">📄</div>
+        <p>クリックまたはドラッグ＆ドロップ<br>.xlsx / .xls / .csv 対応<br>※PDFはCSV/Excelに変換してください</p>
+        <div class="file-name" id="inv-filename"></div>
+        <input type="file" id="inv-file" accept=".xlsx,.xls,.csv" onchange="handleFile(event,'inv')">
+      </div>
+      <button class="sample-btn" onclick="loadSampleINV()">📋 サンプルデータを読込</button>
+
+      <!-- 列マッピング（INV） -->
+      <div class="mapping-wrap" id="inv-mapping">
+        <div class="mapping-title">列の対応設定（必須列：*）</div>
+        <div class="mapping-grid">
+          <div class="mapping-row"><label>* 注文番号</label><select class="mapping-select required-field" id="inv-col-order"></select></div>
+          <div class="mapping-row"><label>* 得意先コード/名</label><select class="mapping-select required-field" id="inv-col-customer"></select></div>
+          <div class="mapping-row"><label>* 検収金額（税抜）</label><select class="mapping-select required-field" id="inv-col-amount"></select></div>
+          <div class="mapping-row"><label>消費税額</label><select class="mapping-select" id="inv-col-tax"></select></div>
+          <div class="mapping-row"><label>検収金額（税込）</label><select class="mapping-select" id="inv-col-total"></select></div>
+          <div class="mapping-row"><label>単価</label><select class="mapping-select" id="inv-col-price"></select></div>
+          <div class="mapping-row"><label>数量</label><select class="mapping-select" id="inv-col-qty"></select></div>
+          <div class="mapping-row"><label>検収日</label><select class="mapping-select" id="inv-col-date"></select></div>
+          <div class="mapping-row"><label>品名/品番</label><select class="mapping-select" id="inv-col-item"></select></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 照合オプション -->
+  <div class="options-card">
+    <h3>⚙️ 照合オプション</h3>
+    <div class="options-grid">
+      <div class="option-group">
+        <label>消費税率（%）</label>
+        <input class="option-input" type="number" id="tax-rate" value="10" min="0" max="100" step="1">
+      </div>
+      <div class="option-group">
+        <label>単価差異の許容額（円）</label>
+        <input class="option-input" type="number" id="price-tolerance" value="0" min="0">
+      </div>
+      <div class="option-group">
+        <label>消費税誤差の許容額（円）</label>
+        <input class="option-input" type="number" id="tax-tolerance" value="1" min="0">
+      </div>
+      <div class="option-group">
+        <label>金額誤差の許容額（円）</label>
+        <input class="option-input" type="number" id="amount-tolerance" value="0" min="0">
+      </div>
+    </div>
+  </div>
+
+  <!-- 照合実行ボタン -->
+  <button class="match-btn" onclick="runMatch()" id="match-btn">
+    🔍 照合を実行する
+  </button>
+
+  <!-- 結果エリア -->
+  <div id="result-area" style="display:none">
+
+    <!-- サマリー -->
+    <div class="summary-wrap" id="summary-wrap"></div>
+
+    <!-- 凡例 -->
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-ok-b)"></div>一致</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-miss-b)"></div>未検収（当社売上あり・客先未検収）</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-price-b)"></div>単価差異</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-tax-b)"></div>消費税誤差</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-delay-b)"></div>当社計上遅れ（客先検収あり・当社未計上）</div>
+    </div>
+
+    <!-- フィルター＆ダウンロード -->
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">すべて</button>
+      <button class="filter-btn f-miss" onclick="setFilter('miss',this)">未検収</button>
+      <button class="filter-btn f-price" onclick="setFilter('price',this)">単価差異</button>
+      <button class="filter-btn f-tax" onclick="setFilter('tax',this)">消費税誤差</button>
+      <button class="filter-btn f-delay" onclick="setFilter('delay',this)">計上遅れ</button>
+      <button class="filter-btn f-ok" onclick="setFilter('ok',this)">一致</button>
+      <button class="dl-btn" onclick="downloadExcel()">⬇️ Excelダウンロード</button>
+      <button class="print-btn" onclick="window.print()">🖨️ 印刷</button>
+    </div>
+
+    <!-- 結果テーブル -->
+    <div class="result-wrap">
+      <div class="result-table-wrap">
+        <table class="result-table" id="result-table">
+          <thead>
+            <tr>
+              <th>差異区分</th>
+              <th>注文番号</th>
+              <th>得意先</th>
+              <th>品名/品番</th>
+              <th>売上日</th>
+              <th>検収日</th>
+              <th>当社単価</th>
+              <th>客先単価</th>
+              <th>当社数量</th>
+              <th>客先数量</th>
+              <th>当社金額(税抜)</th>
+              <th>客先金額(税抜)</th>
+              <th>差異金額</th>
+              <th>当社消費税</th>
+              <th>客先消費税</th>
+              <th>消費税差異</th>
+              <th>備考</th>
+            </tr>
+          </thead>
+          <tbody id="result-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
+  <p>© 株式会社指月電機製作所 | 残高照合アプリ（デモ）</p>
+</footer>
+
+<script>
+let arData = [];   // 売掛金台帳データ
+let invData = [];  // 検収明細データ
+let arHeaders = [];
+let invHeaders = [];
+let matchResults = [];
+let currentFilter = 'all';
+
+// ===== ファイル読込 =====
+function handleDrop(e, type) {
+  e.preventDefault();
+  document.getElementById(type+'-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file, type);
+}
+function handleFile(e, type) {
+  const file = e.target.files[0];
+  if (file) readFile(file, type);
+}
+function readFile(file, type) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      let data, headers;
+      if (file.name.endsWith('.csv')) {
+        const text = new TextDecoder('utf-8').decode(ev.target.result);
+        const rows = parseCSV(text);
+        headers = rows[0];
+        data = rows.slice(1).filter(r => r.some(c => c));
+      } else {
+        const wb = XLSX.read(ev.target.result, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        headers = json[0].map(String);
+        data = json.slice(1).filter(r => r.some(c => c));
+      }
+      if (type === 'ar') { arHeaders = headers; arData = data; }
+      else { invHeaders = headers; invData = data; }
+      document.getElementById(type+'-filename').textContent = '✅ ' + file.name + ' (' + data.length + '行)';
+      document.getElementById(type+'-zone').classList.add('has-file');
+      setupMapping(type, headers);
+    } catch(err) {
+      alert('ファイル読込エラー: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { row.push(cell.trim()); cell = ''; }
+    else if ((c === '\n' || c === '\r') && !inQ) {
+      if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
+      row = []; cell = '';
+      if (c === '\r' && text[i+1] === '\n') i++;
+    } else { cell += c; }
+  }
+  if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
+  return rows;
+}
+
+function setupMapping(type, headers) {
+  const fields = ['order','customer','amount','tax','total','price','qty','date','item'];
+  const labels = {
+    order:['注文番号','PO番号','発注番号','オーダー','ORDER','order_no'],
+    customer:['得意先','顧客','会社','客先','取引先','CUSTOMER'],
+    amount:['金額','売上金額','検収金額','税抜','税抜金額','AMOUNT','amount'],
+    tax:['消費税','税額','TAX','tax'],
+    total:['税込','税込金額','合計','TOTAL'],
+    price:['単価','PRICE','price','unit'],
+    qty:['数量','QTY','qty','個数'],
+    date:['日付','売上日','検収日','DATE','date'],
+    item:['品名','品番','商品','ITEM','item','製品']
+  };
+  fields.forEach(f => {
+    const sel = document.getElementById(type+'-col-'+f);
+    sel.innerHTML = '<option value="">-- 選択 --</option>' +
+      headers.map((h,i) => `<option value="${i}">${h}</option>`).join('');
+    // 自動マッチング
+    const candidates = labels[f] || [];
+    const idx = headers.findIndex(h => candidates.some(c => h.includes(c) || c.toLowerCase() === h.toLowerCase()));
+    if (idx >= 0) sel.value = idx;
+  });
+  document.getElementById(type+'-mapping').classList.add('show');
+}
+
+// ===== サンプルデータ =====
+function loadSampleAR() {
+  arHeaders = ['注文番号','得意先名','品番','品名','数量','単価','売上金額','消費税','税込金額','売上日'];
+  arData = [
+    ['PO-2025-001','ABC電機㈱','CAP-001','PPフィルムコンデンサ 100μF','100','1500','150000','15000','165000','2025/03/15'],
+    ['PO-2025-002','ABC電機㈱','CAP-002','PPフィルムコンデンサ 220μF','50','2800','140000','14000','154000','2025/03/20'],
+    ['PO-2025-003','XYZ製作所','CAP-003','DCリンクコンデンサ 500μF','20','8500','170000','17000','187000','2025/03/28'],
+    ['PO-2025-004','ABC電機㈱','CAP-004','スナバコンデンサ 10μF','200','450','90000','9000','99000','2025/03/29'],
+    ['PO-2025-005','DEF工業㈱','CAP-001','PPフィルムコンデンサ 100μF','80','1500','120000','12000','132000','2025/03/30'],
+    ['PO-2025-006','XYZ製作所','CAP-005','進相コンデンサ 50kvar','5','45000','225000','22500','247500','2025/03/31'],
+  ];
+  arHeaders = arHeaders;
+  document.getElementById('ar-filename').textContent = '✅ サンプル売掛金台帳.csv (6行)';
+  document.getElementById('ar-zone').classList.add('has-file');
+  setupMapping('ar', arHeaders);
+  alert('サンプルの売掛金台帳データを読み込みました（6件）');
+}
+
+function loadSampleINV() {
+  invHeaders = ['注文番号','得意先名','品番','品名','数量','単価','検収金額','消費税','税込金額','検収日'];
+  invData = [
+    ['PO-2025-001','ABC電機㈱','CAP-001','PPフィルムコンデンサ 100μF','100','1500','150000','15000','165000','2025/03/20'],
+    ['PO-2025-002','ABC電機㈱','CAP-002','PPフィルムコンデンサ 220μF','50','2750','137500','13750','151250','2025/03/25'],  // 単価差異
+    ['PO-2025-003','XYZ製作所','CAP-003','DCリンクコンデンサ 500μF','20','8500','170000','17001','187001','2025/04/02'],  // 消費税誤差
+    // PO-2025-004は未検収（客先データなし）
+    // PO-2025-005は未検収（客先データなし）
+    ['PO-2025-007','DEF工業㈱','CAP-006','PPSフィルムコンデンサ 47μF','30','3200','96000','9600','105600','2025/03/31'],  // 計上遅れ
+  ];
+  document.getElementById('inv-filename').textContent = '✅ サンプル検収明細書.csv (4行)';
+  document.getElementById('inv-zone').classList.add('has-file');
+  setupMapping('inv', invHeaders);
+  alert('サンプルの検収明細データを読み込みました（4件）\n※差異パターンが含まれています');
+}
+
+// ===== 列インデックス取得 =====
+function getColIdx(type, field) {
+  const val = document.getElementById(type+'-col-'+field).value;
+  return val !== '' ? parseInt(val) : -1;
+}
+function getVal(row, idx, defaultVal='') {
+  if (idx < 0 || idx >= row.length) return defaultVal;
+  return row[idx] !== undefined && row[idx] !== null ? row[idx] : defaultVal;
+}
+function toNum(v) {
+  if (v === '' || v === null || v === undefined) return 0;
+  const n = parseFloat(String(v).replace(/[,，￥¥\s]/g,''));
+  return isNaN(n) ? 0 : n;
+}
+
+// ===== 照合実行 =====
+function runMatch() {
+  if (arData.length === 0) { alert('売掛金台帳をアップロードしてください'); return; }
+  if (invData.length === 0) { alert('検収明細書をアップロードしてください'); return; }
+
+  const arOrderIdx = getColIdx('ar','order');
+  const invOrderIdx = getColIdx('inv','order');
+  if (arOrderIdx < 0 || invOrderIdx < 0) { alert('注文番号の列を設定してください（必須）'); return; }
+
+  const taxRate = parseFloat(document.getElementById('tax-rate').value) / 100 || 0.1;
+  const priceTol = toNum(document.getElementById('price-tolerance').value);
+  const taxTol = toNum(document.getElementById('tax-tolerance').value);
+  const amtTol = toNum(document.getElementById('amount-tolerance').value);
+
+  // INVをMapに変換（注文番号→行）
+  const invMap = new Map();
+  invData.forEach(row => {
+    const key = String(getVal(row, invOrderIdx)).trim();
+    if (key) invMap.set(key, row);
+  });
+
+  // AR側を処理（売上あり）
+  const processedInvKeys = new Set();
+  matchResults = [];
+
+  arData.forEach(arRow => {
+    const orderNo = String(getVal(arRow, arOrderIdx)).trim();
+    if (!orderNo) return;
+
+    const arCustomer = getVal(arRow, getColIdx('ar','customer'));
+    const arItem = getVal(arRow, getColIdx('ar','item'));
+    const arDate = getVal(arRow, getColIdx('ar','date'));
+    const arAmount = toNum(getVal(arRow, getColIdx('ar','amount')));
+    const arTax = getVal(arRow, getColIdx('ar','tax')) !== '' ? toNum(getVal(arRow, getColIdx('ar','tax'))) : Math.round(arAmount * taxRate);
+    const arPrice = toNum(getVal(arRow, getColIdx('ar','price')));
+    const arQty = toNum(getVal(arRow, getColIdx('ar','qty')));
+
+    const invRow = invMap.get(orderNo);
+
+    if (!invRow) {
+      // 未検収：当社売上あり・客先検収なし
+      matchResults.push({
+        type:'miss', orderNo, customer:arCustomer, item:arItem,
+        arDate, invDate:'', arPrice, invPrice:0, arQty, invQty:0,
+        arAmount, invAmount:0, diffAmount:arAmount,
+        arTax, invTax:0, diffTax:arTax,
+        note:'当社売上計上済・客先未検収'
+      });
+    } else {
+      processedInvKeys.add(orderNo);
+      const invCustomer = getVal(invRow, getColIdx('inv','customer'));
+      const invDate = getVal(invRow, getColIdx('inv','date'));
+      const invAmount = toNum(getVal(invRow, getColIdx('inv','amount')));
+      const invTax = getVal(invRow, getColIdx('inv','tax')) !== '' ? toNum(getVal(invRow, getColIdx('inv','tax'))) : Math.round(invAmount * taxRate);
+      const invPrice = toNum(getVal(invRow, getColIdx('inv','price')));
+      const invQty = toNum(getVal(invRow, getColIdx('inv','qty')));
+
+      const diffAmount = arAmount - invAmount;
+      const diffTax = arTax - invTax;
+      const diffPrice = arPrice - invPrice;
+
+      // 差異判定（複数差異あり得る場合は優先度順）
+      let type = 'ok';
+      const notes = [];
+
+      if (arPrice !== 0 && invPrice !== 0 && Math.abs(diffPrice) > priceTol) {
+        type = 'price';
+        notes.push(`単価差異: 当社¥${fmt(arPrice)} vs 客先¥${fmt(invPrice)}`);
+      }
+      if (Math.abs(diffTax) > taxTol && type === 'ok') {
+        type = 'tax';
+        notes.push(`消費税誤差: ¥${fmt(diffTax)}`);
+      }
+      if (Math.abs(diffAmount) > amtTol && type === 'ok') {
+        type = 'price'; // 金額差は単価差異として扱う
+        notes.push(`金額差異: ¥${fmt(diffAmount)}`);
+      }
+
+      matchResults.push({
+        type, orderNo, customer: arCustomer || invCustomer, item: arItem || getVal(invRow, getColIdx('inv','item')),
+        arDate, invDate, arPrice, invPrice, arQty, invQty,
+        arAmount, invAmount, diffAmount,
+        arTax, invTax, diffTax,
+        note: notes.join(' / ')
+      });
+    }
+  });
+
+  // 計上遅れ：客先検収あり・当社売上なし
+  invData.forEach(invRow => {
+    const orderNo = String(getVal(invRow, invOrderIdx)).trim();
+    if (!orderNo || processedInvKeys.has(orderNo)) return;
+    const invCustomer = getVal(invRow, getColIdx('inv','customer'));
+    const invItem = getVal(invRow, getColIdx('inv','item'));
+    const invDate = getVal(invRow, getColIdx('inv','date'));
+    const invAmount = toNum(getVal(invRow, getColIdx('inv','amount')));
+    const invTax = getVal(invRow, getColIdx('inv','tax')) !== '' ? toNum(getVal(invRow, getColIdx('inv','tax'))) : Math.round(invAmount * (parseFloat(document.getElementById('tax-rate').value)/100||0.1));
+    const invPrice = toNum(getVal(invRow, getColIdx('inv','price')));
+    const invQty = toNum(getVal(invRow, getColIdx('inv','qty')));
+    matchResults.push({
+      type:'delay', orderNo, customer:invCustomer, item:invItem,
+      arDate:'', invDate, arPrice:0, invPrice, arQty:0, invQty,
+      arAmount:0, invAmount, diffAmount:-invAmount,
+      arTax:0, invTax, diffTax:-invTax,
+      note:'客先検収済・当社未計上'
+    });
+  });
+
+  renderResults();
+  document.getElementById('result-area').style.display = 'block';
+  document.getElementById('result-area').scrollIntoView({behavior:'smooth'});
+}
+
+function fmt(n) {
+  if (!n && n !== 0) return '-';
+  return Number(n).toLocaleString('ja-JP');
+}
+
+// ===== 結果描画 =====
+function renderResults() {
+  // サマリー
+  const counts = {ok:0,miss:0,price:0,tax:0,delay:0};
+  const amounts = {ok:0,miss:0,price:0,tax:0,delay:0};
+  matchResults.forEach(r => { counts[r.type]++; amounts[r.type] += Math.abs(r.diffAmount); });
+  document.getElementById('summary-wrap').innerHTML = `
+    <div class="summary-card s-ok"><div class="s-count">${counts.ok}</div><div class="s-label">一致</div></div>
+    <div class="summary-card s-miss"><div class="s-count">${counts.miss}</div><div class="s-label">未検収</div><div class="s-amount">¥${fmt(amounts.miss)}</div></div>
+    <div class="summary-card s-price"><div class="s-count">${counts.price}</div><div class="s-label">単価差異</div><div class="s-amount">¥${fmt(amounts.price)}</div></div>
+    <div class="summary-card s-tax"><div class="s-count">${counts.tax}</div><div class="s-label">消費税誤差</div><div class="s-amount">¥${fmt(amounts.tax)}</div></div>
+    <div class="summary-card s-delay"><div class="s-count">${counts.delay}</div><div class="s-label">計上遅れ</div><div class="s-amount">¥${fmt(amounts.delay)}</div></div>
+  `;
+
+  renderTable();
+}
+
+function renderTable() {
+  const filtered = currentFilter === 'all' ? matchResults : matchResults.filter(r => r.type === currentFilter);
+  const badgeMap = {
+    ok:'<span class="diff-badge badge-ok">✅ 一致</span>',
+    miss:'<span class="diff-badge badge-miss">🔴 未検収</span>',
+    price:'<span class="diff-badge badge-price">🟠 単価差異</span>',
+    tax:'<span class="diff-badge badge-tax">🟡 消費税誤差</span>',
+    delay:'<span class="diff-badge badge-delay">🟢 計上遅れ</span>'
+  };
+  document.getElementById('result-tbody').innerHTML = filtered.map(r => `
+    <tr class="row-${r.type}">
+      <td>${badgeMap[r.type]}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700">${r.orderNo}</td>
+      <td>${r.customer}</td>
+      <td>${r.item}</td>
+      <td>${r.arDate}</td>
+      <td>${r.invDate}</td>
+      <td class="num">${r.arPrice ? fmt(r.arPrice) : '-'}</td>
+      <td class="num">${r.invPrice ? fmt(r.invPrice) : '-'}</td>
+      <td class="num">${r.arQty ? fmt(r.arQty) : '-'}</td>
+      <td class="num">${r.invQty ? fmt(r.invQty) : '-'}</td>
+      <td class="num">${fmt(r.arAmount)}</td>
+      <td class="num">${r.invAmount ? fmt(r.invAmount) : '-'}</td>
+      <td class="diff-num ${r.diffAmount > 0 ? 'diff-pos' : r.diffAmount < 0 ? 'diff-neg' : 'diff-zero'}">${r.diffAmount !== 0 ? (r.diffAmount > 0 ? '+' : '') + fmt(r.diffAmount) : '-'}</td>
+      <td class="num">${fmt(r.arTax)}</td>
+      <td class="num">${r.invTax ? fmt(r.invTax) : '-'}</td>
+      <td class="diff-num ${r.diffTax !== 0 ? (r.diffTax > 0 ? 'diff-pos' : 'diff-neg') : 'diff-zero'}">${r.diffTax !== 0 ? (r.diffTax > 0 ? '+' : '') + fmt(r.diffTax) : '-'}</td>
+      <td style="font-size:11px;color:var(--text3)">${r.note}</td>
+    </tr>`).join('');
+}
+
+// ===== フィルター =====
+function setFilter(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+// ===== Excelダウンロード =====
+function downloadExcel() {
+  const typeLabel = {ok:'一致',miss:'未検収',price:'単価差異',tax:'消費税誤差',delay:'計上遅れ'};
+  const wsData = [
+    ['差異区分','注文番号','得意先','品名/品番','売上日','検収日','当社単価','客先単価','当社数量','客先数量','当社金額(税抜)','客先金額(税抜)','差異金額','当社消費税','客先消費税','消費税差異','備考'],
+    ...matchResults.map(r => [
+      typeLabel[r.type], r.orderNo, r.customer, r.item, r.arDate, r.invDate,
+      r.arPrice||'', r.invPrice||'', r.arQty||'', r.invQty||'',
+      r.arAmount, r.invAmount||'', r.diffAmount||'',
+      r.arTax, r.invTax||'', r.diffTax||'', r.note
+    ])
+  ];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  // 列幅設定
+  ws['!cols'] = [14,16,18,18,12,12,10,10,10,10,14,14,12,12,12,12,30].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws, '照合結果');
+
+  // 差異ごとにシート分割
+  const types = ['miss','price','tax','delay'];
+  const typeNames = {miss:'未検収',price:'単価差異',tax:'消費税誤差',delay:'計上遅れ'};
+  types.forEach(t => {
+    const filtered = matchResults.filter(r => r.type === t);
+    if (filtered.length === 0) return;
+    const wsD = XLSX.utils.aoa_to_sheet([wsData[0], ...filtered.map(r => [
+      typeLabel[r.type], r.orderNo, r.customer, r.item, r.arDate, r.invDate,
+      r.arPrice||'', r.invPrice||'', r.arQty||'', r.invQty||'',
+      r.arAmount, r.invAmount||'', r.diffAmount||'',
+      r.arTax, r.invTax||'', r.diffTax||'', r.note
+    ])]);
+    wsD['!cols'] = wsData[0].map((_,i) => ({wch:[14,16,18,18,12,12,10,10,10,10,14,14,12,12,12,12,30][i]||12}));
+    XLSX.utils.book_append_sheet(wb, wsD, typeNames[t]);
+  });
+
+  const today = new Date().toLocaleDateString('ja-JP').replace(/\//g,'-');
+  XLSX.writeFile(wb, `残高照合結果_${today}.xlsx`);
+}
+</script>
+</body>
+</html>
