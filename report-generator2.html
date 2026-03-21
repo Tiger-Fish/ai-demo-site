@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>経営情報レポートジェネレーター | 指月電機製作所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628;--navy2:#132040;--navy3:#1e3060;
+  --accent:#2e7de0;--accent2:#5b9ef7;--accent3:#93c0ff;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --green:#16a34a;--teal:#0d9488;--orange:#ea580c;--red:#dc2626;--purple:#7c3aed;
+  --text:#1a1a2e;--text2:#3a4a6a;--text3:#6a7a9a;
+  --bg:#f4f6fb;--bg2:#fff;--bg3:#eef2fa;
+  --border:#dde4f0;
+  --shadow:0 2px 16px rgba(10,22,40,.08);
+  --shadow2:0 8px 32px rgba(10,22,40,.14);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);color:white;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(46,125,224,.2),transparent 70%)}
+.header-inner{max-width:900px;margin:0 auto;padding:36px 24px 32px;position:relative;z-index:1}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.2);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:20px;margin-bottom:14px}
+header h1{font-size:clamp(20px,3.5vw,28px);font-weight:700;line-height:1.3;margin-bottom:6px}
+header h1 span{color:var(--accent3)}
+header p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.7}
+
+main{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+
+/* 入力フォーム */
+.input-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-bottom:20px}
+.input-card h2{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.input-card h2 .icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--navy3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+.url-input-wrap{display:flex;gap:10px;margin-bottom:12px}
+.url-input{flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--bg3);transition:border .2s}
+.url-input:focus{outline:none;border-color:var(--accent);background:white}
+.add-url-btn{padding:12px 18px;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.add-url-btn:hover{filter:brightness(1.1)}
+
+.url-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.url-item{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 14px}
+.url-item .url-text{flex:1;font-size:12px;color:var(--accent);font-family:'JetBrains Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.url-item .url-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.status-pending{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.status-loading{background:#eff6ff;color:var(--accent);border:1px solid var(--accent2)}
+.status-done{background:#f0fdf4;color:var(--green);border:1px solid #86efac}
+.status-error{background:#fff0f0;color:var(--red);border:1px solid #fecaca}
+.url-remove{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0;transition:color .2s;flex-shrink:0}
+.url-remove:hover{color:var(--red)}
+
+.sample-link{font-size:12px;color:var(--accent);cursor:pointer;text-decoration:underline;display:inline-flex;align-items:center;gap:4px;margin-bottom:14px}
+.sample-link:hover{color:var(--navy)}
+
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:600px){.options-grid{grid-template-columns:1fr}}
+.option-group{display:flex;flex-direction:column;gap:5px}
+.option-group label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em}
+.option-select{padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;background:var(--bg3);color:var(--text);transition:border .2s}
+.option-select:focus{outline:none;border-color:var(--accent)}
+
+.gen-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;border:none;border-radius:var(--radius);font-family:'Noto Sans JP',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px}
+.gen-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* ローディング */
+#loading{display:none;text-align:center;padding:48px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-steps{display:flex;flex-direction:column;gap:8px;max-width:300px;margin:16px auto 0}
+.loading-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text3);opacity:.4;transition:opacity .3s}
+.loading-step.active{opacity:1;color:var(--accent)}
+.loading-step.done{opacity:.7;color:var(--green)}
+
+/* レポート */
+#report-section{display:none}
+.report-doc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow2)}
+
+.report-header{background:linear-gradient(135deg,var(--navy),var(--navy3));color:white;padding:36px 40px}
+.report-header .company{font-size:12px;color:rgba(255,255,255,.5);letter-spacing:.1em;margin-bottom:8px}
+.report-header h2{font-size:clamp(18px,3vw,24px);font-weight:700;line-height:1.4;margin-bottom:14px}
+.report-header .meta{display:flex;gap:20px;flex-wrap:wrap}
+.report-header .meta span{font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:5px}
+.report-source{margin-top:12px;display:flex;flex-direction:column;gap:4px}
+.report-source a{font-size:11px;color:rgba(255,255,255,.5);text-decoration:none;font-family:'JetBrains Mono',monospace}
+.report-source a:hover{color:rgba(255,255,255,.8)}
+
+.report-body{padding:36px 40px}
+@media(max-width:600px){.report-header{padding:28px 24px}.report-body{padding:24px}}
+
+/* セクション */
+.report-section{margin-bottom:32px}
+.section-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:14px;padding:10px 16px;border-radius:8px;display:flex;align-items:center;gap:10px}
+.section-title.opportunity{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-left:4px solid var(--green);color:#14532d}
+.section-title.threat{background:linear-gradient(135deg,#fff1f2,#ffe4e6);border-left:4px solid var(--red);color:#881337}
+.section-title.action{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-left:4px solid var(--accent);color:var(--navy3)}
+.section-title.exec{background:linear-gradient(135deg,#fefce8,#fef9c3);border-left:4px solid var(--gold);color:#713f12}
+.section-title.dept{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left:4px solid var(--purple);color:#4c1d95}
+
+.action-items{display:flex;flex-direction:column;gap:12px}
+.action-item{background:var(--bg3);border-radius:10px;padding:16px 18px;border-left:3px solid var(--accent)}
+.action-item.urgent{border-left-color:var(--red);background:#fff8f8}
+.action-item.mid{border-left-color:var(--orange);background:#fffbf8}
+.action-item.normal{border-left-color:var(--accent);background:var(--bg3)}
+.action-item .ai-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.action-item .ai-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.tag-urgent{background:var(--red);color:white}
+.tag-mid{background:var(--orange);color:white}
+.tag-normal{background:var(--accent);color:white}
+.action-item .ai-title{font-size:14px;font-weight:700;color:var(--navy)}
+.action-item .ai-who{font-size:11px;color:var(--text3);font-weight:600}
+.action-item .ai-body{font-size:13px;color:var(--text2);line-height:1.85}
+
+.bullet-list{display:flex;flex-direction:column;gap:8px}
+.bullet-item{display:flex;gap:10px;font-size:14px;color:var(--text2);line-height:1.75}
+.bullet-icon{flex-shrink:0;margin-top:2px}
+
+.report-footer{background:var(--bg3);border-top:1px solid var(--border);padding:18px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text3)}
+
+/* アクションボタン */
+.action-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.action-btn{padding:11px 22px;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-print{background:var(--navy);color:white;border:none}
+.btn-print:hover{background:var(--navy3)}
+.btn-reset{background:var(--bg3);color:var(--text2);border:1.5px solid var(--border)}
+.btn-reset:hover{border-color:var(--accent);color:var(--accent)}
+
+/* デモメッセージ */
+.demo-note{background:#fffbeb;border:1px solid var(--gold);border-radius:10px;padding:14px 18px;font-size:13px;color:#713f12;line-height:1.75;margin-bottom:20px}
+.demo-note strong{color:var(--orange)}
+
+footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px;margin-top:40px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);text-decoration:none;padding:8px 18px;border-radius:8px;font-size:12px;margin-bottom:12px;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:white}
+
+@media print{header,footer,.input-card,.action-btns,.demo-note{display:none!important}.report-doc{box-shadow:none;border:none}body{background:white}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">📊 経営情報レポートジェネレーター</div>
+    <h1>経営情報<span>レポートジェネレーター</span></h1>
+    <p>閲覧するサイトのURLを入力するだけで、AIが内容を分析し、指月電機製作所の事業活動に対する機会・脅威・具体的な行動計画をレポートにまとめます。</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="input-card">
+    <h2><span class="icon">🌐</span>分析するURLを入力</h2>
+
+    <div class="url-input-wrap">
+      <input class="url-input" id="url-input" type="url" placeholder="https://www.example.go.jp/... " onkeydown="if(event.key==='Enter')addUrl()">
+      <button class="add-url-btn" onclick="addUrl()">＋ 追加</button>
+    </div>
+
+    <div class="url-list" id="url-list"></div>
+
+    <!-- APIキー必要メッセージ -->
+    <div id="api-notice" style="display:none;align-items:flex-start;gap:12px;background:#fff7ed;border:1.5px solid #fb923c;border-radius:10px;padding:14px 18px;margin-bottom:14px">
+      <span style="font-size:20px;flex-shrink:0">🔑</span>
+      <div style="font-size:13px;color:#7c2d12;line-height:1.85">
+        APIキーを設定することで動作します。※ APIキーの利用には別途課金が必要になります。<br>
+        サンプルA・B・Cの3つのデモを用意しておりますので、そちらをご覧ください。
+      </div>
+    </div>
+
+    <div id="sample-link-wrap">
+        <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="sample-link" onclick="loadSampleUrl('meti1')">
+          📋 サンプルA：経産省 AI・半導体成長戦略WG（EV・データセンター需要）
+        </span>
+        <span class="sample-link" onclick="loadSampleUrl('econsec')">
+          🌟 サンプルB：経済安全保障×フィルムコンデンサ特定重要物資（3サイト統合レポート）<br>
+          <small style="color:var(--text3);margin-left:1em">
+            ①経産省 先端電子部品ページ ②内閣府 特定重要物資の方向性（r5_dai8） ③内閣府 取組フォローアップ（r7_dai12）
+          </small>
+        </span>
+        <span class="sample-link" onclick="loadSampleUrl('panasonic')">
+          🔴 サンプルC：パナソニック フィルムコンデンサ製品ページ（競合分析レポート）
+        </span>
+      </div>
+    </div>
+
+    <div class="options-grid">
+      <div class="option-group">
+        <label>レポートの深さ</label>
+        <select class="option-select" id="opt-depth">
+          <option value="standard">標準（機会・脅威・行動計画）</option>
+          <option value="detail">詳細（部門別行動計画含む）</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <label>重点視点</label>
+        <select class="option-select" id="opt-focus">
+          <option value="balanced">バランス型（機会・脅威均等）</option>
+          <option value="opportunity">機会重視（成長戦略フォーカス）</option>
+          <option value="risk">リスク重視（脅威・対策フォーカス）</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="gen-btn" onclick="generateReport()">
+      🤖 AIがレポートを生成する
+    </button>
+  </div>
+
+  <!-- ローディング -->
+  <div id="loading">
+    <div class="loading-spinner"></div>
+    <p style="color:var(--text3);font-size:14px;font-weight:500">AIが情報を分析中...</p>
+    <div class="loading-steps">
+      <div class="loading-step active" id="ls1">🌐 サイトの内容を読み取り中</div>
+      <div class="loading-step" id="ls2">🔍 指月電機への影響を分析中</div>
+      <div class="loading-step" id="ls3">📊 機会・脅威を抽出中</div>
+      <div class="loading-step" id="ls4">✍️ 行動計画を策定中</div>
+      <div class="loading-step" id="ls5">📄 レポートを整形中</div>
+    </div>
+  </div>
+
+  <!-- レポート -->
+  <div id="report-section">
+    <div class="demo-note" id="demo-note" style="display:none">
+      🔑 <strong>デモ表示：</strong>APIキーを設定することで、入力したURLをAIがリアルタイムで読み取り、最新情報に基づくレポートを生成します。現在はサンプルレポートを表示しています。<br>
+      <small>※ APIキーの利用には別途課金が必要になります。</small>
+    </div>
+    <div class="report-doc" id="report-doc"></div>
+    <div class="action-btns">
+      <button class="action-btn btn-print" onclick="window.print()">🖨️ 印刷・PDF保存</button>
+      <button class="action-btn btn-reset" onclick="resetAll()">↺ 新しいレポートを作成</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
+  <p>© 株式会社指月電機製作所 | 経営情報レポートジェネレーター</p>
+</footer>
+
+<script>
+let urlList = [];
+
+// ===== URL管理 =====
+function addUrl() {
+  const input = document.getElementById('url-input');
+  const url = input.value.trim();
+  if (!url) return;
+  if (!url.startsWith('http')) { alert('URLはhttpまたはhttpsで始まる形式で入力してください'); return; }
+  if (urlList.find(u => u.url === url)) { alert('同じURLがすでに追加されています'); return; }
+  urlList.push({ url, status: 'pending' });
+  input.value = '';
+  renderUrlList();
+  document.getElementById('api-notice').style.display = 'flex';
+}
+
+function removeUrl(idx) {
+  urlList.splice(idx, 1);
+  renderUrlList();
+}
+
+function renderUrlList() {
+  const statusMap = { pending:'待機中', loading:'取得中...', done:'取得済み', error:'エラー' };
+  const statusCls = { pending:'status-pending', loading:'status-loading', done:'status-done', error:'status-error' };
+  document.getElementById('url-list').innerHTML = urlList.map((u,i) => `
+    <div class="url-item">
+      <span class="url-text" title="${u.url}">${u.url}</span>
+      <span class="url-status ${statusCls[u.status]}">${statusMap[u.status]}</span>
+      <button class="url-remove" onclick="removeUrl(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+const SAMPLE_URLS = {
+  meti1:   ['https://www.meti.go.jp/policy/mono_info_service/joho/conference/seichosenryakuwg/aisemicon01/aisemicon01.html'],
+  econsec: [
+    'https://www.meti.go.jp/policy/economy/economic_security/semicon/electronic_components.html',
+    'https://www.cas.go.jp/jp/seisaku/keizai_anzen_hosyohousei/r5_dai8/siryou2.pdf',
+    'https://www.cas.go.jp/jp/seisaku/keizai_anzen_hosyohousei/r7_dai12/shiryo3-2.pdf',
+  ],
+  panasonic: [
+    'https://industrial.panasonic.com/jp/products/capacitors/film-capacitors',
+  ],
+};
+
+function loadSampleUrl(key) {
+  urlList = []; // 既存をクリアして入れ直す
+  const targets = SAMPLE_URLS[key] || [];
+  targets.forEach(url => {
+    urlList.push({ url, status: 'pending' });
+  });
+  renderUrlList();
+}
+
+// ===== ローディングアニメーション =====
+function animateLoading() {
+  const steps = ['ls1','ls2','ls3','ls4','ls5'];
+  let i = 0;
+  document.getElementById('ls1').classList.add('active');
+  const timer = setInterval(() => {
+    if (i < steps.length - 1) {
+      document.getElementById(steps[i]).classList.remove('active');
+      document.getElementById(steps[i]).classList.add('done');
+      document.getElementById(steps[i]).textContent = '✓ ' + document.getElementById(steps[i]).textContent.slice(2);
+      i++;
+      document.getElementById(steps[i]).classList.add('active');
+    } else { clearInterval(timer); }
+  }, 1200);
+  return timer;
+}
+
+// ===== レポート生成 =====
+async function generateReport() {
+  if (urlList.length === 0) { alert('URLを1つ以上追加してください'); return; }
+
+  document.getElementById('input-card') && null;
+  document.querySelector('.input-card').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  const loadTimer = animateLoading();
+
+  const depth = document.getElementById('opt-depth').value;
+  const focus = document.getElementById('opt-focus').value;
+  const urls = urlList.map(u => u.url);
+  const today = new Date().toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric'});
+
+  const prompt = `あなたは株式会社指月電機製作所の経営戦略アドバイザーです。
+
+【指月電機製作所について】
+- 1939年創業。コンデンサ専門メーカー
+- 主力製品：フィルムコンデンサ（DCリンク用・スナバ用・EMIフィルタ・進相コンデンサ・車載用）
+- 主要市場：EV/HEV、産業用インバータ、太陽光・風力発電、鉄道、医療機器
+- 特徴：国内一貫製造、高信頼性、AEC-Q200対応、カスタム対応力
+- 課題：半導体・AI化の波への対応、原材料コスト上昇、グローバル競争激化
+
+【分析対象サイト】
+${urls.map((u,i) => `URL${i+1}: ${u}`).join('\n')}
+
+【上記サイトの内容（経産省 AI・半導体成長戦略WG 第1回 2026年）】
+主な内容：
+- 政府はAI・半導体分野に2030年度までの7年間に10兆円以上の公的支援
+- 10年間で50兆円超の官民投資、約160兆円の経済波及効果を目標
+- EV・インバータ・データセンター等でのAI利活用加速
+- 省エネAI半導体の設計支援・次世代チップ開発推進
+- Rapidus等による国内先端半導体量産化推進
+- サプライチェーン強靭化・経済安保の観点から国産半導体・部品の需要増大
+- 人口減少による自動化・AI活用の急務化
+- EUV露光装置等の先端製造設備整備
+
+以下のJSON形式のみで回答してください：
+{
+  "title": "レポートタイトル",
+  "summary": "エグゼクティブサマリー（3〜4文）",
+  "opportunities": [
+    {"title": "機会のタイトル", "detail": "詳細説明（指月電機にとっての具体的な機会）", "impact": "high/mid/low"}
+  ],
+  "threats": [
+    {"title": "脅威のタイトル", "detail": "詳細説明（指月電機にとっての具体的なリスク）", "impact": "high/mid/low"}
+  ],
+  "actions": [
+    {
+      "title": "アクションタイトル",
+      "priority": "urgent/mid/normal",
+      "who": "担当部門（例：営業部・技術開発部・経営企画部）",
+      "what": "具体的に何をするか（一般従業員が明日から動けるレベルで）",
+      "why": "なぜこのアクションが必要か",
+      "when": "いつまでに（例：3ヶ月以内・半年以内）"
+    }
+  ],
+  "exec_message": "経営層への提言（2〜3文）"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.replace(/```json|```/g, '').trim();
+    const r = JSON.parse(text);
+    clearInterval(loadTimer);
+    showReport(r, urls, today, false);
+  } catch(e) {
+    clearInterval(loadTimer);
+    showDemoReport(urls, today);
+  }
+}
+
+// ===== レポート表示（API成功時） =====
+function showReport(r, urls, today, isDemo) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('report-section').style.display = 'block';
+  if (isDemo) document.getElementById('demo-note').style.display = 'block';
+
+  const impactLabel = { high:'🔴 高影響', mid:'🟡 中影響', low:'🟢 低影響' };
+  const priorityLabel = { urgent:'⚡ 最優先', mid:'🔶 優先', normal:'🔷 通常' };
+  const priorityCls = { urgent:'urgent', mid:'mid', normal:'normal' };
+  const tagCls = { urgent:'tag-urgent', mid:'tag-mid', normal:'tag-normal' };
+
+  const opHTML = (r.opportunities||[]).map(o => `
+    <div class="bullet-item">
+      <span class="bullet-icon">${o.impact==='high'?'🌟':o.impact==='mid'?'✅':'💡'}</span>
+      <div>
+        <strong style="color:var(--green)">${o.title}</strong>
+        <span style="font-size:11px;margin-left:8px;background:#f0fdf4;color:var(--green);padding:1px 6px;border-radius:4px;font-weight:700">${impactLabel[o.impact]||''}</span><br>
+        <span style="font-size:13px">${o.detail}</span>
+      </div>
+    </div>`).join('');
+
+  const thHTML = (r.threats||[]).map(t => `
+    <div class="bullet-item">
+      <span class="bullet-icon">${t.impact==='high'?'⚠️':t.impact==='mid'?'🔶':'📌'}</span>
+      <div>
+        <strong style="color:var(--red)">${t.title}</strong>
+        <span style="font-size:11px;margin-left:8px;background:#fff1f2;color:var(--red);padding:1px 6px;border-radius:4px;font-weight:700">${impactLabel[t.impact]||''}</span><br>
+        <span style="font-size:13px">${t.detail}</span>
+      </div>
+    </div>`).join('');
+
+  const acHTML = (r.actions||[]).map(a => `
+    <div class="action-item ${priorityCls[a.priority]||'normal'}">
+      <div class="ai-header">
+        <span class="ai-tag ${tagCls[a.priority]||'tag-normal'}">${priorityLabel[a.priority]||'🔷 通常'}</span>
+        <span class="ai-title">${a.title}</span>
+        <span class="ai-who">【${a.who}】</span>
+      </div>
+      <div class="ai-body">
+        <strong>何をする：</strong>${a.what}<br>
+        <strong>なぜ：</strong>${a.why}<br>
+        <strong>いつまでに：</strong>${a.when}
+      </div>
+    </div>`).join('');
+
+  document.getElementById('report-doc').innerHTML = `
+    <div class="report-header">
+      <div class="company">株式会社指月電機製作所 ｜ 経営情報分析レポート</div>
+      <h2>${r.title||'経営情報分析レポート'}</h2>
+      <div class="meta">
+        <span>📅 ${today}</span>
+        <span>🌐 分析URL: ${urls.length}件</span>
+        <span>🤖 AI生成</span>
+      </div>
+      <div class="report-source">
+        ${urls.map(u => `<a href="${u}" target="_blank">📎 ${u}</a>`).join('')}
+      </div>
+    </div>
+    <div class="report-body">
+      <div class="report-section">
+        <div class="section-title exec">💼 エグゼクティブサマリー</div>
+        <p style="font-size:14px;color:var(--text2);line-height:1.9;padding:0 4px">${r.summary||''}</p>
+      </div>
+      <div class="report-section">
+        <div class="section-title opportunity">🌟 当社への機会（Opportunities）</div>
+        <div class="bullet-list">${opHTML}</div>
+      </div>
+      <div class="report-section">
+        <div class="section-title threat">⚠️ 当社への脅威（Threats）</div>
+        <div class="bullet-list">${thHTML}</div>
+      </div>
+      <div class="report-section">
+        <div class="section-title action">📋 具体的行動計画（Action Items）</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:12px">⚡最優先 = 即着手　🔶優先 = 1〜3ヶ月以内　🔷通常 = 計画的に実施</p>
+        <div class="action-items">${acHTML}</div>
+      </div>
+      <div class="report-section">
+        <div class="section-title exec">👔 経営層への提言</div>
+        <div style="background:linear-gradient(135deg,#fffbeb,#fef9c3);border-left:4px solid var(--gold);border-radius:0 10px 10px 0;padding:18px 22px;font-size:14px;color:#713f12;line-height:1.9">${r.exec_message||''}</div>
+      </div>
+    </div>
+    <div class="report-footer">
+      <div>本レポートはAIが生成した参考情報です。意思決定の際は担当部門と確認ください。</div>
+      <div>作成日：${today}</div>
+    </div>
+  `;
+
+  document.getElementById('report-section').scrollIntoView({behavior:'smooth'});
+}
+
+// ===== デモ用サンプルレポート =====
+function showDemoReport(urls, today) {
+  // URL群によって異なるデモレポートを表示
+  const hasEconSec = urls.some(u => u.includes('electronic_components') || u.includes('cas.go.jp'));
+  const hasPanasonic = urls.some(u => u.includes('panasonic.com'));
+
+  if (hasPanasonic) {
+    showDemoReportPanasonic(urls, today);
+    return;
+  }
+  if (hasEconSec) {
+    showDemoReportEconSec(urls, today);
+    return;
+  }
+  const demoReport = {
+    title: '経産省 AI・半導体成長戦略WG 第1回 ｜ 指月電機製作所への示唆と行動計画',
+    summary: '政府がAI・半導体分野に7年間で10兆円超の公的支援を決定し、EVインバータ・データセンター・再生可能エネルギー向けの半導体需要が急増する見通しです。フィルムコンデンサはこれらの主要部品であり、当社にとって大型の市場拡大機会が到来しています。一方、省エネ・高性能化への技術ニーズ高度化と海外競合の攻勢が脅威となっており、今すぐ営業・技術・経営の各部門が連携して動くことが求められます。',
+    opportunities: [
+      { title: 'EV・HEV向けDCリンクコンデンサの需要急増', detail: 'EV市場の拡大に伴い、インバータの心臓部であるDCリンクコンデンサの需要が急増。政府の10兆円超の支援でEV関連投資が加速し、国内外カーメーカーへの供給拡大のチャンス。', impact: 'high' },
+      { title: 'AI・データセンター向け電力変換コンデンサ市場の新規開拓', detail: 'データセンターの急増に伴いUPS・電源装置用の高信頼性コンデンサ需要が拡大。当社の耐電流・低損失技術が差別化ポイントになる。', impact: 'high' },
+      { title: '省エネ半導体・インバータ向け製品の拡販機会', detail: '政府の省エネAI半導体推進政策により、高効率インバータ用スナバ・DCリンクコンデンサの需要増大。既存製品の横展開が可能。', impact: 'mid' },
+      { title: '国内サプライチェーン強化政策による国産部品優遇', detail: '経済安保の観点から国内調達を優先する動きが加速。台湾・韓国依存から脱却したい国内メーカーが国産コンデンサを優先採用する傾向が強まる。', impact: 'mid' },
+    ],
+    threats: [
+      { title: '技術高度化への対応遅れリスク', detail: '次世代半導体（SiC/GaN）の普及により、スイッチング周波数が高くなり、コンデンサに求められる仕様が急速に高度化。現行製品ラインの競争力が低下する恐れがある。', impact: 'high' },
+      { title: '海外大手コンデンサメーカーとの価格競争激化', detail: 'AI・半導体投資の活発化を見て中国・韓国・欧州の競合他社が大量投資を実施。規模の経済により価格競争が激化し、カスタム品でも価格圧力が高まる。', impact: 'high' },
+      { title: '原材料（銅・アルミ・ポリプロピレン）の調達コスト上昇', detail: 'AI・半導体投資拡大による産業用金属の需要増大と地政学リスクにより、コンデンサの主要原材料コストが上昇。MC管理と売価設定の見直しが急務。', impact: 'mid' },
+      { title: '人材確保難と技術継承リスク', detail: 'AI・半導体産業への人材集中が進み、製造業の技術者採用が困難に。ベテラン技術者の退職に伴う製造ノウハウの継承が課題。', impact: 'mid' },
+    ],
+    actions: [
+      { title: 'EV・データセンター向け重点顧客への緊急訪問計画の立案', priority: 'urgent', who: '営業部・営業企画部', what: 'EV・HEVインバータメーカー上位10社、データセンター向け電源メーカー上位5社をリストアップし、今後6ヶ月の訪問計画を今週中に作成する。訪問時は政府のAI・半導体投資計画の増産動向を確認し、当社製品の採用可能性を打診する。', why: '政府の10兆円支援で今後2〜3年が最大の市場拡大期。今から顧客と関係を築かないと競合に先行される。', when: '今週中に計画立案、来月から訪問開始' },
+      { title: 'SiC/GaN対応次世代コンデンサの開発ロードマップ策定', priority: 'urgent', who: '技術開発部・品質保証部', what: 'SiC・GaNパワー半導体を採用した次世代インバータに対応できる高周波・低ESL仕様のコンデンサの技術要件を整理し、3ヶ月以内に開発ロードマップを作成する。既存製品の改良で対応できるものと新規開発が必要なものを分類する。', why: 'SiC/GaN普及が2〜3年以内に本格化。今から動かないと顧客の設計段階から外れてしまう。', when: '3ヶ月以内にロードマップ完成' },
+      { title: '原材料価格変動に連動した売価見直しルールの整備', priority: 'mid', who: '営業企画部・経理部', what: '銅・アルミ・PPの市場価格を月次でモニタリングし、一定以上変動した場合に自動的に売価改定を検討するトリガールールを設定する。既存の売価設定支援アプリと原材料相場モニターを活用し、粗利率が維持できているか月次チェックする仕組みを作る。', why: '原材料高騰で知らぬうちに赤字製品が増える。データに基づいた価格管理が収益防衛に直結。', when: '2ヶ月以内にルール策定・運用開始' },
+      { title: '政府補助金・助成金情報の定期収集と申請検討体制の整備', priority: 'mid', who: '経営企画部・技術開発部', what: 'METIのAI・半導体関連補助金（省エネAI半導体開発支援等）の公募情報を週次でチェックする担当者を決め、自社が申請できるものを経営企画部がリストアップして毎月役員会で報告する体制を作る。', why: '10兆円の公的支援のうち、中小・中堅メーカーも活用できる補助金・助成金が多数。情報を取り逃さない体制が必要。', when: '1ヶ月以内に担当者選任・情報収集開始' },
+      { title: 'AI活用による製造・営業業務の効率化推進', priority: 'normal', who: '全部門（推進：営業企画部）', what: '社内AIデモサイトで公開している各ツール（議事録メーカー・売価設定支援・残高照合等）を各部門で実際に使い始め、業務効率化の効果を数値で測定する。月1回の活用事例共有会を開催し、横展開を進める。', why: '人口減少・人手不足の中で競争力を維持するにはAI活用による生産性向上が不可欠。政府もAI活用を強く推進している。', when: '今月から開始（段階的に拡大）' },
+    ],
+    exec_message: 'AI・半導体政策の追い風を最大限に活かすため、EV・データセンター向け市場への攻勢と次世代技術への先行投資を、今後1年間の最重要経営課題として位置づけることを提言します。あわせて、原材料コスト上昇と競合激化という二重の脅威に対し、売価管理の精緻化と補助金活用の体制整備を同時に進めることで、収益を守りながら成長を実現することが可能です。'
+  };
+
+  showReport(demoReport, urls, today, true);
+}
+
+// ===== 経済安全保障×フィルムコンデンサ 3サイト統合デモレポート =====
+function showDemoReportEconSec(urls, today) {
+  const r = {
+    title: '経済安全保障政策とフィルムコンデンサ「特定重要物資」指定 ｜ 指月電機製作所 経営戦略への示唆',
+    summary: '2024年2月、フィルムコンデンサーが経済安全保障推進法に基づく「特定重要物資」に正式指定され、政府は国内メーカーへの大型補助金支援（NEDO経由）と技術流出防止措置を制度化しました。データセンター・EV・防衛・医療機器など幅広い分野に不可欠な部品として国家戦略上の重要インフラと認定された当社製品は、今後2〜3年で補助金獲得・国内優遇調達・市場拡大という三重の追い風を享受できる立場にあります。一方で、中国企業による技術獲得圧力・供給確保計画の申請遅延・原材料リスクへの対応を怠ると、この機会を競合に奪われかねません。',
+    opportunities: [
+      {
+        title: '供給確保計画の認定による政府補助金（数十〜数百億円規模）の取得',
+        detail: '経済安全保障推進法に基づき経産省に「供給確保計画」を申請し認定されれば、NEDO経由で生産能力増強・研究開発費への大型補助金が受け取れる。先端電子部品分野では総額数千億円の予算が措置済みで、フィルムコンデンサ専業メーカーとして申請優先度は高い。第4回公募（2025年2月）まで実施されており、次回公募が予告なく開始される可能性がある。担当窓口（製造産業局 素材産業課 03-3501-1737）への事前相談が認定への第一歩。',
+        impact: 'high'
+      },
+      {
+        title: 'EV・自動運転・データセンター向けの旺盛な高信頼性コンデンサ需要',
+        detail: 'EV・HEVのパワーコントロールユニット（PCU）をはじめインバーターには多数のフィルムコンデンサが使用されており、EV普及に伴う需要拡大は直接的に当社の事業機会となる。データセンター・5G基地局・産業用ロボット向けの高性能コンデンサ需要も政府のAI・半導体投資を背景に急増中。当社の高耐圧・低損失・自己回復性能が最もニーズに合致する。',
+        impact: 'high'
+      },
+      {
+        title: '国内調達優遇による防衛・医療・宇宙分野への新規参入機会',
+        detail: '経済安保政策の進展で、防衛装備品・医療機器・宇宙機器メーカーが国内サプライヤーからの優先調達に動いている。政府資料でもハイエンドのフィルムコンデンサは防衛・医療用途で幅広く使用されることが言及されており、当社の国内一貫製造体制と高信頼性製品が差別化ポイントとなる。',
+        impact: 'high'
+      },
+      {
+        title: '技術流出防止の認定要件化による国内専業メーカーの競争優位の制度的担保',
+        detail: '供給確保計画の認定要件として「コア技術の流出防止措置」が義務付けられた。これは中国等の海外競合が単純な技術模倣で追いつくことを制度的に抑制する効果があり、当社のような国内技術力の高いメーカーの優位性が長期的に守られやすくなる。',
+        impact: 'mid'
+      },
+    ],
+    threats: [
+      {
+        title: '供給確保計画の申請・認定遅延による競合との補助金格差拡大',
+        detail: '第1〜4回公募はすでに終了。第5回以降の開始時期は未定で「希望者は今すぐ事前相談を」という状態。申請が遅れると競合他社が先に認定を受けて補助金で設備増強し、価格競争力に差がつく。政府資料では135件の供給確保計画が既に認定済みとあり、フィルムコンデンサ分野でも先行者がいる可能性がある。今すぐ動くことが不可欠。',
+        impact: 'high'
+      },
+      {
+        title: '中国電子部品メーカーによる技術獲得・特許侵害の継続的リスク',
+        detail: '政府資料で、2010年のニッセイ電機倒産後の中国現地法人による技術取得、2021年のパナソニックによる中国メーカーへの特許侵害提訴が具体的事例として挙げられている。当社の技術・ノウハウも同様の標的となるリスクがある。また供給確保計画の認定要件としても技術流出防止措置が義務付けられているため、未整備では認定を受けられない。',
+        impact: 'high'
+      },
+      {
+        title: 'フィルムコンデンサ原材料（ポリプロピレン・アルミ等）の調達リスク上昇',
+        detail: '政府資料でMLCC原材料のジルコニウム・バリウムの他国による囲い込みリスクが指摘されている。フィルムコンデンサの原材料（ポリプロピレンフィルム・アルミ蒸着材等）も同様の地政学リスクにさらされており、特定国・特定サプライヤーへの依存度を把握した上での備蓄・複線化が必要。',
+        impact: 'mid'
+      },
+      {
+        title: 'ローエンド品での価格競争激化と中国企業のシェア拡大',
+        detail: '政府資料で「ローエンド品は外部依存が高まりつつある」ことが明示されている。当社のカスタム品の一部がローエンドカテゴリに分類される場合、中国・東南アジアメーカーとの価格競争にさらされるリスクがある。ハイエンド品への選択と集中が収益防衛の鍵となる。',
+        impact: 'mid'
+      },
+    ],
+    actions: [
+      {
+        title: '経産省への「供給確保計画」事前相談を今月実施し申請準備を開始する',
+        priority: 'urgent',
+        who: '経営企画部・技術開発部（経営層の決裁必須）',
+        what: '製造産業局 素材産業課（03-3501-1737）に今月中に電話し事前相談を申し込む。相談では「フィルムコンデンサ及びその製造装置・部素材」の担当として、①現在の生産能力②3〜5年の増強投資計画③主要技術・特許リスト④技術流出防止の取組を説明する。申請書類（供給確保計画申請書・別紙・添付書類）は経産省HPからダウンロードして社内検討を開始する。',
+        why: '数十〜数百億円規模の補助金を獲得できる可能性がある。第5回公募がいつ始まるかわからないため、今すぐ準備しないと機会を逃す。競合が先に認定を受けると価格競争力に取り返しのつかない差がつく。',
+        when: '今月中に事前相談、3ヶ月以内に申請書類の骨格完成'
+      },
+      {
+        title: 'コア技術・ノウハウ・特許の棚卸しと技術流出防止規程の整備',
+        priority: 'urgent',
+        who: '技術開発部・法務（法務担当がいない場合は社労士・弁護士に依頼）',
+        what: '当社が保有するフィルムコンデンサ製造に関わるコア技術・ノウハウ・特許を一覧化し、秘密管理レベル（機密・社外秘・一般）を設定する。社外への技術提供・海外企業との取引には事前の法務確認フローを設ける。これは供給確保計画の認定要件にも直結するため、申請準備と同時並行で進める。',
+        why: '中国メーカーによる技術獲得事例が政府資料に実名で記載されている現実がある。また認定要件として技術流出防止措置が義務付けられており、未整備のままでは補助金申請ができない。',
+        when: '3ヶ月以内に規程整備・一覧作成完了'
+      },
+      {
+        title: 'EV・防衛・医療向け重点顧客リストを作成し提案活動を開始する',
+        priority: 'mid',
+        who: '営業部・営業企画部',
+        what: '「国産フィルムコンデンサ＝特定重要物資指定の安心感」という経済安保訴求ポイントを営業トークに加える。EV・HEVインバーターメーカー上位10社・防衛関連メーカー5社・医療機器メーカー5社のリストを作成し、来月から訪問を開始する。商談では「国内調達のリスク管理」という観点で当社採用のメリットを説明する。',
+        why: '経済安保政策の追い風で「国産部品の優先採用」が経営課題になっている企業が増えている。このタイミングで提案しないと競合に先行される。',
+        when: '来月から訪問開始（まず10社リストを今週中に作成）'
+      },
+      {
+        title: '主要原材料の調達リスクマップを作成し備蓄・複線化方針を決定する',
+        priority: 'mid',
+        who: '購買部・製造部',
+        what: 'PPフィルム・アルミ蒸着材・エポキシ樹脂等の主要原材料について、現在の調達先国・サプライヤー・在庫日数を一覧化する。単一国・単一サプライヤーへの依存度が高いものから代替調達先を開拓し、安定調達のための適正在庫水準を設定する。相場モニターアプリで月次コスト動向を把握し、売価設定支援アプリで粗利率への影響を管理する仕組みを運用する。',
+        why: '政府が原材料の囲い込みリスクを明示しており、当社も同様のリスクを自社管理する義務がある。供給確保計画にも備蓄計画を記載できるため、申請内容の充実にもつながる。',
+        when: '半年以内に調達リスクマップ完成・備蓄方針決定'
+      },
+      {
+        title: '社内AI活用ツールの全部門展開と業務効率化効果の測定',
+        priority: 'normal',
+        who: '営業企画部（推進）・全部門',
+        what: '社内AIデモサイトの各ツール（売価設定支援・残高照合・議事録メーカー等）を各部門で実際に使い始め、月次で業務時間削減効果を数値で記録する。経済安保対応・補助金申請・営業提案の各業務でもAIを積極的に活用し、少ない人員で多くの業務をこなせる体制を作る。',
+        why: '供給確保計画の申請・管理・報告には相当の事務工数がかかる。AIで既存業務の効率化を進め、経済安保対応に人員を割けるようにすることが不可欠。',
+        when: '今月から段階的に展開開始'
+      },
+    ],
+    exec_message: '当社の主力製品フィルムコンデンサが国家安全保障上の「特定重要物資」に指定されたことは、80年の歴史で培った技術と製造基盤が国の安全保障を支える不可欠なインフラとして正式に認められた歴史的な出来事です。政府補助金の申請・技術保護体制の整備・国内優遇調達の営業活用という三本柱の施策を、今年度中に具体的な成果として実現することを最優先の経営課題として位置づけるよう提言します。特に補助金申請の事前相談は、今月中に行動に移すことが急務です。'
+  };
+  showReport(r, urls, today, true);
+}
+
+
+// ===== パナソニック競合分析デモレポート =====
+function showDemoReportPanasonic(urls, today) {
+  const r = {
+    title: 'パナソニック フィルムコンデンサ製品ページ分析 ｜ 競合動向と指月電機製作所の対応戦略',
+    summary: 'パナソニックインダストリーは車載用フィルムコンデンサで世界シェア首位（約70%）を保持し、xEV・産業インフラ向けに高耐圧・低ESR・AEC-Q200対応品をラインナップ。富山・松江・中国・スロバキアの4極体制で大規模な増産投資を実施しており、世界市場における最大の競合です。一方で、パナソニックがカバーしにくいカスタム・小ロット・特殊仕様品の領域は指月電機が優位性を持てる市場であり、競合の動向を踏まえた差別化戦略が急務です。',
+    opportunities: [
+      {
+        title: 'パナソニックが手薄な中小ロット・カスタム品への特化戦略',
+        detail: 'パナソニックは大量生産・標準品で世界トップの地位を確立しているが、逆に言えば多品種小ロット・一品一様のカスタム品への対応は大企業の構造上難しい。指月電機の強みである「カスタム対応力・小ロット対応・迅速な仕様変更」はパナソニックが苦手とする領域で、この差別化ポイントを営業現場で積極的に訴求すべき。',
+        impact: 'high'
+      },
+      {
+        title: 'パナソニックが生産終息品を出しているシリーズの後継需要の取込み',
+        detail: 'パナソニックのサイトには複数シリーズの生産終息・新規採用非推奨が掲載されている（ECQUA/B、ECWU各シリーズ等）。これらを採用していた既存顧客が代替品を探しており、当社の類似仕様品を提案する絶好の機会。競合の生産終息情報は新規顧客開拓の手がかりになる。',
+        impact: 'high'
+      },
+      {
+        title: '国内一貫製造による調達リスク低減訴求での差別化',
+        detail: 'パナソニックは中国（江門）・スロバキアに生産拠点を分散しているが、経済安保・地政学リスクの観点から「国内完結製造」を重視する顧客が増えている。指月電機が国内一貫製造にこだわることで、パナソニックに対する「安定供給の安心感」という差別化ポイントを訴求できる。',
+        impact: 'mid'
+      },
+      {
+        title: 'パナソニックのシミュレーションツール・設計支援の仕組みを参考にした顧客サービス強化',
+        detail: 'パナソニックはフィルムキャパシタ選定ツール・LCフィルターシミュレータ・クロスリファレンスなど充実した設計支援ツールを提供している。当社もWebベースの製品選定支援・特性シミュレーション機能を強化することで、顧客の設計段階から関与できる関係構築が可能になる。',
+        impact: 'mid'
+      },
+    ],
+    threats: [
+      {
+        title: 'パナソニックの世界シェア約70%という圧倒的な競争力による価格・技術プレッシャー',
+        detail: 'パナソニックは車載用フィルムコンデンサで約70%の世界シェアを保有し、富山・松江・中国・スロバキアの4極体制で大規模な設備投資（約900億円規模）を実施。スケールメリットによる低コスト製造と最先端の蒸着技術（高精度パターン蒸着・ヒューズ機能）で、同じ市場を直接狙った場合の競争は非常に厳しい。',
+        impact: 'high'
+      },
+      {
+        title: 'AEC-Q200・高耐熱対応など車載品質標準の高度化への追従コスト',
+        detail: 'パナソニックはxEV充電回路用のAEC-Q200準拠品・125℃連続使用の高耐熱品を標準ラインナップとして揃えている。車載市場では顧客から同等以上の品質保証が求められる場合があり、対応するための認定取得・試験設備への投資が必要になる可能性がある。',
+        impact: 'mid'
+      },
+      {
+        title: 'ニチコン等の他の国内競合も増産投資を加速',
+        detail: 'パナソニックだけでなく、ニチコンも中国での現地生産開始など増産体制を強化している。国内フィルムコンデンサ市場において複数の大手が設備増強を進めており、汎用品・量産品での価格競争がさらに激化するリスクがある。',
+        impact: 'mid'
+      },
+      {
+        title: 'パナソニックのクロスリファレンス機能による他社品からの乗り換え誘導',
+        detail: 'パナソニックはWebサイトでクロスリファレンス（他社品番から自社品への置換え検索）機能を提供している。当社製品を使用している顧客がこの機能でパナソニック品に乗り換えるリスクがある。逆に当社も同様の機能を持つことで防衛・攻勢の両面に活用できる。',
+        impact: 'low'
+      },
+    ],
+    actions: [
+      {
+        title: 'パナソニックの生産終息品リストを入手し、代替提案リストを今月中に作成する',
+        priority: 'urgent',
+        who: '営業部・技術開発部',
+        what: 'パナソニックのWebサイト（industrial.panasonic.com）で「生産終息」「新規採用非推奨」と掲載されているシリーズ一覧を今月中に収集する。該当品番に近いスペックの当社製品を技術部門が照合し、代替提案書（型番・仕様比較表）を作成する。その後、該当品番を採用している既存・新規顧客リストと照合して提案活動を開始する。',
+        why: '顧客は今まさに代替品を探している状態にあり、タイミングとしてこれ以上ない絶好の機会。早く動くほど他の競合より先に採用される可能性が高い。',
+        when: '今月中にリスト作成、来月から提案活動開始'
+      },
+      {
+        title: '「カスタム対応・小ロット・短納期」の強みを明示した営業資料を刷新する',
+        priority: 'urgent',
+        who: '営業部・営業企画部',
+        what: '現在の営業資料・会社案内に「パナソニックとの違い」を明示したポジショニングページを追加する。具体的には①最小ロット数②標準納期③カスタム仕様対応の範囲（電圧・容量・形状・端子）④対応リードタイム、を数字で示す。「大手が対応しにくい領域の専門家」として差別化することが目的。',
+        why: '顧客がパナソニックとの比較検討をする際に、当社の独自価値が伝わる資料がなければ「価格だけの比較」になってしまう。',
+        when: '2ヶ月以内に営業資料刷新完了'
+      },
+      {
+        title: '国内一貫製造・経済安保対応品であることを製品認定の訴求ポイントに加える',
+        priority: 'mid',
+        who: '営業部・技術開発部',
+        what: '顧客向けの製品説明書・会社案内に「全工程国内製造」「特定重要物資対応品」であることを明示する。パナソニックが中国・スロバキアに製造拠点を持つのに対し、調達リスクを重視する顧客（防衛・医療・公共インフラ向け）には国内製造が決め手になる場合がある。',
+        why: '経済安保政策の強化で「国産部品を優先したい」というニーズが増加している。競合との差別化において「国産」は今後最大の武器のひとつになる。',
+        when: '3ヶ月以内に資料反映'
+      },
+      {
+        title: 'Webサイトに製品選定支援・クロスリファレンス機能を追加することを検討する',
+        priority: 'normal',
+        who: '営業企画部・技術開発部・IT担当',
+        what: 'パナソニックが提供しているような、他社品番から当社品番への変換（クロスリファレンス）機能、および仕様入力による製品選定ツールを自社Webサイトまたは社内デモサイトに追加する方向で検討を開始する。まずは主要な他社品番（パナソニック・ニチコン等）との対照表をExcelで作成し、営業ツールとして活用するところから始める。',
+        why: 'パナソニックは自社のWebツールで他社からの乗り換えを積極的に誘導している。当社が同様の機能を持つことで、逆に競合顧客を獲得できる可能性がある。',
+        when: 'まず6ヶ月以内にExcel対照表作成、1年以内にWeb化を検討'
+      },
+    ],
+    exec_message: 'パナソニックは車載用フィルムコンデンサで約70%の世界シェアを持つ最大の競合ですが、大企業ゆえにカスタム対応・小ロット・多品種対応には限界があります。指月電機の勝ち筋は「パナソニックが手薄な領域への集中」「国内一貫製造による調達安心感」「生産終息品の代替需要の取込み」の3点です。競合を研究し、勝てる市場・顧客を選んで経営資源を集中させる戦略の立案を提言します。'
+  };
+  showReport(r, urls, today, true);
+}
+
+function resetAll() {
+  document.querySelector('.input-card').style.display = 'block';
+  document.getElementById('report-section').style.display = 'none';
+  document.getElementById('report-doc').innerHTML = '';
+  document.getElementById('demo-note').style.display = 'none';
+  document.getElementById('loading').style.display = 'none';
+  // ローディングステップをリセット
+  ['ls1','ls2','ls3','ls4','ls5'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done');
+  });
+}
+</script>
+</body>
+</html>
