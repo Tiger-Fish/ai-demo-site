@@ -162,6 +162,16 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;paddi
 
     <div class="url-list" id="url-list"></div>
 
+    <!-- APIキー必要メッセージ -->
+    <div id="api-notice" style="display:none;align-items:flex-start;gap:12px;background:#fff7ed;border:1.5px solid #fb923c;border-radius:10px;padding:14px 18px;margin-bottom:14px">
+      <span style="font-size:20px;flex-shrink:0">🔑</span>
+      <div style="font-size:13px;color:#7c2d12;line-height:1.85">
+        <strong>URLを解析してレポートを生成するにはAPIキーが必要です。</strong><br>
+        他のデモツール同様、APIキーの設定と別途課金が必要になります。<br>
+        <span style="color:#9a3412">サンプルA・B・Cの3つのデモを用意しておりますので、そちらをご覧ください。</span>
+      </div>
+    </div>
+
     <div id="sample-link-wrap">
         <div style="display:flex;flex-direction:column;gap:6px">
         <span class="sample-link" onclick="loadSampleUrl('meti1')">
@@ -248,6 +258,7 @@ function addUrl() {
   urlList.push({ url, status: 'pending' });
   input.value = '';
   renderUrlList();
+  document.getElementById('api-notice').style.display = 'flex';
 }
 
 function removeUrl(idx) {
