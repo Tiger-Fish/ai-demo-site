@@ -71,7 +71,7 @@ main{max-width:1200px;margin:0 auto;padding:24px 24px 80px}
 .market-source a:hover{text-decoration:underline}
 
 /* TradingViewウィジェット */
-.tv-widget-wrap{height:220px;background:var(--bg3)}
+.tv-widget-wrap{height:280px;background:var(--bg3);position:relative}
 .tv-widget-wrap iframe{width:100%;height:100%;border:none}
 
 /* 情報バー */
@@ -240,30 +240,30 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;paddi
 // TradingViewシンボル参照: https://www.tradingview.com
 const MARKETS = {
   metal: [
-    { id:'copper',    name:'銅（Copper）',    icon:'🟤', symbol:'COMEX:HG1!',   unit:'USD/ポンド', desc:'コンデンサリード線・端子材料', source:'CME/COMEX' },
-    { id:'aluminum',  name:'アルミニウム',    icon:'⚪', symbol:'LME:ALUMINUM',  unit:'USD/トン',  desc:'電極（真空蒸着）材料', source:'LME' },
-    { id:'zinc',      name:'亜鉛（Zinc）',    icon:'🔵', symbol:'LME:ZINC',      unit:'USD/トン',  desc:'メタリコン（端面電極）材料', source:'LME' },
-    { id:'tin',       name:'錫（Tin）',       icon:'🪙', symbol:'LME:TIN',       unit:'USD/トン',  desc:'ハンダ材料・端子めっき', source:'LME' },
-    { id:'lead',      name:'鉛（Lead）',      icon:'⚫', symbol:'LME:LEAD',      unit:'USD/トン',  desc:'接続材料関連', source:'LME' },
-    { id:'brass',     name:'真鍮（Brass）',   icon:'🟡', symbol:'COMEX:HG1!',   unit:'参考：銅相場', desc:'端子・リード線材料（銅＋亜鉛）', source:'銅相場参考' },
+    { id:'copper',   name:'銅（Copper）',    icon:'🟤', symbol:'COMEX:HG1!',  unit:'USD/ポンド',   desc:'コンデンサリード線・端子材料', source:'COMEX' },
+    { id:'aluminum', name:'アルミニウム',    icon:'⚪', symbol:'COMEX:ALI1!', unit:'USD/ポンド',   desc:'電極（真空蒸着）材料', source:'COMEX' },
+    { id:'zinc',     name:'亜鉛（Zinc）',    icon:'🔵', symbol:'CME:ZNC1!',   unit:'USD/ポンド',   desc:'メタリコン（端面電極）材料', source:'CME' },
+    { id:'tin',      name:'錫（Tin）',       icon:'🪙', symbol:'COMEX:HG1!',  unit:'参考：銅相場',  desc:'ハンダ材料・端子めっき（銅相場参考）', source:'COMEX' },
+    { id:'lead',     name:'鉛（Lead）',      icon:'⚫', symbol:'NYMEX:CL1!',  unit:'参考：原油相場', desc:'接続材料（原油相場参考）', source:'NYMEX' },
+    { id:'brass',    name:'真鍮（銅＋亜鉛）', icon:'🟡', symbol:'COMEX:HG1!',  unit:'参考：銅相場',  desc:'端子・リード線材料（銅相場参考）', source:'COMEX' },
   ],
   precious: [
-    { id:'gold',      name:'金（Gold）',      icon:'🥇', symbol:'COMEX:GC1!',   unit:'USD/トロイオンス', desc:'接点・高信頼性めっき', source:'COMEX' },
-    { id:'silver',    name:'銀（Silver）',    icon:'🥈', symbol:'COMEX:SI1!',   unit:'USD/トロイオンス', desc:'電気接点・導電材料', source:'COMEX' },
-    { id:'platinum',  name:'白金（Platinum）',icon:'💎', symbol:'COMEX:PL1!',   unit:'USD/トロイオンス', desc:'特殊接点・触媒', source:'COMEX' },
-    { id:'palladium', name:'パラジウム',      icon:'✨', symbol:'COMEX:PA1!',   unit:'USD/トロイオンス', desc:'電子部品めっき', source:'COMEX' },
+    { id:'gold',      name:'金（Gold）',      icon:'🥇', symbol:'COMEX:GC1!',  unit:'USD/トロイオンス', desc:'接点・高信頼性めっき', source:'COMEX' },
+    { id:'silver',    name:'銀（Silver）',    icon:'🥈', symbol:'COMEX:SI1!',  unit:'USD/トロイオンス', desc:'電気接点・導電材料', source:'COMEX' },
+    { id:'platinum',  name:'白金（Platinum）',icon:'💎', symbol:'COMEX:PL1!',  unit:'USD/トロイオンス', desc:'特殊接点・触媒', source:'COMEX' },
+    { id:'palladium', name:'パラジウム',      icon:'✨', symbol:'COMEX:PA1!',  unit:'USD/トロイオンス', desc:'電子部品めっき', source:'COMEX' },
   ],
   energy: [
-    { id:'crudeoil',  name:'原油（WTI）',     icon:'🛢️', symbol:'NYMEX:CL1!',  unit:'USD/バレル', desc:'製造エネルギー・樹脂原料', source:'NYMEX' },
-    { id:'naphtha',   name:'ナフサ',          icon:'⚗️', symbol:'NYMEX:RB1!',  unit:'参考：ガソリン先物', desc:'PP/PETフィルム原料（石油化学品）', source:'NYMEX参考' },
-    { id:'natgas',    name:'天然ガス',        icon:'🔥', symbol:'NYMEX:NG1!',  unit:'USD/MMBtu', desc:'製造エネルギー', source:'NYMEX' },
-    { id:'brent',     name:'原油（Brent）',   icon:'🛢️', symbol:'TVC:UKOIL',   unit:'USD/バレル', desc:'国際原油指標', source:'ICE' },
+    { id:'crudeoil', name:'原油（WTI）',  icon:'🛢️', symbol:'NYMEX:CL1!', unit:'USD/バレル',  desc:'製造エネルギー・樹脂原料', source:'NYMEX' },
+    { id:'brent',    name:'原油（Brent）',icon:'🛢️', symbol:'TVC:UKOIL',  unit:'USD/バレル',  desc:'国際原油指標', source:'TVC' },
+    { id:'naphtha',  name:'ナフサ（参考）',icon:'⚗️', symbol:'NYMEX:RB1!', unit:'USD/ガロン',  desc:'PP/PETフィルム原料（ガソリン先物参考）', source:'NYMEX' },
+    { id:'natgas',   name:'天然ガス',     icon:'🔥', symbol:'NYMEX:NG1!', unit:'USD/MMBtu', desc:'製造エネルギー', source:'NYMEX' },
   ],
   material: [
-    { id:'pp',        name:'ポリプロピレン（PP）', icon:'🧪', symbol:'NYMEX:CL1!', unit:'原油相場参考', desc:'PPフィルムコンデンサの誘電体フィルム原料', source:'原油連動' },
-    { id:'pet',       name:'PET（ポリエステル）',  icon:'🧪', symbol:'NYMEX:CL1!', unit:'原油相場参考', desc:'PETフィルムコンデンサの誘電体フィルム原料', source:'原油連動' },
-    { id:'epoxy',     name:'エポキシ樹脂',    icon:'🏭', symbol:'TVC:UKOIL',   unit:'石油相場参考', desc:'外装封止材（石油由来）', source:'石油連動' },
-    { id:'steel',     name:'鉄鋼（Steel）',   icon:'⚙️', symbol:'SGX:UC1!',    unit:'USD/トン',   desc:'ケース・治工具材料', source:'SGX' },
+    { id:'steel',    name:'鉄鋼（Steel）',    icon:'⚙️', symbol:'COMEX:HRC1!', unit:'USD/ショートトン', desc:'ケース・治工具材料', source:'COMEX' },
+    { id:'xauusd',   name:'金（スポット）',   icon:'🥇', symbol:'OANDA:XAUUSD', unit:'USD/オンス',      desc:'貴金属参考（スポット価格）', source:'OANDA' },
+    { id:'copper2',  name:'銅（スポット）',   icon:'🟤', symbol:'OANDA:XCUUSD', unit:'USD/オンス',      desc:'銅スポット参考価格', source:'OANDA' },
+    { id:'oil2',     name:'原油（スポット）', icon:'🛢️', symbol:'TVC:USOIL',   unit:'USD/バレル',      desc:'WTI原油スポット価格', source:'TVC' },
   ]
 };
 
@@ -302,7 +302,6 @@ function createCard(m, cat) {
   div.className = 'market-card';
   div.id = 'card-' + m.id;
 
-  // TradingViewウィジェットのrange設定
   const rangeMap = {
     '1W':'1W','1M':'1M','3M':'3M','6M':'6M',
     '12M':'12M','36M':'36M','60M':'60M','120M':'120M'
@@ -327,43 +326,61 @@ function createCard(m, cat) {
     </div>
   `;
 
-  // TradingViewミニチャートウィジェット埋め込み
   setTimeout(() => {
     const container = document.getElementById('tv-' + m.id);
     if (!container) return;
 
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      symbol: m.symbol,
-      width: '100%',
-      height: '220',
-      locale: 'ja',
-      dateRange: range,
-      colorTheme: 'light',
-      isTransparent: false,
-      autosize: true,
-      largeChartUrl: 'https://www.tradingview.com/symbols/' + m.symbol.replace(':', '/') + '/',
-      noTimeScale: false,
-      chartOnly: false,
-      fontFamily: 'Noto Sans JP, sans-serif'
-    });
-
+    // Symbol Overview ウィジェットを使用（グラフ付き）
     const widgetDiv = document.createElement('div');
     widgetDiv.className = 'tradingview-widget-container';
-    widgetDiv.style.height = '220px';
+    widgetDiv.style.height = '280px';
     widgetDiv.style.width = '100%';
 
     const innerDiv = document.createElement('div');
     innerDiv.className = 'tradingview-widget-container__widget';
-    innerDiv.style.height = '220px';
+    innerDiv.style.height = 'calc(100% - 32px)';
     innerDiv.style.width = '100%';
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js';
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      symbols: [[m.name, m.symbol + '|' + range]],
+      chartOnly: false,
+      width: '100%',
+      height: '280',
+      locale: 'ja',
+      colorTheme: 'light',
+      autosize: true,
+      showVolume: false,
+      showMA: false,
+      hideDateRanges: false,
+      hideMarketStatus: false,
+      hideSymbolLogo: false,
+      scalePosition: 'right',
+      scaleMode: 'Normal',
+      fontFamily: 'Noto Sans JP, sans-serif',
+      fontSize: '10',
+      noTimeScale: false,
+      valuesTracking: '1',
+      changeMode: 'price-and-percent',
+      chartType: 'area',
+      maLineColor: '#2962FF',
+      maLineWidth: 1,
+      maLength: 9,
+      lineWidth: 2,
+      lineType: 0,
+      dateRanges: ['1w|1D','1m|1D','3m|1W','6m|1W','12m|1M','36m|1M','60m|1M','120m|1M'],
+      lineColor: '#2e7de0',
+      topColor: 'rgba(46,125,224,0.2)',
+      bottomColor: 'rgba(46,125,224,0)',
+    });
 
     widgetDiv.appendChild(innerDiv);
     widgetDiv.appendChild(script);
     container.appendChild(widgetDiv);
-  }, 50);
+  }, Math.random() * 300 + 50); // ランダム遅延で同時ロードを避ける
 
   return div;
 }
