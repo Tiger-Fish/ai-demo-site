@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>売価設定支援アプリ | 指月電機製作所</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#132040;--navy3:#1e3060;
+  --accent:#2e7de0;--accent2:#5b9ef7;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --green:#16a34a;--teal:#0d9488;--orange:#ea580c;--red:#dc2626;--purple:#7c3aed;
+  --text:#1a1a2e;--text2:#3a4a6a;--text3:#6a7a9a;
+  --bg:#f4f6fb;--bg2:#fff;--bg3:#eef2fa;
+  --border:#dde4f0;
+  --shadow:0 2px 16px rgba(10,22,40,.08);
+  --shadow2:0 8px 32px rgba(10,22,40,.14);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ヘッダー */
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);color:white;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(46,125,224,.2),transparent 70%)}
+.header-inner{max-width:1200px;margin:0 auto;padding:32px 24px 28px;position:relative;z-index:1}
+.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,.2);border:1px solid var(--gold);color:var(--gold2);font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:20px;margin-bottom:14px}
+header h1{font-size:clamp(20px,3.5vw,28px);font-weight:700;line-height:1.3;margin-bottom:6px}
+header h1 span{color:var(--accent2)}
+header p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.7}
+
+/* タブ */
+.tab-bar{background:var(--navy2);border-bottom:2px solid var(--accent)}
+.tab-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;gap:0;overflow-x:auto}
+.tab-btn{padding:13px 20px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,.6);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.tab-btn:hover{color:white}
+.tab-btn.active{color:white;border-bottom-color:var(--accent2)}
+
+/* メイン */
+main{max-width:1200px;margin:0 auto;padding:28px 24px 80px}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ファイルアップロード */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+@media(max-width:700px){.upload-grid{grid-template-columns:1fr}}
+.upload-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow)}
+.upload-card h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.upload-card h3 .icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--navy3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:#eff6ff}
+.drop-zone.loaded{border-color:var(--green);background:#f0fdf4;border-style:solid}
+.drop-zone .dz-icon{font-size:28px;margin-bottom:8px}
+.drop-zone p{font-size:12px;color:var(--text3);line-height:1.6}
+.drop-zone .file-name{font-size:13px;font-weight:700;color:var(--green);margin-top:6px}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.col-map{margin-top:14px;display:none}
+.col-map.show{display:block}
+.col-map-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.08em;margin-bottom:8px}
+.col-map-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.col-map-row{display:flex;flex-direction:column;gap:3px}
+.col-map-row label{font-size:11px;color:var(--text3);font-weight:600}
+.col-select{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-family:'Noto Sans JP',sans-serif;font-size:12px;background:var(--bg3);color:var(--text);transition:border .2s}
+.col-select:focus{outline:none;border-color:var(--accent)}
+.col-select.req{border-color:var(--accent)}
+.sample-btn{font-size:11px;color:var(--accent);background:none;border:1px solid var(--accent);border-radius:6px;padding:3px 10px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-weight:600;transition:all .2s;margin-top:8px;display:inline-block}
+.sample-btn:hover{background:var(--accent);color:white}
+
+/* 検索パネル */
+.search-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.search-card h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.search-card h3 .icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--navy3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.search-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:16px}
+.search-group{display:flex;flex-direction:column;gap:5px}
+.search-group label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em}
+.search-input,.search-select{padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;color:var(--text);background:var(--bg3);transition:border .2s;width:100%}
+.search-input:focus,.search-select:focus{outline:none;border-color:var(--accent);background:white}
+.tolerance-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.search-btn{padding:12px 28px;background:linear-gradient(135deg,var(--accent),var(--navy3));color:white;border:none;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.search-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.clear-btn{padding:12px 20px;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);transition:all .2s;margin-left:10px}
+.clear-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* 統計サマリー */
+.stats-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);text-align:center}
+.stat-box .sv{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--navy);line-height:1}
+.stat-box .sl{font-size:11px;color:var(--text3);margin-top:4px;font-weight:600}
+.stat-box.s-avg{border-top:3px solid var(--accent)}
+.stat-box.s-max{border-top:3px solid var(--green)}
+.stat-box.s-min{border-top:3px solid var(--orange)}
+.stat-box.s-cnt{border-top:3px solid var(--purple)}
+.stat-box.s-gm{border-top:3px solid var(--teal)}
+
+/* 推奨売価計算 */
+.calc-card{background:var(--bg2);border:1.5px solid var(--accent);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.calc-card h4{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;align-items:end}
+.calc-group{display:flex;flex-direction:column;gap:5px}
+.calc-group label{font-size:11px;font-weight:700;color:var(--text3)}
+.calc-input{padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--text);background:var(--bg3);transition:border .2s;width:100%}
+.calc-input:focus{outline:none;border-color:var(--accent);background:white}
+.calc-result{background:linear-gradient(135deg,#eef4ff,#f0f8ff);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.calc-result .cr-label{font-size:12px;color:var(--text3);font-weight:600}
+.calc-result .cr-value{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--accent)}
+
+/* 結果テーブル */
+.result-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.result-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--border)}
+.result-title{font-size:14px;font-weight:700;color:var(--navy)}
+.result-count{font-size:12px;color:var(--text3);background:var(--bg3);padding:3px 10px;border-radius:8px;font-family:'JetBrains Mono',monospace}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap}
+.action-btn{padding:8px 16px;border-radius:8px;font-family:'Noto Sans JP',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-dl{background:linear-gradient(135deg,var(--green),var(--teal));color:white;border:none}
+.btn-dl:hover{filter:brightness(1.08)}
+.btn-print{background:var(--bg3);border:1.5px solid var(--border);color:var(--text2)}
+.btn-print:hover{border-color:var(--accent);color:var(--accent)}
+
+.result-table-wrap{overflow-x:auto}
+.result-table{width:100%;border-collapse:collapse;font-size:12px}
+.result-table th{background:var(--navy);color:white;padding:10px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.03em;white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0}
+.result-table th:hover{background:var(--navy3)}
+.result-table th .sort-icon{margin-left:4px;opacity:.5}
+.result-table th.sorted .sort-icon{opacity:1}
+.result-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.result-table tr:last-child td{border-bottom:none}
+.result-table tr:hover td{background:#f8fbff}
+.result-table .num{font-family:'JetBrains Mono',monospace;text-align:right}
+.result-table .code{font-family:'JetBrains Mono',monospace;font-size:11px}
+
+/* 粗利率バー */
+.gm-bar-wrap{display:flex;align-items:center;gap:6px}
+.gm-bar{height:6px;border-radius:3px;flex-shrink:0}
+.gm-val{font-family:'JetBrains Mono',monospace;font-size:12px}
+.gm-high{color:var(--green)}
+.gm-mid{color:var(--accent)}
+.gm-low{color:var(--orange)}
+.gm-neg{color:var(--red)}
+
+/* 参照ボタン */
+.ref-btn{padding:3px 8px;font-size:10px;font-weight:700;font-family:'Noto Sans JP',sans-serif;background:var(--accent);color:white;border:none;border-radius:5px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.ref-btn:hover{filter:brightness(1.15)}
+
+/* 全件一覧 */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.filter-input{padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Noto Sans JP',sans-serif;font-size:13px;background:var(--bg3);min-width:200px}
+.filter-input:focus{outline:none;border-color:var(--accent)}
+.filter-count{font-size:12px;color:var(--text3);margin-left:auto}
+
+/* 空状態 */
+.empty{text-align:center;padding:60px 24px;color:var(--text3)}
+.empty .ei{font-size:48px;margin-bottom:16px}
+.empty p{font-size:14px;line-height:1.7}
+
+/* ポイントボックス */
+.point{background:linear-gradient(135deg,#eef4ff,#f0f8ff);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#2a3a5a;line-height:1.8}
+.point strong{color:var(--accent)}
+
+footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px;margin-top:40px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);text-decoration:none;padding:8px 18px;border-radius:8px;font-size:12px;margin-bottom:12px;transition:all .2s}
+.back-btn:hover{background:rgba(255,255,255,.18);color:white}
+
+@media print{header,footer,.tab-bar,.search-card,.calc-card,.result-actions,.upload-grid{display:none!important}.result-wrap{box-shadow:none;border:1px solid #ccc}body{background:white}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">💴 売価設定支援</div>
+    <h1>売価設定<span>支援アプリ</span></h1>
+    <p>製品マスタ・売上マスタをアップロードし、型番・電圧・容量から類似品の売価実績を即時検索。粗利率ベースの推奨売価を自動計算します。</p>
+  </div>
+</header>
+
+<nav class="tab-bar">
+  <div class="tab-inner">
+    <button class="tab-btn active" onclick="switchTab('upload')" id="tab-upload">📁 データ読込</button>
+    <button class="tab-btn" onclick="switchTab('search')" id="tab-search">🔍 類似品検索・売価設定</button>
+    <button class="tab-btn" onclick="switchTab('list')" id="tab-list">📋 得意先別全件一覧</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ===== データ読込パネル ===== -->
+  <div class="panel active" id="upload-panel">
+
+    <div class="point">
+      📌 <strong>使い方：</strong>①製品マスタ（売価・MC含む）と②売上マスタ（数量含む）をアップロード → 列の対応を設定 → 「類似品検索」タブへ。Excel・CSV両対応。データはブラウザ内で処理され外部送信されません。
+    </div>
+
+    <div class="upload-grid">
+      <!-- 製品マスタ -->
+      <div class="upload-card">
+        <h3><span class="icon">📊</span>製品マスタ（売価・MC情報）</h3>
+        <div class="drop-zone" id="pm-zone"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleDrop(event,'pm')">
+          <div class="dz-icon">📋</div>
+          <p>クリックまたはドラッグ＆ドロップ<br>.xlsx / .xls / .csv 対応</p>
+          <div class="file-name" id="pm-filename"></div>
+          <input type="file" id="pm-file" accept=".xlsx,.xls,.csv" onchange="handleFile(event,'pm')">
+        </div>
+        <button class="sample-btn" onclick="loadSamplePM()">📋 サンプルデータを読込</button>
+        <div class="col-map" id="pm-map">
+          <div class="col-map-title">列の対応設定（* 必須）</div>
+          <div class="col-map-grid">
+            <div class="col-map-row"><label>* 製品コード（14桁）</label><select class="col-select req" id="pm-c-code"></select></div>
+            <div class="col-map-row"><label>* 得意先コード</label><select class="col-select req" id="pm-c-cust"></select></div>
+            <div class="col-map-row"><label>得意先名</label><select class="col-select" id="pm-c-custname"></select></div>
+            <div class="col-map-row"><label>* 売価</label><select class="col-select req" id="pm-c-price"></select></div>
+            <div class="col-map-row"><label>* MC（工場原価）</label><select class="col-select req" id="pm-c-mc"></select></div>
+            <div class="col-map-row"><label>市場記号</label><select class="col-select" id="pm-c-market"></select></div>
+            <div class="col-map-row"><label>商品記号</label><select class="col-select" id="pm-c-item"></select></div>
+            <div class="col-map-row"><label>図面番号</label><select class="col-select" id="pm-c-drawing"></select></div>
+            <div class="col-map-row"><label>顧客仕様書番号</label><select class="col-select" id="pm-c-spec"></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 売上マスタ -->
+      <div class="upload-card">
+        <h3><span class="icon">📈</span>売上マスタ（数量情報）</h3>
+        <div class="drop-zone" id="sm-zone"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleDrop(event,'sm')">
+          <div class="dz-icon">📦</div>
+          <p>クリックまたはドラッグ＆ドロップ<br>.xlsx / .xls / .csv 対応<br>（任意：なくても検索可能）</p>
+          <div class="file-name" id="sm-filename"></div>
+          <input type="file" id="sm-file" accept=".xlsx,.xls,.csv" onchange="handleFile(event,'sm')">
+        </div>
+        <button class="sample-btn" onclick="loadSampleSM()">📋 サンプルデータを読込</button>
+        <div class="col-map" id="sm-map">
+          <div class="col-map-title">列の対応設定（* 必須）</div>
+          <div class="col-map-grid">
+            <div class="col-map-row"><label>* 製品コード</label><select class="col-select req" id="sm-c-code"></select></div>
+            <div class="col-map-row"><label>* 得意先コード</label><select class="col-select req" id="sm-c-cust"></select></div>
+            <div class="col-map-row"><label>* 数量</label><select class="col-select req" id="sm-c-qty"></select></div>
+            <div class="col-map-row"><label>期間/年月</label><select class="col-select" id="sm-c-period"></select></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center">
+      <button class="search-btn" onclick="goToSearch()">🔍 類似品検索へ進む →</button>
+    </div>
+  </div>
+
+  <!-- ===== 類似品検索パネル ===== -->
+  <div class="panel" id="search-panel">
+
+    <div class="search-card">
+      <h3><span class="icon">🔍</span>類似品検索条件</h3>
+
+      <div class="search-grid">
+        <div class="search-group">
+          <label>得意先（絞込み）</label>
+          <select class="search-select" id="s-customer" onchange="updateCustomerFilter()">
+            <option value="">全得意先</option>
+          </select>
+        </div>
+        <div class="search-group">
+          <label>型番（製品コード先頭2文字）</label>
+          <input class="search-input" id="s-model" type="text" placeholder="例：PP" maxlength="2" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="search-group">
+          <label>電圧（製品コード3〜5文字目）</label>
+          <input class="search-input" id="s-voltage" type="text" placeholder="例：450">
+        </div>
+        <div class="search-group">
+          <label>容量（参考値）</label>
+          <input class="search-input" id="s-capacity" type="text" placeholder="例：100">
+        </div>
+      </div>
+
+      <div class="tolerance-grid">
+        <div class="search-group">
+          <label>電圧の許容範囲（±%）</label>
+          <input class="search-input" id="s-vtol" type="number" value="20" min="0" max="100">
+        </div>
+        <div class="search-group">
+          <label>容量の許容範囲（±%）</label>
+          <input class="search-input" id="s-ctol" type="number" value="50" min="0" max="500">
+        </div>
+      </div>
+
+      <div>
+        <button class="search-btn" onclick="runSearch()">🔍 類似品を検索する</button>
+        <button class="clear-btn" onclick="clearSearch()">クリア</button>
+      </div>
+    </div>
+
+    <!-- 統計サマリー -->
+    <div class="stats-wrap" id="stats-wrap" style="display:none"></div>
+
+    <!-- 推奨売価計算 -->
+    <div class="calc-card" id="calc-card" style="display:none">
+      <h4>💴 推奨売価計算（粗利率ベース）</h4>
+      <div class="calc-grid">
+        <div class="calc-group">
+          <label>新製品のMC（工場原価）</label>
+          <input class="calc-input" id="calc-mc" type="number" placeholder="0" oninput="calcPrice()">
+        </div>
+        <div class="calc-group">
+          <label>目標粗利率（%）</label>
+          <input class="calc-input" id="calc-gm" type="number" placeholder="30" value="30" oninput="calcPrice()">
+        </div>
+        <div class="calc-group">
+          <label>参考：類似品の平均粗利率</label>
+          <input class="calc-input" id="calc-ref-gm" type="text" readonly style="background:#f0fdf4;color:var(--green);font-weight:700">
+        </div>
+        <div class="calc-result" id="calc-result" style="display:none">
+          <div>
+            <div class="cr-label">推奨売価</div>
+            <div class="cr-value" id="calc-price-val">¥0</div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.7">
+            MC ÷ (1 - 粗利率)<br>で計算
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 検索結果テーブル -->
+    <div class="result-wrap" id="result-wrap" style="display:none">
+      <div class="result-header">
+        <div>
+          <div class="result-title">🔍 類似品一覧</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px" id="search-condition-label"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span class="result-count" id="result-count">0件</span>
+          <div class="result-actions">
+            <button class="action-btn btn-dl" onclick="downloadExcel('search')">⬇️ Excelダウンロード</button>
+            <button class="action-btn btn-print" onclick="window.print()">🖨️ 印刷</button>
+          </div>
+        </div>
+      </div>
+      <div class="result-table-wrap">
+        <table class="result-table" id="result-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('model')" title="型番">型番<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('code')" title="製品コード">製品コード<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('custcode')" title="得意先コード">得意先C<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('custname')" title="得意先名">得意先名<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('voltage')" title="電圧">電圧<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('market')" title="市場記号">市場記号<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('item')" title="商品記号">商品記号<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('price')" title="売価">売価<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('mc')" title="MC">MC<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('gm')" title="粗利率">粗利率<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('qty')" title="販売数量">販売数量<span class="sort-icon">↕</span></th>
+              <th>図面番号</th>
+              <th>顧客仕様書番号</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="result-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 全件一覧パネル ===== -->
+  <div class="panel" id="list-panel">
+    <div class="search-card">
+      <h3><span class="icon">📋</span>得意先別 製品マスタ全件一覧</h3>
+      <div class="search-grid">
+        <div class="search-group">
+          <label>得意先を選択</label>
+          <select class="search-select" id="list-customer" onchange="renderList()">
+            <option value="">全得意先を表示</option>
+          </select>
+        </div>
+        <div class="search-group">
+          <label>フリー検索（製品コード・記号など）</label>
+          <input class="search-input" id="list-search" type="text" placeholder="製品コード・市場記号・図面番号など" oninput="renderList()">
+        </div>
+        <div class="search-group">
+          <label>粗利率フィルター</label>
+          <select class="search-select" id="list-gm-filter" onchange="renderList()">
+            <option value="">すべて</option>
+            <option value="high">高利益（30%以上）</option>
+            <option value="mid">中利益（10〜30%）</option>
+            <option value="low">低利益（0〜10%）</option>
+            <option value="neg">赤字（0%未満）</option>
+          </select>
+        </div>
+      </div>
+      <div class="result-actions" style="margin-top:12px">
+        <button class="action-btn btn-dl" onclick="downloadExcel('list')">⬇️ 全件Excelダウンロード</button>
+      </div>
+    </div>
+
+    <div class="result-wrap">
+      <div class="result-header">
+        <div class="result-title">📋 製品マスタ</div>
+        <span class="result-count" id="list-count">0件</span>
+      </div>
+      <div class="result-table-wrap">
+        <table class="result-table" id="list-table">
+          <thead>
+            <tr>
+              <th>型番</th><th>製品コード</th><th>得意先C</th><th>得意先名</th>
+              <th>電圧</th><th>市場記号</th><th>商品記号</th>
+              <th>売価</th><th>MC</th><th>粗利率</th><th>販売数量</th>
+              <th>図面番号</th><th>顧客仕様書番号</th>
+            </tr>
+          </thead>
+          <tbody id="list-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
+  <p>© 株式会社指月電機製作所 | 売価設定支援アプリ</p>
+</footer>
+
+<script>
+// ===== グローバルデータ =====
+let pmData = [];   // 製品マスタ
+let smData = [];   // 売上マスタ
+let pmHeaders = [];
+let smHeaders = [];
+let searchResults = [];
+let sortKey = '';
+let sortAsc = true;
+
+// ===== タブ切り替え =====
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab+'-panel').classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'list') renderList();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ===== ファイル読込 =====
+function handleDrop(e, type) {
+  e.preventDefault();
+  document.getElementById(type+'-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) readFile(file, type);
+}
+function handleFile(e, type) {
+  const file = e.target.files[0];
+  if (file) readFile(file, type);
+}
+function readFile(file, type) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      let data, headers;
+      if (file.name.toLowerCase().endsWith('.csv')) {
+        const text = new TextDecoder('utf-8').decode(ev.target.result);
+        const rows = parseCSV(text);
+        headers = rows[0].map(String);
+        data = rows.slice(1).filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
+      } else {
+        const wb = XLSX.read(ev.target.result, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+        headers = json[0].map(String);
+        data = json.slice(1).filter(r => r.some(c => c !== '' && c !== null && c !== undefined));
+      }
+      if (type === 'pm') { pmHeaders = headers; pmData = data; }
+      else { smHeaders = headers; smData = data; }
+      document.getElementById(type+'-filename').textContent = '✅ ' + file.name + ' (' + data.length + '行)';
+      document.getElementById(type+'-zone').classList.add('loaded');
+      setupColMap(type, headers);
+      updateCustomerList();
+    } catch(err) {
+      alert('ファイル読込エラー: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === ',' && !inQ) { row.push(cell.trim()); cell = ''; }
+    else if ((c === '\n' || c === '\r') && !inQ) {
+      if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
+      row = []; cell = '';
+      if (c === '\r' && text[i+1] === '\n') i++;
+    } else { cell += c; }
+  }
+  if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
+  return rows;
+}
+
+function setupColMap(type, headers) {
+  const fields = type === 'pm'
+    ? {code:'製品コード', cust:'得意先コード', custname:'得意先名', price:'売価', mc:'MC', market:'市場記号', item:'商品記号', drawing:'図面番号', spec:'顧客仕様書'}
+    : {code:'製品コード', cust:'得意先コード', qty:'数量', period:'期間'};
+  const keywords = {
+    code:['製品コード','品番','CODE','product','商品コード'],
+    cust:['得意先コード','顧客コード','客先コード','CUST','customer'],
+    custname:['得意先名','顧客名','CLIENT','名称'],
+    price:['売価','単価','販売価格','PRICE','price'],
+    mc:['MC','工場原価','原価','COST','cost'],
+    market:['市場記号','市場','MARKET'],
+    item:['商品記号','商品','ITEM'],
+    drawing:['図面番号','図番','DWG','drawing'],
+    spec:['仕様書','SPEC'],
+    qty:['数量','QTY','qty','個数','出荷数'],
+    period:['期間','年月','DATE','date']
+  };
+  Object.keys(fields).forEach(f => {
+    const sel = document.getElementById(type+'-c-'+f);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">-- 選択 --</option>' +
+      headers.map((h,i) => `<option value="${i}">${h}</option>`).join('');
+    const kws = keywords[f] || [];
+    const idx = headers.findIndex(h => kws.some(k => h.toString().toLowerCase().includes(k.toLowerCase())));
+    if (idx >= 0) sel.value = idx;
+  });
+  document.getElementById(type+'-map').classList.add('show');
+}
+
+// ===== 製品コード解析 =====
+function parseProductCode(code) {
+  const s = String(code || '').trim();
+  // 14桁: AA(型番2) + 99(数字2) + A(ｱﾙﾌｧ1) + 999(数字3) + AAAAA(ｱﾙﾌｧ6)
+  return {
+    model:   s.substring(0,2).toUpperCase(),
+    voltNum: s.substring(2,4),
+    voltAlp: s.substring(4,5).toUpperCase(),
+    voltage: s.substring(2,5),
+    serial:  s.substring(5,8),
+    suffix:  s.substring(8).toUpperCase(),
+    full:    s
+  };
+}
+
+function getVal(row, selId, defaultVal='') {
+  const sel = document.getElementById(selId);
+  if (!sel) return defaultVal;
+  const idx = parseInt(sel.value);
+  if (isNaN(idx) || idx < 0 || idx >= row.length) return defaultVal;
+  const v = row[idx];
+  return v !== null && v !== undefined ? v : defaultVal;
+}
+
+function toNum(v) {
+  if (v === '' || v === null || v === undefined) return 0;
+  const n = parseFloat(String(v).replace(/[,，￥¥\s]/g,''));
+  return isNaN(n) ? 0 : n;
+}
+
+function calcGM(price, mc) {
+  if (!price || price === 0) return null;
+  return ((price - mc) / price) * 100;
+}
+
+function fmt(n, digits=0) {
+  if (n === null || n === undefined || isNaN(n)) return '-';
+  return Number(n).toLocaleString('ja-JP', {minimumFractionDigits:digits, maximumFractionDigits:digits});
+}
+
+// ===== 得意先リスト更新 =====
+function updateCustomerList() {
+  if (pmData.length === 0) return;
+  const custMap = new Map();
+  pmData.forEach(row => {
+    const code = String(getVal(row,'pm-c-cust') || '').trim();
+    const name = String(getVal(row,'pm-c-custname') || '').trim();
+    if (code) custMap.set(code, name || code);
+  });
+  const opts = [...custMap.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ja'));
+  const html = '<option value="">全得意先</option>' +
+    opts.map(([c,n]) => `<option value="${c}">${c}${n&&n!==c?' - '+n:''}</option>`).join('');
+  document.getElementById('s-customer').innerHTML = html;
+  document.getElementById('list-customer').innerHTML = '<option value="">全得意先を表示</option>' +
+    opts.map(([c,n]) => `<option value="${c}">${c}${n&&n!==c?' - '+n:''}</option>`).join('');
+}
+
+function updateCustomerFilter() {}
+
+// ===== 販売数量マップ =====
+function buildQtyMap() {
+  const map = new Map();
+  if (smData.length === 0) return map;
+  smData.forEach(row => {
+    const code = String(getVal(row,'sm-c-code') || '').trim();
+    const cust = String(getVal(row,'sm-c-cust') || '').trim();
+    const qty = toNum(getVal(row,'sm-c-qty'));
+    if (code && qty) {
+      const key = code + '|' + cust;
+      map.set(key, (map.get(key) || 0) + qty);
+    }
+  });
+  return map;
+}
+
+// ===== 類似品検索 =====
+function runSearch() {
+  if (pmData.length === 0) { alert('製品マスタをアップロードしてください'); return; }
+  const custFilter = document.getElementById('s-customer').value;
+  const modelFilter = document.getElementById('s-model').value.trim().toUpperCase();
+  const voltageStr = document.getElementById('s-voltage').value.trim();
+  const capacityStr = document.getElementById('s-capacity').value.trim();
+  const vTol = parseFloat(document.getElementById('s-vtol').value) / 100 || 0.2;
+  const cTol = parseFloat(document.getElementById('s-ctol').value) / 100 || 0.5;
+  const qtyMap = buildQtyMap();
+  const voltageNum = parseFloat(voltageStr);
+  const capacityNum = parseFloat(capacityStr);
+
+  searchResults = [];
+  pmData.forEach(row => {
+    const code = String(getVal(row,'pm-c-code') || '').trim();
+    const custCode = String(getVal(row,'pm-c-cust') || '').trim();
+    if (!code) return;
+    // 得意先フィルター
+    if (custFilter && custCode !== custFilter) return;
+    const parsed = parseProductCode(code);
+    // 型番フィルター
+    if (modelFilter && parsed.model !== modelFilter) return;
+    // 電圧フィルター
+    if (voltageStr && voltageNum) {
+      const rowVoltage = parseFloat(parsed.voltage);
+      if (rowVoltage && Math.abs(rowVoltage - voltageNum) / voltageNum > vTol) return;
+    }
+    // 容量フィルター（製品コードの容量許容差文字は参考。capacityはユーザーが入力した参考値）
+    // 容量フィルターは任意 - 入力があればserialの数値部分と比較
+    if (capacityStr && capacityNum) {
+      const capVal = parseFloat(parsed.serial);
+      if (capVal && Math.abs(capVal - capacityNum) / capacityNum > cTol) return;
+    }
+    const price = toNum(getVal(row,'pm-c-price'));
+    const mc = toNum(getVal(row,'pm-c-mc'));
+    const gm = calcGM(price, mc);
+    const qtyKey = code + '|' + custCode;
+    searchResults.push({
+      model: parsed.model,
+      code: code,
+      custcode: custCode,
+      custname: String(getVal(row,'pm-c-custname') || '').trim(),
+      voltage: parsed.voltage,
+      suffix: parsed.suffix,
+      market: String(getVal(row,'pm-c-market') || '').trim(),
+      item: String(getVal(row,'pm-c-item') || '').trim(),
+      drawing: String(getVal(row,'pm-c-drawing') || '').trim(),
+      spec: String(getVal(row,'pm-c-spec') || '').trim(),
+      price, mc, gm,
+      qty: qtyMap.get(qtyKey) || 0,
+    });
+  });
+
+  renderSearchResults();
+}
+
+function clearSearch() {
+  document.getElementById('s-customer').value = '';
+  document.getElementById('s-model').value = '';
+  document.getElementById('s-voltage').value = '';
+  document.getElementById('s-capacity').value = '';
+  document.getElementById('s-vtol').value = '20';
+  document.getElementById('s-ctol').value = '50';
+  document.getElementById('stats-wrap').style.display = 'none';
+  document.getElementById('calc-card').style.display = 'none';
+  document.getElementById('result-wrap').style.display = 'none';
+  searchResults = [];
+}
+
+function renderSearchResults() {
+  const cnt = searchResults.length;
+  document.getElementById('result-count').textContent = cnt + '件';
+  document.getElementById('result-wrap').style.display = cnt > 0 ? 'block' : 'none';
+
+  const cond = [];
+  const m = document.getElementById('s-model').value;
+  const v = document.getElementById('s-voltage').value;
+  const c = document.getElementById('s-capacity').value;
+  const cu = document.getElementById('s-customer').value;
+  if (cu) cond.push('得意先:' + cu);
+  if (m) cond.push('型番:' + m);
+  if (v) cond.push('電圧:' + v + '(±'+document.getElementById('s-vtol').value+'%)');
+  if (c) cond.push('容量:' + c + '(±'+document.getElementById('s-ctol').value+'%)');
+  document.getElementById('search-condition-label').textContent = cond.length ? '検索条件: ' + cond.join(' / ') : '';
+
+  if (cnt === 0) {
+    document.getElementById('result-tbody').innerHTML = '<tr><td colspan="14" style="text-align:center;padding:40px;color:var(--text3)">該当する類似品が見つかりませんでした。検索条件を変えてお試しください。</td></tr>';
+    document.getElementById('stats-wrap').style.display = 'none';
+    document.getElementById('calc-card').style.display = 'none';
+    return;
+  }
+
+  // 統計計算
+  const prices = searchResults.map(r => r.price).filter(p => p > 0);
+  const gms = searchResults.map(r => r.gm).filter(g => g !== null);
+  const avgPrice = prices.reduce((a,b) => a+b, 0) / prices.length;
+  const maxPrice = Math.max(...prices);
+  const minPrice = Math.min(...prices);
+  const avgGM = gms.reduce((a,b) => a+b, 0) / gms.length;
+  document.getElementById('stats-wrap').style.display = 'grid';
+  document.getElementById('stats-wrap').innerHTML = `
+    <div class="stat-box s-cnt"><div class="sv">${cnt}</div><div class="sl">件数</div></div>
+    <div class="stat-box s-avg"><div class="sv">¥${fmt(avgPrice)}</div><div class="sl">平均売価</div></div>
+    <div class="stat-box s-max"><div class="sv">¥${fmt(maxPrice)}</div><div class="sl">最高売価</div></div>
+    <div class="stat-box s-min"><div class="sv">¥${fmt(minPrice)}</div><div class="sl">最低売価</div></div>
+    <div class="stat-box s-gm"><div class="sv">${fmt(avgGM,1)}%</div><div class="sl">平均粗利率</div></div>
+  `;
+
+  // 推奨売価計算エリア
+  document.getElementById('calc-card').style.display = 'block';
+  document.getElementById('calc-ref-gm').value = fmt(avgGM,1) + '%';
+  document.getElementById('calc-gm').value = fmt(avgGM,1);
+  calcPrice();
+
+  // テーブル描画
+  renderTableRows();
+}
+
+function renderTableRows() {
+  let rows = [...searchResults];
+  if (sortKey) {
+    rows.sort((a,b) => {
+      let av = a[sortKey], bv = b[sortKey];
+      if (typeof av === 'number') return sortAsc ? av - bv : bv - av;
+      return sortAsc ? String(av||'').localeCompare(String(bv||''),'ja') : String(bv||'').localeCompare(String(av||''),'ja');
+    });
+  }
+  document.getElementById('result-tbody').innerHTML = rows.map(r => {
+    const gm = r.gm;
+    const gmCls = gm === null ? '' : gm >= 30 ? 'gm-high' : gm >= 10 ? 'gm-mid' : gm >= 0 ? 'gm-low' : 'gm-neg';
+    const barW = gm ? Math.min(Math.max(gm, 0), 60) * 1.2 : 0;
+    const barColor = gm >= 30 ? 'var(--green)' : gm >= 10 ? 'var(--accent)' : gm >= 0 ? 'var(--orange)' : 'var(--red)';
+    return `<tr>
+      <td class="code">${r.model}</td>
+      <td class="code" title="${r.code}">${r.code}</td>
+      <td class="code">${r.custcode}</td>
+      <td>${r.custname}</td>
+      <td class="num">${r.voltage}</td>
+      <td>${r.market}</td>
+      <td>${r.item}</td>
+      <td class="num">¥${fmt(r.price)}</td>
+      <td class="num">¥${fmt(r.mc)}</td>
+      <td>
+        <div class="gm-bar-wrap">
+          <div class="gm-bar" style="width:${barW}px;background:${barColor}"></div>
+          <span class="gm-val ${gmCls}">${gm !== null ? fmt(gm,1)+'%' : '-'}</span>
+        </div>
+      </td>
+      <td class="num">${r.qty ? fmt(r.qty) : '-'}</td>
+      <td class="code">${r.drawing}</td>
+      <td class="code">${r.spec}</td>
+      <td><button class="ref-btn" onclick="refPrice(${r.price},${r.mc})">この値を参照</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function refPrice(price, mc) {
+  document.getElementById('calc-mc').value = mc || '';
+  calcPrice();
+  document.getElementById('calc-card').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function sortTable(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = true; }
+  document.querySelectorAll('.result-table th').forEach(th => th.classList.remove('sorted'));
+  renderTableRows();
+}
+
+// ===== 推奨売価計算 =====
+function calcPrice() {
+  const mc = parseFloat(document.getElementById('calc-mc').value) || 0;
+  const gm = parseFloat(document.getElementById('calc-gm').value) || 0;
+  const result = document.getElementById('calc-result');
+  if (mc > 0 && gm < 100 && gm >= 0) {
+    const price = mc / (1 - gm / 100);
+    document.getElementById('calc-price-val').textContent = '¥' + fmt(price);
+    result.style.display = 'flex';
+  } else {
+    result.style.display = 'none';
+  }
+}
+
+// ===== 全件一覧 =====
+function renderList() {
+  if (pmData.length === 0) {
+    document.getElementById('list-tbody').innerHTML = '<tr><td colspan="13" style="text-align:center;padding:40px;color:var(--text3)">製品マスタをアップロードしてください</td></tr>';
+    document.getElementById('list-count').textContent = '0件';
+    return;
+  }
+  const custFilter = document.getElementById('list-customer').value;
+  const kw = document.getElementById('list-search').value.toLowerCase();
+  const gmFilter = document.getElementById('list-gm-filter').value;
+  const qtyMap = buildQtyMap();
+
+  let rows = pmData.map(row => {
+    const code = String(getVal(row,'pm-c-code') || '').trim();
+    const custCode = String(getVal(row,'pm-c-cust') || '').trim();
+    const price = toNum(getVal(row,'pm-c-price'));
+    const mc = toNum(getVal(row,'pm-c-mc'));
+    const gm = calcGM(price, mc);
+    const parsed = parseProductCode(code);
+    return {
+      model:parsed.model, code, custcode:custCode,
+      custname:String(getVal(row,'pm-c-custname')||'').trim(),
+      voltage:parsed.voltage,
+      market:String(getVal(row,'pm-c-market')||'').trim(),
+      item:String(getVal(row,'pm-c-item')||'').trim(),
+      drawing:String(getVal(row,'pm-c-drawing')||'').trim(),
+      spec:String(getVal(row,'pm-c-spec')||'').trim(),
+      price, mc, gm, qty: qtyMap.get(code+'|'+custCode)||0
+    };
+  }).filter(r => {
+    if (custFilter && r.custcode !== custFilter) return false;
+    if (kw && ![r.code,r.market,r.item,r.drawing,r.spec,r.custcode,r.custname].join(' ').toLowerCase().includes(kw)) return false;
+    if (gmFilter) {
+      const g = r.gm;
+      if (gmFilter==='high' && (g===null||g<30)) return false;
+      if (gmFilter==='mid' && (g===null||g<10||g>=30)) return false;
+      if (gmFilter==='low' && (g===null||g<0||g>=10)) return false;
+      if (gmFilter==='neg' && (g===null||g>=0)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('list-count').textContent = rows.length + '件';
+  document.getElementById('list-tbody').innerHTML = rows.map(r => {
+    const gm = r.gm;
+    const gmCls = gm === null ? '' : gm >= 30 ? 'gm-high' : gm >= 10 ? 'gm-mid' : gm >= 0 ? 'gm-low' : 'gm-neg';
+    const barW = gm ? Math.min(Math.max(gm,0),60)*1.2 : 0;
+    const barColor = gm>=30?'var(--green)':gm>=10?'var(--accent)':gm>=0?'var(--orange)':'var(--red)';
+    return `<tr>
+      <td class="code">${r.model}</td>
+      <td class="code" title="${r.code}">${r.code}</td>
+      <td class="code">${r.custcode}</td>
+      <td>${r.custname}</td>
+      <td class="num">${r.voltage}</td>
+      <td>${r.market}</td>
+      <td>${r.item}</td>
+      <td class="num">¥${fmt(r.price)}</td>
+      <td class="num">¥${fmt(r.mc)}</td>
+      <td><div class="gm-bar-wrap"><div class="gm-bar" style="width:${barW}px;background:${barColor}"></div><span class="gm-val ${gmCls}">${gm!==null?fmt(gm,1)+'%':'-'}</span></div></td>
+      <td class="num">${r.qty?fmt(r.qty):'-'}</td>
+      <td class="code">${r.drawing}</td>
+      <td class="code">${r.spec}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== Excelダウンロード =====
+function downloadExcel(mode) {
+  const data = mode === 'search' ? searchResults : (() => {
+    const custFilter = document.getElementById('list-customer').value;
+    const kw = document.getElementById('list-search').value.toLowerCase();
+    const qtyMap = buildQtyMap();
+    return pmData.map(row => {
+      const code = String(getVal(row,'pm-c-code')||'').trim();
+      const custCode = String(getVal(row,'pm-c-cust')||'').trim();
+      const price = toNum(getVal(row,'pm-c-price'));
+      const mc = toNum(getVal(row,'pm-c-mc'));
+      const parsed = parseProductCode(code);
+      return { model:parsed.model, code, custcode:custCode, custname:String(getVal(row,'pm-c-custname')||''), voltage:parsed.voltage, market:String(getVal(row,'pm-c-market')||''), item:String(getVal(row,'pm-c-item')||''), drawing:String(getVal(row,'pm-c-drawing')||''), spec:String(getVal(row,'pm-c-spec')||''), price, mc, gm:calcGM(price,mc), qty:qtyMap.get(code+'|'+custCode)||0 };
+    }).filter(r => (!custFilter || r.custcode === custFilter) && (!kw || [r.code,r.market,r.item].join(' ').toLowerCase().includes(kw)));
+  })();
+
+  const headers = ['型番','製品コード','得意先コード','得意先名','電圧','市場記号','商品記号','売価','MC','粗利率(%)','販売数量','図面番号','顧客仕様書番号'];
+  const wsData = [headers, ...data.map(r => [r.model,r.code,r.custcode,r.custname,r.voltage,r.market,r.item,r.price,r.mc,r.gm!==null?parseFloat(fmt(r.gm,2)):'',(r.qty||''),r.drawing,r.spec])];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [8,16,12,18,8,10,10,12,12,10,10,14,16].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws, mode==='search'?'類似品検索結果':'製品マスタ全件');
+  const today = new Date().toLocaleDateString('ja-JP').replace(/\//g,'-');
+  XLSX.writeFile(wb, `売価設定_${mode==='search'?'類似品検索':'全件一覧'}_${today}.xlsx`);
+}
+
+// ===== サンプルデータ =====
+function loadSamplePM() {
+  pmHeaders = ['製品コード','得意先コード','得意先名','売価','MC','市場記号','商品記号','図面番号','顧客仕様書番号'];
+  // 製品コード14桁: AA(型番2)+99(数字2)+A(ｱﾙﾌｧ1)+999(数字3)+AAAAAA(ｱﾙﾌｧ6)
+  // 市場記号:2桁数字 / 商品記号:2文字アルファベット
+  pmData = [
+    ['PP45J001ABCDEF','C001','ABC電機㈱','1200','800','01','DC','DWG-001','SPEC-001'],
+    ['PP45J001ABCDEG','C001','ABC電機㈱','1150','800','01','DC','DWG-002','SPEC-002'],
+    ['PP45K001ABCDEH','C001','ABC電機㈱','1300','850','01','DC','DWG-003',''],
+    ['PP50J002ABCDEF','C001','ABC電機㈱','1400','900','02','SN','DWG-004','SPEC-003'],
+    ['PP45J003ABCDEF','C002','XYZ製作所','1100','800','03','DC','DWG-005',''],
+    ['PP45J003ABCDEG','C002','XYZ製作所','980','800','03','DC','','SPEC-004'],
+    ['PP63J004ABCDEF','C002','XYZ製作所','1800','1100','03','DC','DWG-006',''],
+    ['MC45J005ABCDEF','C003','DEF工業㈱','950','700','04','MT','DWG-007','SPEC-005'],
+    ['MC45J005ABCDEG','C003','DEF工業㈱','1050','700','04','MT','',''],
+    ['MC50K006ABCDEF','C003','DEF工業㈱','1200','750','04','MT','DWG-008',''],
+    ['PP45J007ABCDEF','C004','GHI商事','2200','800','05','DC','DWG-009','SPEC-006'],
+    ['PP45J007ABCDEG','C004','GHI商事','2100','800','05','DC','','SPEC-007'],
+    ['DC80J008ABCDEF','C001','ABC電機㈱','3500','2200','01','DC','DWG-010','SPEC-008'],
+    ['DC80J009ABCDEF','C002','XYZ製作所','3200','2200','03','DC','DWG-011',''],
+  ];
+  document.getElementById('pm-filename').textContent = '✅ サンプル製品マスタ.csv (14行)';
+  document.getElementById('pm-zone').classList.add('loaded');
+  setupColMap('pm', pmHeaders);
+  updateCustomerList();
+  alert('サンプル製品マスタを読み込みました（14件）');
+}
+
+function loadSampleSM() {
+  smHeaders = ['製品コード','得意先コード','数量','年月'];
+  smData = [
+    ['PP45J001ABCDEF','C001','5000','2024/01'],
+    ['PP45J001ABCDEG','C001','3000','2024/01'],
+    ['PP45K001ABCDEH','C001','2000','2024/01'],
+    ['PP50J002ABCDEF','C001','1500','2024/01'],
+    ['PP45J003ABCDEF','C002','8000','2024/01'],
+    ['PP45J003ABCDEG','C002','12000','2024/01'],
+    ['PP63J004ABCDEF','C002','500','2024/01'],
+    ['MC45J005ABCDEF','C003','20000','2024/01'],
+    ['MC45J005ABCDEG','C003','15000','2024/01'],
+    ['MC50K006ABCDEF','C003','8000','2024/01'],
+    ['PP45J007ABCDEF','C004','200','2024/01'],
+    ['PP45J007ABCDEG','C004','300','2024/01'],
+  ];
+  document.getElementById('sm-filename').textContent = '✅ サンプル売上マスタ.csv (12行)';
+  document.getElementById('sm-zone').classList.add('loaded');
+  setupColMap('sm', smHeaders);
+  alert('サンプル売上マスタを読み込みました（12件）');
+}
+
+function goToSearch() {
+  if (pmData.length === 0) { alert('製品マスタをアップロードしてください'); return; }
+  switchTab('search');
+}
+</script>
+</body>
+</html>
