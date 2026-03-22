@@ -335,7 +335,7 @@ async function generateProposal() {
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('result-section').style.display = 'block';
-  document.getElementById('result-section').innerHTML = proposalHTML;
+  document.getElementById('proposal-doc').innerHTML = proposalHTML;
   window.scrollTo({top: document.getElementById('result-section').offsetTop - 80, behavior:'smooth'});
 }
 
