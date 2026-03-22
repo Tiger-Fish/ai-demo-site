@@ -250,95 +250,77 @@ function animateLoading() {
 }
 
 async function generateProposal() {
-  const customer = document.getElementById('customer').value || '株式会社サンプル商事';
-  const contact  = document.getElementById('contact').value  || '山田 太郎 様';
-  const industry = document.getElementById('industry').value || '電子機器製造';
-  const category = document.getElementById('product').value  || 'フィルムコンデンサ全般';
-  const needs    = document.getElementById('needs').value    || '設備の長寿命化と省メンテナンスを実現したい';
-  const specs    = document.getElementById('specs').value    || '定格電圧630VDC、静電容量10μF';
-  const goal     = document.getElementById('goal').value     || '新規採用';
-
-  if (!document.getElementById('customer').value) {
-    alert('顧客会社名を入力してください');
-    return;
-  }
-
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('result-section').style.display = 'none';
-  document.getElementById('form-section').style.display = 'none';
-  window.scrollTo({top: document.getElementById('loading').offsetTop - 80, behavior:'smooth'});
-
-  const steps = ['ls1','ls2','ls3','ls4'];
-  let si = 0;
-  const stepTimer = setInterval(() => {
-    if (si < steps.length) { const el = document.getElementById(steps[si]); if(el) el.classList.add('active'); si++; }
-    else clearInterval(stepTimer);
+  var cu = document.getElementById("customer").value;
+  var co = document.getElementById("contact").value || "担当者";
+  var ind = document.getElementById("industry").value || "製造業";
+  var cat = document.getElementById("product").value || "フィルムコンデンサ";
+  var ne = document.getElementById("needs").value || "品質向上・コスト削減";
+  var sp = document.getElementById("specs").value || "要確認";
+  var go = document.getElementById("goal").value || "新規採用";
+  if (!cu) { alert("顧客会社名を入力してください"); return; }
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("result-section").style.display = "none";
+  document.getElementById("form-section").style.display = "none";
+  window.scrollTo({top:0, behavior:"smooth"});
+  var steps = ["ls1","ls2","ls3","ls4"]; var si = 0;
+  var t = setInterval(function() {
+    if (si < steps.length) { var el = document.getElementById(steps[si]); if(el) el.classList.add("active"); si++; }
+    else clearInterval(t);
   }, 600);
-
-  await new Promise(r => setTimeout(r, 2800));
-  clearInterval(stepTimer);
-  steps.forEach(id => { const el = document.getElementById(id); if(el){ el.classList.remove('active'); el.classList.add('done'); } });
-  await new Promise(r => setTimeout(r, 300));
-
-  const today = new Date();
-  const dateStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
-
-  const proposalHTML = '<div class="proposal-doc">'
-    + '<div class="doc-header">'
-    +   '<div class="company">株式会社 指月電機製作所</div>'
-    +   '<div class="doc-title">営業提案書</div>'
-    +   '<div class="doc-sub">' + category + ' ご採用のご提案</div>'
-    +   '<div class="doc-meta"><span>提出日：' + dateStr + '</span><span>提出先：' + customer + '</span><span>担当：' + contact + '</span></div>'
-    + '</div>'
-    + '<div class="doc-body">'
-    +   '<div class="doc-section"><div class="section-title">1. はじめに</div>'
-    +   '<p>平素より格別のご高配を賜り、厚く御礼申し上げます。<br>この度は貴社の課題解決に向け、弊社が製造・販売する<strong>' + category + '</strong>についてご提案申し上げます。<br>貴社のご要望「' + needs + '」を踏まえ、最適なソリューションをご紹介いたします。</p></div>'
-    +   '<div class="doc-section"><div class="section-title">2. 貴社課題の認識</div>'
-    +   '<div class="info-box">'
-    +     '<div class="info-row"><span class="info-label">業種</span><span>' + (industry||'—') + '</span></div>'
-    +     '<div class="info-row"><span class="info-label">課題・ニーズ</span><span>' + needs + '</span></div>'
-    +     '<div class="info-row"><span class="info-label">技術仕様要件</span><span>' + (specs||'要確認') + '</span></div>'
-    +     '<div class="info-row"><span class="info-label">提案目標</span><span>' + (goal||'—') + '</span></div>'
-    +   '</div></div>'
-    +   '<div class="doc-section"><div class="section-title">3. 推奨製品</div>'
-    +   '<div class="product-card"><div class="product-name">📦 指月電機製作所 ' + category + '</div>'
-    +   '<div class="product-desc">貴社のご要件に対応する製品ラインナップをご提案いたします。指月電機製作所は創業以来、コンデンサ専業メーカーとして高品質・高信頼性の製品を提供してまいりました。</div>'
-    +   '<table class="spec-table"><tr><th>項目</th><th>仕様</th></tr>'
-    +   '<tr><td>製品カテゴリ</td><td>' + category + '</td></tr>'
-    +   '<tr><td>対応スペック</td><td>' + (specs||'別途ご相談') + '</td></tr>'
-    +   '<tr><td>品質保証</td><td>ISO 9001認証取得・AEC-Q200対応</td></tr>'
-    +   '<tr><td>納期</td><td>標準品：4〜8週間（要確認）</td></tr>'
-    +   '<tr><td>サポート</td><td>技術サポート・評価品対応可</td></tr>'
-    +   '</table></div></div>'
-    +   '<div class="doc-section"><div class="section-title">4. 指月電機製作所の強み</div>'
-    +   '<div class="strength-grid">'
-    +     '<div class="strength-item"><div class="strength-icon">🏭</div><div class="strength-text"><strong>国内一貫生産</strong><br>安定した品質と供給体制</div></div>'
-    +     '<div class="strength-item"><div class="strength-icon">🔬</div><div class="strength-text"><strong>高い技術力</strong><br>フィルム・電解・セラミック幅広く対応</div></div>'
-    +     '<div class="strength-item"><div class="strength-icon">🌍</div><div class="strength-text"><strong>グローバル対応</strong><br>AEC-Q200など国際規格に準拠</div></div>'
-    +     '<div class="strength-item"><div class="strength-icon">🤝</div><div class="strength-text"><strong>技術サポート</strong><br>選定から設計サポートまで対応</div></div>'
-    +   '</div></div>'
-    +   '<div class="doc-section"><div class="section-title">5. 今後のアクション</div>'
-    +   '<div class="action-list">'
-    +     '<div class="action-item"><span class="action-num">01</span><span>評価サンプルのご提供（ご希望の場合）</span></div>'
-    +     '<div class="action-item"><span class="action-num">02</span><span>技術打ち合わせ・仕様確認</span></div>'
-    +     '<div class="action-item"><span class="action-num">03</span><span>お見積りご提示</span></div>'
-    +     '<div class="action-item"><span class="action-num">04</span><span>量産・採用に向けたご支援</span></div>'
-    +   '</div></div>'
-    +   '<div class="doc-footer-note">※ 本提案書はサンプルです。<br>'
-    +   '<strong style="color:var(--accent)">💡 APIキーを設定することで、入力内容に応じたAI生成の提案書が動作します。</strong><br>'
-    +   '※ APIキーの利用には別途課金が必要になります。</div>'
-    + '</div></div>'
-    + '<div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap">'
-    +   '<button onclick="window.print()" style="flex:1;padding:14px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600">🖨️ 印刷・PDF保存</button>'
-    +   '<button onclick="document.getElementById('form-section').style.display='block';document.getElementById('result-section').style.display='none';document.getElementById('loading').style.display='none';window.scrollTo({top:0,behavior:'smooth'})" style="flex:1;padding:14px;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:15px;cursor:pointer;font-weight:600">✏️ 入力内容を修正する</button>'
-    + '</div>';
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('result-section').style.display = 'block';
-  document.getElementById('proposal-doc').innerHTML = proposalHTML;
-  window.scrollTo({top: document.getElementById('result-section').offsetTop - 80, behavior:'smooth'});
+  await new Promise(function(r){ setTimeout(r, 2800); });
+  clearInterval(t);
+  steps.forEach(function(id){ var el=document.getElementById(id); if(el){ el.classList.remove("active"); el.classList.add("done"); }});
+  await new Promise(function(r){ setTimeout(r, 300); });
+  var d = new Date();
+  var ds = d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日";
+  var h = "";
+  h += "<div class=\"doc-header\">";
+  h += "<div class=\"company\">株式会社 指月電機製作所</div>";
+  h += "<div class=\"doc-title\">営業提案書</div>";
+  h += "<div class=\"doc-sub\">"+cat+" ご採用のご提案</div>";
+  h += "<div class=\"doc-meta\"><span>提出日："+ds+"</span><span>提出先："+cu+"</span><span>担当："+co+"</span></div>";
+  h += "</div>";
+  h += "<div class=\"doc-body\">";
+  h += "<div class=\"doc-section\"><div class=\"section-title\">1. はじめに</div>";
+  h += "<p>平素より格別のご高配を賜り厚く御礼申し上げます。この度は貴社の課題解決に向け、弊社製造の<strong>"+cat+"</strong>についてご提案申し上げます。貴社のご要望を踏まえ最適なソリューションをご紹介いたします。</p></div>";
+  h += "<div class=\"doc-section\"><div class=\"section-title\">2. 貴社課題の認識</div>";
+  h += "<div class=\"info-box\">";
+  h += "<div class=\"info-row\"><span class=\"info-label\">業種</span><span>"+ind+"</span></div>";
+  h += "<div class=\"info-row\"><span class=\"info-label\">課題・ニーズ</span><span>"+ne+"</span></div>";
+  h += "<div class=\"info-row\"><span class=\"info-label\">技術仕様要件</span><span>"+sp+"</span></div>";
+  h += "<div class=\"info-row\"><span class=\"info-label\">提案目標</span><span>"+go+"</span></div>";
+  h += "</div></div>";
+  h += "<div class=\"doc-section\"><div class=\"section-title\">3. 推奨製品</div>";
+  h += "<div class=\"product-card\"><div class=\"product-name\">📦 指月電機製作所 "+cat+"</div>";
+  h += "<table class=\"spec-table\"><tr><th>項目</th><th>仕様</th></tr>";
+  h += "<tr><td>製品カテゴリ</td><td>"+cat+"</td></tr>";
+  h += "<tr><td>対応スペック</td><td>"+sp+"</td></tr>";
+  h += "<tr><td>品質保証</td><td>ISO 9001・AEC-Q200対応</td></tr>";
+  h += "<tr><td>納期</td><td>標準品：4〜8週間</td></tr>";
+  h += "<tr><td>サポート</td><td>技術サポート・評価品対応可</td></tr></table></div></div>";
+  h += "<div class=\"doc-section\"><div class=\"section-title\">4. 指月電機製作所の強み</div>";
+  h += "<div class=\"strength-grid\">";
+  h += "<div class=\"strength-item\"><div class=\"strength-icon\">🏭</div><div class=\"strength-text\"><strong>国内一貫生産</strong><br>安定した品質と供給体制</div></div>";
+  h += "<div class=\"strength-item\"><div class=\"strength-icon\">🔬</div><div class=\"strength-text\"><strong>高い技術力</strong><br>フィルム・電解・セラミック対応</div></div>";
+  h += "<div class=\"strength-item\"><div class=\"strength-icon\">🌍</div><div class=\"strength-text\"><strong>グローバル対応</strong><br>国際規格に準拠</div></div>";
+  h += "<div class=\"strength-item\"><div class=\"strength-icon\">🤝</div><div class=\"strength-text\"><strong>技術サポート</strong><br>選定から設計まで対応</div></div>";
+  h += "</div></div>";
+  h += "<div class=\"doc-section\"><div class=\"section-title\">5. 今後のアクション</div>";
+  h += "<div class=\"action-list\">";
+  h += "<div class=\"action-item\"><span class=\"action-num\">01</span><span>評価サンプルのご提供</span></div>";
+  h += "<div class=\"action-item\"><span class=\"action-num\">02</span><span>技術打ち合わせ・仕様確認</span></div>";
+  h += "<div class=\"action-item\"><span class=\"action-num\">03</span><span>お見積りご提示</span></div>";
+  h += "<div class=\"action-item\"><span class=\"action-num\">04</span><span>量産採用に向けたご支援</span></div>";
+  h += "</div></div>";
+  h += "<div class=\"doc-footer-note\">※ 本提案書はサンプルです。<br>";
+  h += "<strong style=\"color:var(--accent)\">💡 APIキーを設定することで、入力内容に応じたAI生成の提案書が動作します。</strong><br>";
+  h += "※ APIキーの利用には別途課金が必要になります。</div>";
+  h += "</div>";
+  document.getElementById("proposal-doc").innerHTML = h;
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("result-section").style.display = "block";
+  window.scrollTo({top: document.getElementById("result-section").offsetTop - 80, behavior:"smooth"});
 }
-
 </script>
 </body>
 </html>
