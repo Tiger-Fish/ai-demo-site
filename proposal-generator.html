@@ -222,83 +222,84 @@ function animateLoading() {
 }
 
 async function generateProposal() {
-  const customer = document.getElementById('customer').value || '○○株式会社';
-  const contact = document.getElementById('contact').value || 'ご担当者';
-  const industry = document.getElementById('industry').value || '製造業';
-  const product = document.getElementById('product').value || 'フィルムコンデンサ';
-  const needs = document.getElementById('needs').value || '高信頼性・長寿命のコンデンサを求めている';
-  const specs = document.getElementById('specs').value || '要確認';
-  const goal = document.getElementById('goal').value || '新規採用の獲得';
-  const tone = document.getElementById('tone').value || '技術訴求型';
+  const customer  = document.getElementById('customer').value  || '株式会社サンプル電機';
+  const contact   = document.getElementById('contact').value   || '山田 太郎 様';
+  const industry  = document.getElementById('industry').value  || '自動車・EV関連';
+  const category  = document.getElementById('category').value  || 'フィルムコンデンサ';
+  const needs     = document.getElementById('needs').value     || 'EVインバータ向けに高耐熱・高リップル電流対応のコンデンサを探している。';
+  const specs     = document.getElementById('specs').value     || '定格電圧800VDC、静電容量200〜500μF、動作温度-40〜+105℃';
+  const goal      = document.getElementById('goal').value      || '新規採用・サンプル評価';
+  const tone      = document.getElementById('tone').value      || '技術訴求型（スペック・信頼性重視）';
 
-  document.getElementById('form-section').style.display = 'none';
+  // ローディング表示
   document.getElementById('loading').style.display = 'block';
-  animateLoading();
+  document.getElementById('result-section').style.display = 'none';
+  const steps = ['step1','step2','step3','step4'];
+  steps.forEach(s => {
+    const el = document.getElementById(s);
+    if (el) { el.className = 'loading-step'; el.textContent = '⏳ ' + el.textContent.replace(/^[✅⏳]\s*/,''); }
+  });
 
-  const today = new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+  let i = 0;
+  const tick = setInterval(() => {
+    if (i < steps.length) {
+      const el = document.getElementById(steps[i]);
+      if (el) { el.classList.add('done'); el.textContent = '✅ ' + el.textContent.replace(/^[✅⏳]\s*/,''); }
+      i++;
+    } else {
+      clearInterval(tick);
+      document.getElementById('loading').style.display = 'none';
 
-  const prompt = `あなたは指月電機製作所の優秀な営業担当者です。以下の条件で営業提案書を作成してください。
-
-【商談情報】
-- 顧客: ${customer}（${industry}）
-- 担当者: ${contact}
-- 提案製品: ${product}
-- 顧客の課題・ニーズ: ${needs}
-- 技術仕様・要件: ${specs}
-- 提案目標: ${goal}
-- 提案トーン: ${tone}
-
-以下のJSON形式のみで回答してください：
-{
-  "title": "提案書タイトル",
-  "executive_summary": "エグゼクティブサマリー（3〜4文）",
-  "customer_challenges": ["課題1", "課題2", "課題3"],
-  "proposed_solution": "提案ソリューションの説明（150字程度）",
-  "product_name": "提案製品名",
-  "product_features": [
-    {"name": "特徴名", "detail": "詳細説明"},
-    {"name": "特徴名", "detail": "詳細説明"},
-    {"name": "特徴名", "detail": "詳細説明"}
-  ],
-  "specs": [
-    {"item": "項目名", "value": "値"},
-    {"item": "項目名", "value": "値"},
-    {"item": "項目名", "value": "値"},
-    {"item": "項目名", "value": "値"}
-  ],
-  "why_shizuki": "指月電機を選ぶ理由（100字程度）",
-  "expected_benefits": ["期待効果1", "期待効果2", "期待効果3"],
-  "next_action": "次のアクション提案（具体的に）"
-}`;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    const data = await response.json();
-    const text = data.content[0].text.replace(/```json|```/g,'').trim();
-    const r = JSON.parse(text);
-    showProposal(r, customer, contact, today);
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('result-section').style.display = 'block';
-    document.getElementById('proposal-doc').innerHTML = `
-      <div style="text-align:center;padding:48px 24px">
-        <div style="font-size:40px;margin-bottom:16px">🔑</div>
-        <div style="font-size:16px;font-weight:700;color:var(--navy);margin-bottom:12px">デモのため回答は生成されません</div>
-        <div style="font-size:14px;color:var(--text2);line-height:1.85;max-width:400px;margin:0 auto 24px;background:var(--bg3);border-radius:10px;padding:16px 20px;border-left:4px solid var(--gold)">
-          APIキーを設定することで動作します。<br>
-          <span style="font-size:12px;color:var(--text3)">※ APIキーの利用には別途課金が必要になります。</span>
-        </div>
+      // デモ提案書HTML
+      document.getElementById('proposal-doc').innerHTML = `
+    <div class="doc-header">
+      <div class="company">株式会社 指月電機製作所</div>
+      <h2>製品提案書 ― ${category}</h2>
+      <div class="doc-meta">${customer}　${contact}　御中</div>
+    </div>
+    <div class="doc-body">
+      <div class="doc-section">
+        <h3>📋 お客様課題・背景</h3>
+        <p>${needs}</p>
       </div>
-    `;
-  }
+      <div class="doc-section">
+        <h3>🎯 提案製品・ソリューション</h3>
+        <p>指月電機のフィルムコンデンサ <strong>SFシリーズ</strong> をご提案いたします。<br>
+        高耐熱・高リップル電流特性に優れ、EVインバータ・産業機器向けに豊富な実績がございます。</p>
+        <table class="spec-table">
+          <tr><th>項目</th><th>スペック</th></tr>
+          <tr><td>定格電圧</td><td>800VDC</td></tr>
+          <tr><td>静電容量</td><td>200〜500μF（カスタム対応可）</td></tr>
+          <tr><td>動作温度</td><td>-40〜+105℃</td></tr>
+          <tr><td>リップル電流</td><td>最大150Arms（105℃時）</td></tr>
+          <tr><td>認証</td><td>AEC-Q200対応、RoHS準拠</td></tr>
+        </table>
+      </div>
+      <div class="doc-section">
+        <h3>✅ 指月電機の強み</h3>
+        <ul>
+          <li>創業60年超・フィルムコンデンサ専業メーカーの技術力</li>
+          <li>EV・再生可能エネルギー向け高信頼性製品ラインアップ</li>
+          <li>カスタム対応・少量多品種生産に柔軟に対応</li>
+          <li>国内生産・品質管理体制（ISO 9001認証）</li>
+        </ul>
+      </div>
+      <div class="doc-section">
+        <h3>📅 次のステップ</h3>
+        <p>サンプル品のご提供が可能です。まずは評価用サンプルをお手配し、貴社評価環境でのご確認をお勧めいたします。<br>
+        ご希望の仕様・数量をご連絡いただければ、1〜2週間以内にお届けできます。</p>
+      </div>
+      <div class="doc-section" style="background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:16px;margin-top:24px;font-size:13px;color:#7a6000;">
+        <strong>⚠️ デモ表示について</strong><br>
+        これはサンプルの提案書です。APIキーを設定することで、入力内容に応じたAI生成の提案書が動作します。<br>
+        ※ APIキーの利用には別途課金が必要になります。
+      </div>
+    </div>`;
+
+      document.getElementById('result-section').style.display = 'block';
+      document.getElementById('result-section').scrollIntoView({behavior:'smooth'});
+    }
+  }, 700);
 }
 
 function showProposal(r, customer, contact, today) {
