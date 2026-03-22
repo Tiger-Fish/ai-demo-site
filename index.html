@@ -31,10 +31,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP','H
 .hero h1 em::after { content: ''; position: absolute; bottom: 2px; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue), var(--blue-m)); border-radius: 2px; opacity: .5; }
 .hero p { font-size: clamp(14px, 2vw, 17px); color: var(--muted); font-weight: 400; max-width: 520px; margin: 0 auto 36px; line-height: 1.8; }
 .hero-stats { display: inline-flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--white); }
-.stat-item { padding: 12px 24px; text-align: center; border-right: 1px solid var(--border); flex: 1; }
+.stat-item { padding: 12px 24px; text-align: center; border-right: 1px solid var(--border); }
 .stat-item:last-child { border-right: none; }
 .stat-val { font-size: 20px; font-weight: 800; color: var(--blue-d); line-height:1; }
-.stat-lbl { font-size: 9px; color: var(--muted); margin-top: 3px; letter-spacing: .3px; white-space: nowrap; }
+.stat-lbl { font-size: 10px; color: var(--muted); margin-top: 3px; letter-spacing: .3px; }
 @media(max-width:480px){ .hero-stats { flex-direction:column; } .stat-item { border-right:none; border-bottom:1px solid var(--border); } .stat-item:last-child { border-bottom:none; } }
 .section { max-width: 1200px; margin: 0 auto; padding: 56px 24px; flex: 1; }
 .sec-header { text-align: center; margin-bottom: 44px; }
@@ -418,18 +418,23 @@ footer p { font-size:12px; color:var(--muted-l); }
       <div class="card-visual"><div class="card-icon icon-crimson">📊</div><div class="card-meta"><div class="card-cat cat-crimson">Management Intelligence</div><div class="card-title">経営情報レポートジェネレーター</div></div></div>
       <div class="card-body-wrap"><hr class="card-divider"/><p class="card-desc">URLを入力するだけでAIがサイトを分析し、指月電機への機会・脅威・具体的行動計画をレポート化。経済安保・競合・政策など様々なサイトに対応。印刷・PDF保存対応。</p><div class="card-tags"><span class="tag tag-crimson">AI分析</span><span class="tag tag-crimson">競合調査</span><span class="tag tag-crimson">行動計画</span></div><a class="btn-demo btn-crimson" href="report-generator2.html">レポートを生成する <span class="btn-arrow">→</span></a>
       </div>
-    
-    <div class="tool-card" style="--card-accent:#0a1628">
-      <div class="tool-card-header">
-        <span class="tool-icon">📋</span>
-        <span class="tool-tag">製造管理</span>
-      </div>
-      <h3 class="tool-name">製作指令書ジェネレーター</h3>
-      <p class="tool-desc">注文書・工場情報をアップロードするだけでAIが読み取り、製作指令書を自動生成。転記ミスをゼロに。</p>
-      <a href="seisaku-shireisho.html" class="tool-btn">製作指令書を生成する <span class="btn-arrow">→</span></a>
     </div>
-</div>
 
+    <!-- Card 16: 製作指令書ジェネレーター -->
+    <div class="demo-card card-navy fade-up">
+      <div class="card-visual" style="background:linear-gradient(135deg,#0a1628,#132040)">
+        <div class="card-icon" style="font-size:48px">📋</div>
+      </div>
+      <div class="card-body">
+        <div class="card-tags">
+          <span class="tag tag-navy">製造管理</span>
+          <span class="tag tag-navy">AI解析</span>
+        </div>
+        <h3 class="card-title">製作指令書ジェネレーター</h3>
+        <p class="card-desc">注文書・工場情報をアップロードするだけでAIが読み取り、製作指令書を自動生成。転記ミスをゼロに。</p>
+        <a class="btn-demo btn-navy" href="seisaku-shireisho.html">製作指令書を生成する <span class="btn-arrow">→</span></a>
+      </div>
+    </div>
   </div>
 </div>
 
