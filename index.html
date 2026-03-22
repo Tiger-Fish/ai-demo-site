@@ -31,7 +31,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP','H
 .hero h1 em::after { content: ''; position: absolute; bottom: 2px; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue), var(--blue-m)); border-radius: 2px; opacity: .5; }
 .hero p { font-size: clamp(14px, 2vw, 17px); color: var(--muted); font-weight: 400; max-width: 520px; margin: 0 auto 36px; line-height: 1.8; }
 .hero-stats { display: inline-flex; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--white); }
-.stat-item { padding: 12px 24px; text-align: center; border-right: 1px solid var(--border); }
+.stat-item { padding: 12px 24px; text-align: center; border-right: 1px solid var(--border); flex: 1; }
 .stat-item:last-child { border-right: none; }
 .stat-val { font-size: 20px; font-weight: 800; color: var(--blue-d); line-height:1; }
 .stat-lbl { font-size: 10px; color: var(--muted); margin-top: 3px; letter-spacing: .3px; }
