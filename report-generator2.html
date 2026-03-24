@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>経営情報レポートジェネレーター | 指月電機製作所</title>
+<title>経営情報レポートジェネレーター | 当社</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -146,7 +146,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;paddi
   <div class="header-inner">
     <div class="header-badge">📊 経営情報レポートジェネレーター</div>
     <h1>経営情報<span>レポートジェネレーター</span></h1>
-    <p>閲覧するサイトのURLを入力するだけで、AIが内容を分析し、指月電機製作所の事業活動に対する機会・脅威・具体的な行動計画をレポートにまとめます。</p>
+    <p>閲覧するサイトのURLを入力するだけで、AIが内容を分析し、当社の事業活動に対する機会・脅威・具体的な行動計画をレポートにまとめます。</p>
   </div>
 </header>
 
@@ -217,7 +217,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;paddi
     <p style="color:var(--text3);font-size:14px;font-weight:500">AIが情報を分析中...</p>
     <div class="loading-steps">
       <div class="loading-step active" id="ls1">🌐 サイトの内容を読み取り中</div>
-      <div class="loading-step" id="ls2">🔍 指月電機への影響を分析中</div>
+      <div class="loading-step" id="ls2">🔍 当社への影響を分析中</div>
       <div class="loading-step" id="ls3">📊 機会・脅威を抽出中</div>
       <div class="loading-step" id="ls4">✍️ 行動計画を策定中</div>
       <div class="loading-step" id="ls5">📄 レポートを整形中</div>
@@ -241,7 +241,7 @@ footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;paddi
 
 <footer>
   <a href="index.html" class="back-btn">← デモサイトトップへ戻る</a>
-  <p>© 株式会社指月電機製作所 | 経営情報レポートジェネレーター</p>
+  <p>© 株式会社〇〇 | 経営情報レポートジェネレーター</p>
 </footer>
 
 <script>
@@ -329,9 +329,9 @@ async function generateReport() {
   const urls = urlList.map(u => u.url);
   const today = new Date().toLocaleDateString('ja-JP', {year:'numeric',month:'long',day:'numeric'});
 
-  const prompt = `あなたは株式会社指月電機製作所の経営戦略アドバイザーです。
+  const prompt = `あなたは株式会社〇〇の経営戦略アドバイザーです。
 
-【指月電機製作所について】
+【当社について】
 - 1939年創業。コンデンサ専門メーカー
 - 主力製品：フィルムコンデンサ（DCリンク用・スナバ用・EMIフィルタ・進相コンデンサ・車載用）
 - 主要市場：EV/HEV、産業用インバータ、太陽光・風力発電、鉄道、医療機器
@@ -357,10 +357,10 @@ ${urls.map((u,i) => `URL${i+1}: ${u}`).join('\n')}
   "title": "レポートタイトル",
   "summary": "エグゼクティブサマリー（3〜4文）",
   "opportunities": [
-    {"title": "機会のタイトル", "detail": "詳細説明（指月電機にとっての具体的な機会）", "impact": "high/mid/low"}
+    {"title": "機会のタイトル", "detail": "詳細説明（当社にとっての具体的な機会）", "impact": "high/mid/low"}
   ],
   "threats": [
-    {"title": "脅威のタイトル", "detail": "詳細説明（指月電機にとっての具体的なリスク）", "impact": "high/mid/low"}
+    {"title": "脅威のタイトル", "detail": "詳細説明（当社にとっての具体的なリスク）", "impact": "high/mid/low"}
   ],
   "actions": [
     {
@@ -443,7 +443,7 @@ function showReport(r, urls, today, isDemo) {
 
   document.getElementById('report-doc').innerHTML = `
     <div class="report-header">
-      <div class="company">株式会社指月電機製作所 ｜ 経営情報分析レポート</div>
+      <div class="company">株式会社〇〇 ｜ 経営情報分析レポート</div>
       <h2>${r.title||'経営情報分析レポート'}</h2>
       <div class="meta">
         <span>📅 ${today}</span>
@@ -501,7 +501,7 @@ function showDemoReport(urls, today) {
     return;
   }
   const demoReport = {
-    title: '経産省 AI・半導体成長戦略WG 第1回 ｜ 指月電機製作所への示唆と行動計画',
+    title: '経産省 AI・半導体成長戦略WG 第1回 ｜ 当社への示唆と行動計画',
     summary: '政府がAI・半導体分野に7年間で10兆円超の公的支援を決定し、EVインバータ・データセンター・再生可能エネルギー向けの半導体需要が急増する見通しです。フィルムコンデンサはこれらの主要部品であり、当社にとって大型の市場拡大機会が到来しています。一方、省エネ・高性能化への技術ニーズ高度化と海外競合の攻勢が脅威となっており、今すぐ営業・技術・経営の各部門が連携して動くことが求められます。',
     opportunities: [
       { title: 'EV・HEV向けDCリンクコンデンサの需要急増', detail: 'EV市場の拡大に伴い、インバータの心臓部であるDCリンクコンデンサの需要が急増。政府の10兆円超の支援でEV関連投資が加速し、国内外カーメーカーへの供給拡大のチャンス。', impact: 'high' },
@@ -531,7 +531,7 @@ function showDemoReport(urls, today) {
 // ===== 経済安全保障×フィルムコンデンサ 3サイト統合デモレポート =====
 function showDemoReportEconSec(urls, today) {
   const r = {
-    title: '経済安全保障政策とフィルムコンデンサ「特定重要物資」指定 ｜ 指月電機製作所 経営戦略への示唆',
+    title: '経済安全保障政策とフィルムコンデンサ「特定重要物資」指定 ｜ 当社 経営戦略への示唆',
     summary: '2024年2月、フィルムコンデンサーが経済安全保障推進法に基づく「特定重要物資」に正式指定され、政府は国内メーカーへの大型補助金支援（NEDO経由）と技術流出防止措置を制度化しました。データセンター・EV・防衛・医療機器など幅広い分野に不可欠な部品として国家戦略上の重要インフラと認定された当社製品は、今後2〜3年で補助金獲得・国内優遇調達・市場拡大という三重の追い風を享受できる立場にあります。一方で、中国企業による技術獲得圧力・供給確保計画の申請遅延・原材料リスクへの対応を怠ると、この機会を競合に奪われかねません。',
     opportunities: [
       {
@@ -628,12 +628,12 @@ function showDemoReportEconSec(urls, today) {
 // ===== パナソニック競合分析デモレポート =====
 function showDemoReportPanasonic(urls, today) {
   const r = {
-    title: 'パナソニック フィルムコンデンサ製品ページ分析 ｜ 競合動向と指月電機製作所の対応戦略',
-    summary: 'パナソニックインダストリーは車載用フィルムコンデンサで世界シェア首位（約70%）を保持し、xEV・産業インフラ向けに高耐圧・低ESR・AEC-Q200対応品をラインナップ。富山・松江・中国・スロバキアの4極体制で大規模な増産投資を実施しており、世界市場における最大の競合です。一方で、パナソニックがカバーしにくいカスタム・小ロット・特殊仕様品の領域は指月電機が優位性を持てる市場であり、競合の動向を踏まえた差別化戦略が急務です。',
+    title: 'パナソニック フィルムコンデンサ製品ページ分析 ｜ 競合動向と当社の対応戦略',
+    summary: 'パナソニックインダストリーは車載用フィルムコンデンサで世界シェア首位（約70%）を保持し、xEV・産業インフラ向けに高耐圧・低ESR・AEC-Q200対応品をラインナップ。富山・松江・中国・スロバキアの4極体制で大規模な増産投資を実施しており、世界市場における最大の競合です。一方で、パナソニックがカバーしにくいカスタム・小ロット・特殊仕様品の領域は当社が優位性を持てる市場であり、競合の動向を踏まえた差別化戦略が急務です。',
     opportunities: [
       {
         title: 'パナソニックが手薄な中小ロット・カスタム品への特化戦略',
-        detail: 'パナソニックは大量生産・標準品で世界トップの地位を確立しているが、逆に言えば多品種小ロット・一品一様のカスタム品への対応は大企業の構造上難しい。指月電機の強みである「カスタム対応力・小ロット対応・迅速な仕様変更」はパナソニックが苦手とする領域で、この差別化ポイントを営業現場で積極的に訴求すべき。',
+        detail: 'パナソニックは大量生産・標準品で世界トップの地位を確立しているが、逆に言えば多品種小ロット・一品一様のカスタム品への対応は大企業の構造上難しい。当社の強みである「カスタム対応力・小ロット対応・迅速な仕様変更」はパナソニックが苦手とする領域で、この差別化ポイントを営業現場で積極的に訴求すべき。',
         impact: 'high'
       },
       {
@@ -643,7 +643,7 @@ function showDemoReportPanasonic(urls, today) {
       },
       {
         title: '国内一貫製造による調達リスク低減訴求での差別化',
-        detail: 'パナソニックは中国（江門）・スロバキアに生産拠点を分散しているが、経済安保・地政学リスクの観点から「国内完結製造」を重視する顧客が増えている。指月電機が国内一貫製造にこだわることで、パナソニックに対する「安定供給の安心感」という差別化ポイントを訴求できる。',
+        detail: 'パナソニックは中国（江門）・スロバキアに生産拠点を分散しているが、経済安保・地政学リスクの観点から「国内完結製造」を重視する顧客が増えている。当社が国内一貫製造にこだわることで、パナソニックに対する「安定供給の安心感」という差別化ポイントを訴求できる。',
         impact: 'mid'
       },
       {
@@ -708,7 +708,7 @@ function showDemoReportPanasonic(urls, today) {
         when: 'まず6ヶ月以内にExcel対照表作成、1年以内にWeb化を検討'
       },
     ],
-    exec_message: 'パナソニックは車載用フィルムコンデンサで約70%の世界シェアを持つ最大の競合ですが、大企業ゆえにカスタム対応・小ロット・多品種対応には限界があります。指月電機の勝ち筋は「パナソニックが手薄な領域への集中」「国内一貫製造による調達安心感」「生産終息品の代替需要の取込み」の3点です。競合を研究し、勝てる市場・顧客を選んで経営資源を集中させる戦略の立案を提言します。'
+    exec_message: 'パナソニックは車載用フィルムコンデンサで約70%の世界シェアを持つ最大の競合ですが、大企業ゆえにカスタム対応・小ロット・多品種対応には限界があります。当社の勝ち筋は「パナソニックが手薄な領域への集中」「国内一貫製造による調達安心感」「生産終息品の代替需要の取込み」の3点です。競合を研究し、勝てる市場・顧客を選んで経営資源を集中させる戦略の立案を提言します。'
   };
   showReport(r, urls, today, true);
 }
